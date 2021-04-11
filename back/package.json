@@ -15,7 +15,7 @@
   },
   "scripts": {
     "prestart": "tsc",
-    "start": "nodemon --exec ts-node build/app.js"
+    "start": "nodemon --exec ts-node build/index.js"
   },
   "devDependencies": {
     "@types/node": "^14.14.37",
