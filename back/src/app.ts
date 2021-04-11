@@ -1,24 +1,23 @@
 "use strict"
 
-import * as express from "express"
-// import { Routes } from "./routes/routes"; TODO router
-import * as bodyParser from 'body-parser';
-import * as errorhandler from 'strong-error-handler'
+import express from "express"
+import bodyParser from 'body-parser';
+import errorhandler from 'strong-error-handler'
+import { Routes } from './app/routes'
 
 class App {
     public app : express.Application;
-    // public routes: Routes = new Routes();
-
+    public routes: Routes = new Routes();
     constructor() {
         this.app = express()
-        this.config();
-        // this.routes.routes(this.app);
-        this.errorHandler();
+        this.config()
+        this.errorHandler()
+        this.routes.routes(this.app)
     }
 
     private config(): void{
-        this.app.use(bodyParser.json({limit: '5mb'}));
-        this.app.use(bodyParser.urlencoded({extended: true}));
+        this.app.use(bodyParser.json({limit: '5mb'}))
+        this.app.use(bodyParser.urlencoded({extended: true})) 
     }
     private errorHandler(): void {
         this.app.use(errorhandler({
