@@ -41,12 +41,31 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var http_1 = require("http");
 var app_1 = __importDefault(require("./app"));
+require("dotenv");
+var models_1 = __importDefault(require("./app/models"));
 var port = process.env.PORT || 7000;
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
-        http_1.createServer(app_1.default).listen(port, function () {
-            console.info("Server running on port " + port);
-        });
+        http_1.createServer(app_1.default).listen(port, function () { return __awaiter(void 0, void 0, void 0, function () {
+            return __generator(this, function (_a) {
+                switch (_a.label) {
+                    case 0: return [4 /*yield*/, models_1.default.authenticate()
+                            .then(function () { return __awaiter(void 0, void 0, void 0, function () {
+                            return __generator(this, function (_a) {
+                                console.log("database connection success");
+                                return [2 /*return*/];
+                            });
+                        }); })
+                            .catch(function (e) {
+                            console.log("database connection failed\n", e);
+                        })];
+                    case 1:
+                        _a.sent();
+                        console.info("Server running on port " + port);
+                        return [2 /*return*/];
+                }
+            });
+        }); });
         return [2 /*return*/];
     });
 }); })();
