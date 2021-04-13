@@ -4,7 +4,6 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var crypto_1 = __importDefault(require("crypto"));
-// hashing function 
 function hash(value, salt) {
     return new Promise(function (resolve, reject) {
         // value will be password, salt will be email
@@ -59,6 +58,7 @@ exports.default = (function (sequelize, DataTypes) {
             defaultValue: false
         }
     });
+    console.log(UserModel);
     return UserModel;
 });
 //# sourceMappingURL=User.js.map

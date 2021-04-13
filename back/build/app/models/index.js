@@ -12,6 +12,7 @@ var sequelize = new sequelize_typescript_1.Sequelize(dbconfig_1.default.database
     host: dbconfig_1.default.host,
     dialect: 'postgres'
 });
+console.log(typeof User_1.default(sequelize, sequelize_1.DataTypes));
 var db = {
     sequelize: sequelize,
     User: User_1.default(sequelize, sequelize_1.DataTypes)

@@ -4,28 +4,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
-var body_parser_1 = __importDefault(require("body-parser"));
 var strong_error_handler_1 = __importDefault(require("strong-error-handler"));
-var routes_1 = require("./app/routes");
-var App = /** @class */ (function () {
-    function App() {
-        this.routes = new routes_1.Routes();
-        this.app = express_1.default();
-        this.config();
-        this.errorHandler();
-        this.routes.routes(this.app);
-    }
-    App.prototype.config = function () {
-        this.app.use(body_parser_1.default.json({ limit: '5mb' }));
-        this.app.use(body_parser_1.default.urlencoded({ extended: true }));
-    };
-    App.prototype.errorHandler = function () {
-        this.app.use(strong_error_handler_1.default({
-            debug: process.env.ENV !== 'prod',
-            log: true,
-        }));
-    };
-    return App;
-}());
-exports.default = new App().app;
+var routes_1 = __importDefault(require("./app/routes"));
+var app = express_1.default();
+// app.use(bodyParser.json({limit: '5mb'}))
+// app.use(bodyParser.urlencoded({extended: true}))
+app.use(express_1.default.json({ limit: "2mb" }));
+app.use("", routes_1.default);
+app.use(strong_error_handler_1.default({
+    debug: process.env.ENV !== 'prod',
+    log: true,
+}));
+exports.default = app;
 //# sourceMappingURL=app.js.map

@@ -17,9 +17,12 @@ const sequelize = new Sequelize(
     }
 )
 
+
+console.log(typeof User(sequelize,DataTypes))
+
 const db = {
     sequelize,
-    User : User(sequelize,DataTypes)
+    User : User(sequelize, DataTypes)
 }
-
 export default db
+

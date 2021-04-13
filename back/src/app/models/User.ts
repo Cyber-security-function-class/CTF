@@ -1,20 +1,9 @@
 'use strict';
 
-import { Model, Sequelize,ModelDefined} from 'sequelize'
+import { Model, Sequelize,ModelDefined, Optional} from 'sequelize'
 import crypto from 'crypto'
 
 
-interface UserAttributes {
-    id : number
-    nickname : string
-    password : string
-    email : string 
-    score : number 
-    isAdmin : boolean
-}
-interface UserInstance extends Model<UserAttributes>, UserAttributes {}
-
-// hashing function 
 function hash(value : string, salt : string) : Promise<string> { 
     return new Promise<string>((resolve, reject) => {
         // value will be password, salt will be email
@@ -22,7 +11,7 @@ function hash(value : string, salt : string) : Promise<string> {
             reject({msg : 'value or salt is empty'})
         }
         const iterateCount = 2048
-        let hash = crypto.createHmac('sha512', salt)
+        let hash = crypto.createHmac('sha512', salt) // 여기서 오류 시발
         for (let i = 1; i <= iterateCount; i++){
             hash.update(value);
             if ( i === iterateCount ) {
@@ -36,8 +25,8 @@ interface passwordSetAttribute {
     password : string, email : string
 }
 
-export default (sequelize : Sequelize,DataTypes) => {
-    const UserModel : ModelDefined<UserAttributes,UserInstance> = sequelize.define(
+export default (sequelize : Sequelize, DataTypes) => {
+    const UserModel =  sequelize.define(
         'User', {
             id : {
                 type : DataTypes.INTEGER,
@@ -51,7 +40,7 @@ export default (sequelize : Sequelize,DataTypes) => {
             password : {
                 type : DataTypes.STRING,
                 allowNull : false,
-                set( value:passwordSetAttribute ) { // value : { password : string, email : string }
+                set( value : passwordSetAttribute ) { // value : { password : string, email : string }
                     hash(value.password, value.email)
                     .then(hashedString => {
                         this.setDataValue('password', hashedString);
@@ -74,7 +63,9 @@ export default (sequelize : Sequelize,DataTypes) => {
                 defaultValue : false
             }
         }
+        
     )
+    console.log(UserModel)
     return UserModel
 }
 
