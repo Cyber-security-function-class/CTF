@@ -40,29 +40,60 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var index_1 = __importDefault(require("../../models/index"));
+var bcrypt_1 = require("bcrypt");
 var User = index_1.default.User;
+var createHashedPassword = function (password) { return __awaiter(void 0, void 0, void 0, function () {
+    var saltRounds, salt, hashedPassword;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                saltRounds = 10;
+                return [4 /*yield*/, bcrypt_1.genSalt(saltRounds)];
+            case 1:
+                salt = _a.sent();
+                return [4 /*yield*/, bcrypt_1.hash(password, salt)];
+            case 2:
+                hashedPassword = _a.sent();
+                return [2 /*return*/, hashedPassword];
+        }
+    });
+}); };
+var checkPassword = function (password, hashedPassword) { return __awaiter(void 0, void 0, void 0, function () {
+    var isPasswordCorrect;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0: return [4 /*yield*/, bcrypt_1.compare(password, hashedPassword)]; // hash.toString for type checking hack
+            case 1:
+                isPasswordCorrect = _a.sent() // hash.toString for type checking hack
+                ;
+                return [2 /*return*/, isPasswordCorrect];
+        }
+    });
+}); };
 exports.default = {
     signUp: function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-        var nickname, password, email;
+        var nickname, password, email, hashedPassword;
         return __generator(this, function (_a) {
-            nickname = req.body.nickname;
-            password = req.body.password;
-            email = req.body.email;
-            console.log(req.body.password);
-            User.create({
-                id: 1,
-                nickname: nickname,
-                password: password,
-                email: email,
-                score: 0,
-                isAdmin: false
-            }).then(function (result) {
-                console.log(result);
-                res.json({ result: "success" });
-            }).catch(function (err) {
-                console.log(err);
-            });
-            return [2 /*return*/];
+            switch (_a.label) {
+                case 0:
+                    nickname = req.body.nickname;
+                    password = req.body.password;
+                    email = req.body.email;
+                    return [4 /*yield*/, createHashedPassword(password)];
+                case 1:
+                    hashedPassword = _a.sent();
+                    User.create({
+                        nickname: nickname,
+                        password: hashedPassword,
+                        email: email
+                    }).then(function (result) {
+                        res.json({ result: result });
+                    }).catch(function (err) {
+                        res.json({ result: false });
+                        console.log(err);
+                    });
+                    return [2 /*return*/];
+            }
         });
     }); },
 };

@@ -1,7 +1,21 @@
 import {Request, Response} from 'express'
 import db from '../../models/index'
 import * as jwt from 'jsonwebtoken'
+import { genSalt, hash, compare } from 'bcrypt'
+import { check } from 'express-validator'
 const User = db.User
+
+const createHashedPassword = async (password: string) => {
+    const saltRounds = 10
+    const salt = await genSalt(saltRounds)
+    const hashedPassword = await hash(password, salt)
+    return hashedPassword
+}
+
+const checkPassword = async (password: string, hashedPassword: string) => {
+    const isPasswordCorrect = await compare(password, hashedPassword) // hash.toString for type checking hack
+    return isPasswordCorrect
+}
 
 export default {
     signUp : async (req:Request, res:Response) => {
@@ -9,24 +23,20 @@ export default {
         const nickname :string = req.body.nickname
         const password :string = req.body.password
         const email :string = req.body.email
-        console.log(req.body.password)
-        
+        const hashedPassword = await createHashedPassword( password )
+
+        // await check('nickname')
 
         User.create({
-            id : 1,
             nickname : nickname,
-            password : password,
-            email : email,
-            score : 0,
-            isAdmin : false
+            password : hashedPassword,
+            email : email
         }).then ( result => {
-            console.log(result)
-            res.json({result: "success"})
+            res.json({result:result})
         }).catch( err => {
+            res.json({result:false})
             console.log(err)
         })
-
-
         
     },
 

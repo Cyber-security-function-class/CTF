@@ -12,9 +12,23 @@ app.listen ( PORT , async () => {
     await db.sequelize.authenticate()
     .then(async () => {
         console.log("database connection success");
+        const driver = async () => {
+            try {
+                await db.sequelize.sync();
+            } catch (err) {
+                console.error('database sycn failed');
+                console.error(err);
+                return;
+            }
+         
+            console.log('database sync success');
+        };
+        driver(); // sequelize sync
     })
     .catch((e) => {
         console.log("database connection failed\n",e)
     })
+
+
     console.info(`Server running on port ${PORT}`)
 })

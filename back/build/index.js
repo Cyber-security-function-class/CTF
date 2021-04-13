@@ -48,8 +48,31 @@ app_1.default.listen(PORT, function () { return __awaiter(void 0, void 0, void 0
         switch (_a.label) {
             case 0: return [4 /*yield*/, models_1.default.sequelize.authenticate()
                     .then(function () { return __awaiter(void 0, void 0, void 0, function () {
+                    var driver;
                     return __generator(this, function (_a) {
                         console.log("database connection success");
+                        driver = function () { return __awaiter(void 0, void 0, void 0, function () {
+                            var err_1;
+                            return __generator(this, function (_a) {
+                                switch (_a.label) {
+                                    case 0:
+                                        _a.trys.push([0, 2, , 3]);
+                                        return [4 /*yield*/, models_1.default.sequelize.sync()];
+                                    case 1:
+                                        _a.sent();
+                                        return [3 /*break*/, 3];
+                                    case 2:
+                                        err_1 = _a.sent();
+                                        console.error('database sycn failed');
+                                        console.error(err_1);
+                                        return [2 /*return*/];
+                                    case 3:
+                                        console.log('database sync success');
+                                        return [2 /*return*/];
+                                }
+                            });
+                        }); };
+                        driver(); // sequelize sync
                         return [2 /*return*/];
                     });
                 }); })
