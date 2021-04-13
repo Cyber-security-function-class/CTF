@@ -1,7 +1,10 @@
 'use strict';
 
 import { Sequelize } from 'sequelize-typescript'
+import { DataTypes } from 'sequelize'
 import dbconfig from '../config/dbconfig'
+// import models
+import User from './User'
 
 
 const sequelize = new Sequelize(
@@ -14,4 +17,9 @@ const sequelize = new Sequelize(
     }
 )
 
-export default sequelize
+const db = {
+    sequelize,
+    User : User(sequelize,DataTypes)
+}
+
+export default db

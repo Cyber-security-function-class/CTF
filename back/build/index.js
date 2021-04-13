@@ -41,15 +41,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var http_1 = require("http");
 var app_1 = __importDefault(require("./app"));
-require("dotenv");
 var models_1 = __importDefault(require("./app/models"));
+require("dotenv");
 var port = process.env.PORT || 7000;
 (function () { return __awaiter(void 0, void 0, void 0, function () {
     return __generator(this, function (_a) {
         http_1.createServer(app_1.default).listen(port, function () { return __awaiter(void 0, void 0, void 0, function () {
             return __generator(this, function (_a) {
                 switch (_a.label) {
-                    case 0: return [4 /*yield*/, models_1.default.authenticate()
+                    case 0: return [4 /*yield*/, models_1.default.sequelize.authenticate()
                             .then(function () { return __awaiter(void 0, void 0, void 0, function () {
                             return __generator(this, function (_a) {
                                 console.log("database connection success");
