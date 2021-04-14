@@ -79,15 +79,19 @@ exports.default = {
                     nickname = req.body.nickname;
                     password = req.body.password;
                     email = req.body.email;
-                    return [4 /*yield*/, createHashedPassword(password)];
+                    return [4 /*yield*/, createHashedPassword(password)
+                        // await check('nickname')
+                    ];
                 case 1:
                     hashedPassword = _a.sent();
+                    // await check('nickname')
+                    console.log("user tried signUp");
                     User.create({
                         nickname: nickname,
                         password: hashedPassword,
                         email: email
                     }).then(function (result) {
-                        res.json({ result: result });
+                        res.json({ result: true });
                     }).catch(function (err) {
                         res.json({ result: false });
                         console.log(err);
@@ -95,6 +99,6 @@ exports.default = {
                     return [2 /*return*/];
             }
         });
-    }); },
+    }); }
 };
 //# sourceMappingURL=authController.js.map
