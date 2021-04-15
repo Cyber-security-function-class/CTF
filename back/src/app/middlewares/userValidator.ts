@@ -1,5 +1,5 @@
 'use strict';
-import { validationResult, check, body } from 'express-validator';
+import { validationResult, body } from 'express-validator';
 
 
 export const resultsValidator = (req) => {

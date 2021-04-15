@@ -90,7 +90,7 @@ export const signIn = async (req,res) => {
                 name : user.nickname,
                 isAdmin : user.isAdmin
             },
-                environment.jwt.secret,   // secret
+                req.app.get('jwt-secret'),   // secret
             {                            // policy
                 expiresIn : environment.jwt.expiresIn
             });

@@ -178,7 +178,7 @@ var signIn = function (req, res) { return __awaiter(void 0, void 0, void 0, func
                         email: user.email,
                         name: user.nickname,
                         isAdmin: user.isAdmin
-                    }, config_1.default.jwt.secret, // secret
+                    }, req.app.get('jwt-secret'), // secret
                     {
                         expiresIn: config_1.default.jwt.expiresIn
                     });
