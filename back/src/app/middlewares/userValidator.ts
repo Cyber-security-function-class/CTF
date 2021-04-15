@@ -14,7 +14,6 @@ export const resultsValidator = (req) => {
 }
 
 export const signUpValidator = () => {
-    console.log("signUp validator")
     return [
         body('nickname')
             .notEmpty()

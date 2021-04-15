@@ -8,6 +8,7 @@ const app = express()
 
 app.use(express.json({limit: "5mb"}))
 app.use("", routes)
+
 app.use(errorhandler({
     debug: process.env.ENV !== 'prod',
     log: true,

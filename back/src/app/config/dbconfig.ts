@@ -7,7 +7,8 @@ const dbconfig = {
     "password" : process.env.dbPassword || "imskilluser",
     "host" : process.env.dbHost || "localhost",
     "database" : "SkillCTF",
-    "dialect" : "postgres"
+    "dialect" : "postgres",
+    "logging": false
 }
 
 

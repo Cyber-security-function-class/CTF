@@ -4,7 +4,7 @@ import { Sequelize } from 'sequelize-typescript'
 import { DataTypes } from 'sequelize'
 import dbconfig from '../config/dbconfig'
 // import models
-import User from './User'
+import { UserFactory } from './User'
 
 
 const sequelize = new Sequelize(
@@ -13,16 +13,15 @@ const sequelize = new Sequelize(
     dbconfig.password,
     {
         host: dbconfig.host,
-        dialect: 'postgres'
+        dialect: 'postgres',
+        logging : dbconfig.logging
     }
 )
 
 
-console.log(typeof User(sequelize,DataTypes))
-
 const db = {
     sequelize,
-    User : User(sequelize, DataTypes)
+    User : UserFactory(sequelize)
 }
 export default db
 

@@ -1,66 +1,27 @@
 'use strict';
 
-import { Sequelize } from 'sequelize'
+import { BuildOptions, DataTypes, Model, Sequelize } from "sequelize";
 
-
-
-// function hash(value : string, salt : string) : Promise<string> { 
-    
-//     return new Promise<string>((resolve, reject) => {
-//         // value will be password, salt will be email
-//         if ( value && salt ){
-//             reject({msg : 'value or salt is empty'})
-//         }
-//         const iterateCount = 2048
-//         let hash = crypto.createHmac('sha512', salt) // 여기서 오류 시발
-//         for (let i = 1; i <= iterateCount; i++){
-//             hash.update(value);
-//             if ( i === iterateCount ) {
-//                 resolve( hash.digest('hex') )
-//             }
-//         }
-//     })
-// }
-
-export default (sequelize : Sequelize, DataTypes) => {
-    const UserModel =  sequelize.define(
-        'user', {
-            id : {
-                type : DataTypes.INTEGER,
-                autoIncrement: true,
-                primaryKey: true,
-            },
-            nickname : {
-                type : DataTypes.STRING,
-                primaryKey: true
-            },
-            password : {
-                type : DataTypes.STRING,
-                allowNull : false
-            },  
-            email : {
-                type : DataTypes.STRING,
-                primaryKey: true
-            },
-            score : {
-                type : DataTypes.INTEGER,
-                allowNull : false,
-                defaultValue :0
-            },
-            isAdmin : {
-                type : DataTypes.BOOLEAN,
-                defaultValue : false
-            }
-        }
-        
-    )
-    console.log(UserModel)
-    return UserModel
+export interface UserAttributes {
+    id?: number;
+    nickname: string;
+    password : string;
+    score?: number;
+    email: string;
+    isAdmin ?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
 }
+export interface UserModel extends Model<UserAttributes>, UserAttributes {}
+export class User extends Model<UserModel, UserAttributes> {}
 
+export type UserStatic = typeof Model & {
+    new (values?: object, options?: BuildOptions): UserModel;
+};
 
-/*
-id : {
+export function UserFactory (sequelize: Sequelize): UserStatic {
+    return <UserStatic>sequelize.define("user", {
+        id : {
             type : DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
@@ -72,7 +33,7 @@ id : {
         password : {
             type : DataTypes.STRING,
             allowNull : false
-        },
+        },  
         email : {
             type : DataTypes.STRING,
             primaryKey: true
@@ -86,4 +47,5 @@ id : {
             type : DataTypes.BOOLEAN,
             defaultValue : false
         }
-*/
+    });
+}

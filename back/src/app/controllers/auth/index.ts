@@ -1,12 +1,17 @@
 
 import express, { Request, Response, NextFunction } from "express"
-import { signUpValidator } from "../../middlewares/userValidator"
+import { signInValidator, signUpValidator } from "../../middlewares/userValidator"
 import router from "../../routes"
-import authController from './authController'
+import { signUp, signIn} from './authController'
 import { body, validationResult } from 'express-validator'
 const routes = express.Router()
 
 
-// routes.post("/signUp",)
-routes.post("/signUp",signUpValidator() ,authController.signUp)
+
+routes.post("/signUp",signUpValidator() , signUp)
+routes.post("/signIn",signInValidator() , signIn)
+
+
+
+
 export default routes

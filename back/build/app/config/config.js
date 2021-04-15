@@ -21,13 +21,11 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var dotenv = __importStar(require("dotenv"));
 dotenv.config();
-var dbconfig = {
-    "username": process.env.dbUser || "skilluser",
-    "password": process.env.dbPassword || "imskilluser",
-    "host": process.env.dbHost || "localhost",
-    "database": "SkillCTF",
-    "dialect": "postgres",
-    "logging": false
+var environment = {
+    jwt: {
+        secret: process.env.jwtSecret || "secretjuju",
+        expiresIn: "2days"
+    }
 };
-exports.default = dbconfig;
-//# sourceMappingURL=dbconfig.js.map
+exports.default = environment;
+//# sourceMappingURL=config.js.map

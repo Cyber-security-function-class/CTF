@@ -15,7 +15,6 @@ var resultsValidator = function (req) {
 };
 exports.resultsValidator = resultsValidator;
 var signUpValidator = function () {
-    console.log("signUp validator");
     return [
         express_validator_1.body('nickname')
             .notEmpty()
