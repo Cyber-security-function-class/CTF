@@ -210,5 +210,7 @@ export const deleteUser = async (req, res) => {
             console.log(err)
             return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send() 
         }
+    } else {
+        return res.status(400).json(getErrorMessage(ErrorType.NotExist)).send()
     }
 }

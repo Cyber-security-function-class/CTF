@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addCategory = exports.getCategories = void 0;
+exports.updateCategory = exports.addCategory = exports.getCategories = void 0;
 var index_1 = __importDefault(require("../../models/index"));
 var index_2 = require("../../error/index");
 var express_validator_1 = require("express-validator");
@@ -111,4 +111,33 @@ var addCategory = function (req, res) { return __awaiter(void 0, void 0, void 0,
     });
 }); };
 exports.addCategory = addCategory;
+var updateCategory = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var errors, _a, id, category;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
+            case 0:
+                if (!req['decoded'].isAdmin) {
+                    return [2 /*return*/, res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send()
+                        // he is not a admin
+                    ];
+                    // he is not a admin
+                }
+                errors = express_validator_1.validationResult(req);
+                if (!errors.isEmpty()) {
+                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), msg: errors.array() })];
+                }
+                _a = req.body, id = _a.id, category = _a.category;
+                return [4 /*yield*/, Category.findOne({ where: { id: id }, raw: true })];
+            case 1:
+                if (!((_b.sent()) !== null)) return [3 /*break*/, 3];
+                return [4 /*yield*/, Category.update({ category: category }, { where: { id: id } })];
+            case 2:
+                _b.sent();
+                return [3 /*break*/, 4];
+            case 3: return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.NotExist)).send()];
+            case 4: return [2 /*return*/];
+        }
+    });
+}); };
+exports.updateCategory = updateCategory;
 //# sourceMappingURL=categoryController.js.map

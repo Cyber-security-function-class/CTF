@@ -313,7 +313,7 @@ var deleteUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 id = req.body.id;
                 return [4 /*yield*/, User.findOne({ where: { id: id }, raw: true, attributes: ['id'] })];
             case 1:
-                if (!((_a.sent()) !== null)) return [3 /*break*/, 5];
+                if (!((_a.sent()) !== null)) return [3 /*break*/, 6];
                 _a.label = 2;
             case 2:
                 _a.trys.push([2, 4, , 5]);
@@ -325,7 +325,9 @@ var deleteUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 err_6 = _a.sent();
                 console.log(err_6);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 5: return [2 /*return*/];
+            case 5: return [3 /*break*/, 7];
+            case 6: return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.NotExist)).send()];
+            case 7: return [2 /*return*/];
         }
     });
 }); };

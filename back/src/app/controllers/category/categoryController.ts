@@ -70,11 +70,16 @@ export const updateCategory = async (req:Request, res:Response) => {
     if ( !errors.isEmpty() ) {
         return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
     }
-    const { id } = req.body
+    const { id, category} = req.body
     if ( await Category.findOne({ where : { id },raw : true}) !== null ) {
-
+        try {
+            await Category.update({category},{where : {id}})
+            return res.json({result: true})
+        } catch (err) {
+            console.log(err)
+            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+        }
     } else {
-        // not exists
-        
+        return res.status(400).json(getErrorMessage(ErrorType.NotExist)).send()
     }
 }

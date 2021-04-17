@@ -11,5 +11,6 @@ var routes = express_1.default.Router();
 routes.use(auth_1.default);
 routes.get('/getCategories', categoryController_1.getCategories);
 routes.post('/addCategory', categoryValidator_1.addCategoryValidator(), categoryController_1.addCategory);
+routes.post('/updateCategory', categoryValidator_1.updateCategoryValidator(), categoryController_1.updateCategory);
 exports.default = routes;
 //# sourceMappingURL=index.js.map
