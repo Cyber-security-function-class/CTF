@@ -103,7 +103,7 @@ var signUp = function (req, res) { return __awaiter(void 0, void 0, void 0, func
             case 0:
                 errors = express_validator_1.validationResult(req);
                 if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), msg: errors.array() })];
+                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
                 }
                 nickname = req.body.nickname;
                 password = req.body.password;
@@ -129,7 +129,7 @@ var signUp = function (req, res) { return __awaiter(void 0, void 0, void 0, func
                     else {
                         msg = "The email already exist.";
                     }
-                    return [2 /*return*/, res.status(409).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), msg: msg }).send()];
+                    return [2 /*return*/, res.status(409).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: msg }).send()];
                 }
                 _b.label = 3;
             case 3:
@@ -161,7 +161,7 @@ var signIn = function (req, res) { return __awaiter(void 0, void 0, void 0, func
             case 0:
                 errors = express_validator_1.validationResult(req);
                 if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), msg: errors.array() })];
+                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
                 }
                 _a = req.body, email = _a.email, password = _a.password;
                 _b.label = 1;
@@ -213,7 +213,7 @@ var getUser = function (req, res) { return __awaiter(void 0, void 0, void 0, fun
                 }
                 errors = express_validator_1.validationResult(req);
                 if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), msg: errors.array() })];
+                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
                 }
                 id = req.query.id;
                 id = +id;
@@ -249,7 +249,7 @@ var updateUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 }
                 errors = express_validator_1.validationResult(req);
                 if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), msg: errors.array() })];
+                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
                 }
                 _a = req.body, id = _a.id, nickname = _a.nickname, email = _a.email, isAdmin = _a.isAdmin, score = _a.score;
                 _b.label = 1;
@@ -287,7 +287,7 @@ var updateUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 console.log(err_4);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
             case 6: return [3 /*break*/, 8];
-            case 7: return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.NotExist)).send()];
+            case 7: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send()];
             case 8: return [3 /*break*/, 10];
             case 9:
                 err_5 = _b.sent();
@@ -308,7 +308,7 @@ var deleteUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 }
                 errors = express_validator_1.validationResult(req);
                 if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), msg: errors.array() })];
+                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
                 }
                 id = req.body.id;
                 return [4 /*yield*/, User.findOne({ where: { id: id }, raw: true, attributes: ['id'] })];
@@ -326,7 +326,7 @@ var deleteUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 console.log(err_6);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
             case 5: return [3 /*break*/, 7];
-            case 6: return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.NotExist)).send()];
+            case 6: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send()];
             case 7: return [2 /*return*/];
         }
     });

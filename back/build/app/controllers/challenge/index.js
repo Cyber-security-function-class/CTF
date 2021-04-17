@@ -12,5 +12,6 @@ routes.use(auth_1.default);
 routes.get('/getChallenges', challengeController_1.getChallenges);
 routes.get('/getChallenge', challengeController_1.getChallenge);
 routes.post('/addChallenge', challengeValidator_1.addChallengeValidator(), challengeController_1.addChallenge);
+routes.post('/updateChallenge', challengeValidator_1.updateChallengeValidator(), challengeController_1.updateChallenge);
 exports.default = routes;
 //# sourceMappingURL=index.js.map

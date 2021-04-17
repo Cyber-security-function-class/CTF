@@ -60,7 +60,7 @@ export const addChallenge = async (req:Request, res:Response) => {
     }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     const { title, score,category_id, content, flag} = req.body
@@ -84,4 +84,37 @@ export const addChallenge = async (req:Request, res:Response) => {
         return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
     }
 
+}
+
+export const updateChallenge = async (req:Request, res:Response) => {
+    if ( !req['decoded'].isAdmin) {
+        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
+        // he is not a admin
+    }
+    const errors = validationResult(req)
+    if ( !errors.isEmpty() ) {
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+    }
+    const {id,title,content,score,flag,category_id} = req.body
+    
+    if( await Category.findOne({where : {id:category_id}}) !== null) {
+        try {
+            await Challenge.update({
+                title,
+                content,
+                score,
+                flag,
+                category_id
+            },{ 
+                where : {id}
+            })
+
+            return res.json({result : true})
+        } catch(err) {
+            console.log(err)
+            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+        }
+    } else {
+        return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),"detail":"category not exist"})
+    }
 }

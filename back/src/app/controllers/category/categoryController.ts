@@ -5,8 +5,6 @@ import db from "../../models/index"
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
 import sequelize from 'sequelize'
-import category from '.'
-
 const Category = db.Category
 
 export const getCategories = async (req: Request, res: Response) => {
