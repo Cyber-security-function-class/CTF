@@ -39,12 +39,15 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateChallenge = exports.addChallenge = exports.getChallenge = exports.getChallenges = void 0;
+exports.authFlag = exports.deleteChallenge = exports.updateChallenge = exports.addChallenge = exports.getChallenge = exports.getChallenges = void 0;
 var index_1 = __importDefault(require("../../models/index"));
 var index_2 = require("../../error/index");
 var express_validator_1 = require("express-validator");
+var sequelize_1 = require("sequelize");
 var Challenge = index_1.default.Challenge;
 var Category = index_1.default.Category;
+var Solved = index_1.default.Solved;
+var User = index_1.default.User;
 var getChallenges = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
     var challenges, err_1;
     return __generator(this, function (_a) {
@@ -168,12 +171,17 @@ var updateChallenge = function (req, res) { return __awaiter(void 0, void 0, voi
                     return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
                 }
                 _a = req.body, id = _a.id, title = _a.title, content = _a.content, score = _a.score, flag = _a.flag, category_id = _a.category_id;
-                return [4 /*yield*/, Category.findOne({ where: { id: category_id } })];
+                return [4 /*yield*/, Challenge.findOne({ where: id })];
             case 1:
-                if (!((_b.sent()) !== null)) return [3 /*break*/, 6];
-                _b.label = 2;
+                if ((_b.sent()) === null) {
+                    return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "challenge doesn't exist" })];
+                }
+                return [4 /*yield*/, Category.findOne({ where: { id: category_id } })];
             case 2:
-                _b.trys.push([2, 4, , 5]);
+                if (!((_b.sent()) !== null)) return [3 /*break*/, 7];
+                _b.label = 3;
+            case 3:
+                _b.trys.push([3, 5, , 6]);
                 return [4 /*yield*/, Challenge.update({
                         title: title,
                         content: content,
@@ -183,18 +191,108 @@ var updateChallenge = function (req, res) { return __awaiter(void 0, void 0, voi
                     }, {
                         where: { id: id }
                     })];
-            case 3:
+            case 4:
                 _b.sent();
                 return [2 /*return*/, res.json({ result: true })];
-            case 4:
+            case 5:
                 err_4 = _b.sent();
                 console.log(err_4);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 5: return [3 /*break*/, 7];
-            case 6: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), "detail": "category not exist" })];
-            case 7: return [2 /*return*/];
+            case 6: return [3 /*break*/, 8];
+            case 7: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), "detail": "category not exist" })];
+            case 8: return [2 /*return*/];
         }
     });
 }); };
 exports.updateChallenge = updateChallenge;
+var deleteChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var errors, id, err_5;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                if (!req['decoded'].isAdmin) {
+                    return [2 /*return*/, res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send()
+                        // he is not a admin
+                    ];
+                    // he is not a admin
+                }
+                errors = express_validator_1.validationResult(req);
+                if (!errors.isEmpty()) {
+                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
+                }
+                id = req.body.id;
+                return [4 /*yield*/, Challenge.findOne({ where: { id: id } })];
+            case 1:
+                if (!((_a.sent()) !== null)) return [3 /*break*/, 6];
+                _a.label = 2;
+            case 2:
+                _a.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, Challenge.destroy({ where: { id: id } })];
+            case 3:
+                _a.sent();
+                return [2 /*return*/, res.json({ result: true })];
+            case 4:
+                err_5 = _a.sent();
+                console.log(err_5);
+                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
+            case 5: return [3 /*break*/, 7];
+            case 6: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "challenge doesn't exist" })];
+            case 7: return [2 /*return*/];
+        }
+    });
+}); };
+exports.deleteChallenge = deleteChallenge;
+var authFlag = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var errors, _a, challenge_id, flag, user_id, challenge, solved, user, err_6;
+    var _b;
+    return __generator(this, function (_c) {
+        switch (_c.label) {
+            case 0:
+                errors = express_validator_1.validationResult(req);
+                if (!errors.isEmpty()) {
+                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
+                }
+                _a = req.body, challenge_id = _a.challenge_id, flag = _a.flag;
+                user_id = req['decoded'].id;
+                return [4 /*yield*/, Challenge.findOne({ where: { id: challenge_id }, raw: true })];
+            case 1:
+                challenge = _c.sent();
+                if (!(challenge !== null)) return [3 /*break*/, 12];
+                if (!(flag === challenge.flag)) return [3 /*break*/, 10];
+                _c.label = 2;
+            case 2:
+                _c.trys.push([2, 8, , 9]);
+                return [4 /*yield*/, Solved.findOne({ where: (_b = {},
+                            _b[sequelize_1.Op.or] = [{ user_id: user_id }, { challenge_id: challenge_id }],
+                            _b) })];
+            case 3:
+                if (!((_c.sent()) === null)) return [3 /*break*/, 6];
+                return [4 /*yield*/, Solved.create({
+                        challenge_id: challenge_id,
+                        user_id: user_id,
+                        score: challenge.score
+                    })];
+            case 4:
+                solved = _c.sent();
+                return [4 /*yield*/, User.findOne({ where: { id: user_id } })];
+            case 5:
+                user = _c.sent();
+                user.increment('score', { by: challenge.score });
+                return [2 /*return*/, res.json(solved)];
+            case 6: return [2 /*return*/, res.status(200).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), "detail": "already solved" })];
+            case 7: return [3 /*break*/, 9];
+            case 8:
+                err_6 = _c.sent();
+                console.log(err_6);
+                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
+            case 9: return [3 /*break*/, 11];
+            case 10: // flag incorrect
+            return [2 /*return*/, res.json({ result: false })];
+            case 11: return [3 /*break*/, 13];
+            case 12: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "challenge doesn't exist" })];
+            case 13: return [2 /*return*/];
+        }
+    });
+}); };
+exports.authFlag = authFlag;
 //# sourceMappingURL=challengeController.js.map

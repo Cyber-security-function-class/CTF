@@ -66,3 +66,27 @@ export const updateChallengeValidator = () => {
             .withMessage("flag is must be string")
     ]
 }
+export const deleteChallengeValidator = () => {
+    return [
+        body('id')
+            .notEmpty()
+            .withMessage("id is required")
+            .isNumeric()
+            .withMessage("id is must be number")
+    ]
+}
+
+export const authFlagValidator = () => {
+    return [
+        body('challenge_id')
+            .notEmpty()
+            .withMessage("challenge_id is required")
+            .isNumeric()
+            .withMessage("challenge_id is must be number"),
+        body('flag')
+            .notEmpty()
+            .withMessage("flag is required")
+            .isString()
+            .withMessage("flag is must be string")
+    ]
+}
