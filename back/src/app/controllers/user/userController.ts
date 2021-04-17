@@ -26,7 +26,7 @@ const checkPassword = async (password: string, hashedPassword: string) => {
 export const signUp = async (req:Request, res:Response) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     // id,nickname,password,email,score,isAdmin,isVerified
@@ -50,7 +50,7 @@ export const signUp = async (req:Request, res:Response) => {
         } else {
             msg = "The email already exist."
         }
-        return res.status(409).json({error : getErrorMessage(ErrorType.AlreadyExist),msg : msg}).send()
+        return res.status(409).json({error : getErrorMessage(ErrorType.AlreadyExist),detail : msg}).send()
     }
 
     try {
@@ -73,7 +73,7 @@ export const signIn = async (req,res) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
     const { email, password } = req.body
     let user : UserModel;
@@ -115,7 +115,7 @@ export const getUser = async (req, res) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     let { id } = req.query
@@ -145,7 +145,7 @@ export const updateUser = async (req, res) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
     // check required things
     const { id,nickname, email, isAdmin, score } = req.body
@@ -179,7 +179,7 @@ export const updateUser = async (req, res) => {
                 return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
             }
         } else {
-            return res.status(400).json(getErrorMessage(ErrorType.NotExist)).send()
+            return res.status(400).json({error : getErrorMessage(ErrorType.NotExist),detail:"user not exist"}).send()
         }
     } catch (err) {
         console.log(err)
@@ -196,7 +196,7 @@ export const deleteUser = async (req, res) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     const { id } = req.body
@@ -211,6 +211,6 @@ export const deleteUser = async (req, res) => {
             return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send() 
         }
     } else {
-        return res.status(400).json(getErrorMessage(ErrorType.NotExist)).send()
+        return res.status(400).json({error : getErrorMessage(ErrorType.NotExist),detail:"user not exist"}).send()
     }
 }

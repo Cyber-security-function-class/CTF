@@ -40,8 +40,11 @@ export const getChallenge = async (req:Request, res:Response) => {
                 as: 'category'
             }]
         })
-
-        res.json(challenge)
+        if ( challenge !== null){
+            return res.json(challenge)
+        } else {
+            return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),"detail":"Challenge not exist"})
+        }
     } catch (err) {
         console.log(err)
         
@@ -60,20 +63,22 @@ export const addChallenge = async (req:Request, res:Response) => {
         return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
     }
 
-    const { title, score, category_id, content, flag} = req.body
+    const { title, score,category_id, content, flag} = req.body
     
 
     try {
-        // console.log(category_id)
-        const chall = await Challenge.create({
-            title : title,
-            score : 200,
-            content : content,
-            flag : flag,
-            category_id : category_id
-        })
-
-        res.json(chall)
+        if ( await Category.findOne({where : {id : category_id}}) !== null) {
+            const chall = await Challenge.create({
+                title,
+                score,
+                content,
+                flag,
+                category_id 
+            })
+            return res.json(chall)
+        } else {
+            return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),"detail":"category not exist"})
+        } 
     } catch (err) {
         console.log(err)
         return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()

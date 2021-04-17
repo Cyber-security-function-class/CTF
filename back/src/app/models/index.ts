@@ -31,7 +31,9 @@ const db = {
 
 db.Category.hasMany(db.Challenge, {
     sourceKey : "id",
-    foreignKey : "category_id"
+    foreignKey : "category_id",
+    onUpdate : 'cascade',
+    onDelete : 'cascade',
 })
 
 db.Challenge.belongsTo(db.Category, {

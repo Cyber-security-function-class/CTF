@@ -93,7 +93,12 @@ var getChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0
                     })];
             case 2:
                 challenge = _a.sent();
-                res.json(challenge);
+                if (challenge !== null) {
+                    return [2 /*return*/, res.json(challenge)];
+                }
+                else {
+                    return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), "msg": "Challenge not exist" })];
+                }
                 return [3 /*break*/, 4];
             case 3:
                 err_2 = _a.sent();
@@ -122,23 +127,27 @@ var addChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0
                 _a = req.body, title = _a.title, score = _a.score, category_id = _a.category_id, content = _a.content, flag = _a.flag;
                 _b.label = 1;
             case 1:
-                _b.trys.push([1, 3, , 4]);
+                _b.trys.push([1, 6, , 7]);
+                return [4 /*yield*/, Category.findOne({ where: { id: category_id } })];
+            case 2:
+                if (!((_b.sent()) !== null)) return [3 /*break*/, 4];
                 return [4 /*yield*/, Challenge.create({
                         title: title,
-                        score: 200,
+                        score: score,
                         content: content,
                         flag: flag,
                         category_id: category_id
                     })];
-            case 2:
-                chall = _b.sent();
-                res.json(chall);
-                return [3 /*break*/, 4];
             case 3:
+                chall = _b.sent();
+                return [2 /*return*/, res.json(chall)];
+            case 4: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), "msg": "category not exist" })];
+            case 5: return [3 /*break*/, 7];
+            case 6:
                 err_3 = _b.sent();
                 console.log(err_3);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 4: return [2 /*return*/];
+            case 7: return [2 /*return*/];
         }
     });
 }); };
