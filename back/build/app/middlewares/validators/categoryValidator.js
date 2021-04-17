@@ -1,6 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCategoryValidator = exports.addCategoryValidator = void 0;
+exports.deleteCategoryValidator = exports.updateCategoryValidator = exports.addCategoryValidator = void 0;
 var express_validator_1 = require("express-validator");
 var addCategoryValidator = function () {
     return [
@@ -27,4 +27,14 @@ var updateCategoryValidator = function () {
     ];
 };
 exports.updateCategoryValidator = updateCategoryValidator;
+var deleteCategoryValidator = function () {
+    return [
+        express_validator_1.body('id')
+            .notEmpty()
+            .withMessage('id is required')
+            .isNumeric()
+            .withMessage('id must be number'),
+    ];
+};
+exports.deleteCategoryValidator = deleteCategoryValidator;
 //# sourceMappingURL=categoryValidator.js.map

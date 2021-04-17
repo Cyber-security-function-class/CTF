@@ -83,3 +83,26 @@ export const updateCategory = async (req:Request, res:Response) => {
         return res.status(400).json(getErrorMessage(ErrorType.NotExist)).send()
     }
 }
+
+export const deleteCategory = async (req:Request, res:Response) => {
+    if ( !req['decoded'].isAdmin) {
+        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
+        // he is not a admin
+    }
+    const errors = validationResult(req)
+    if ( !errors.isEmpty() ) {
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+    }
+    const { id } = req.body
+    if ( await Category.findOne({ where : { id },raw : true}) !== null ) {
+        try {
+            await Category.destroy({where : { id }})
+            return res.json({result: true})
+        } catch (err) {
+            console.log(err)
+            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+        }
+    } else {
+        return res.status(400).json(getErrorMessage(ErrorType.NotExist)).send()
+    }
+}

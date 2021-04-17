@@ -24,3 +24,13 @@ export const updateCategoryValidator = () => {
             .withMessage("category must be string")
     ]
 }
+
+export const deleteCategoryValidator = () => {
+    return  [
+        body('id')
+            .notEmpty()
+            .withMessage('id is required')
+            .isNumeric()
+            .withMessage('id must be number'),
+    ]
+}

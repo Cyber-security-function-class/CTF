@@ -39,7 +39,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.updateCategory = exports.addCategory = exports.getCategories = void 0;
+exports.deleteCategory = exports.updateCategory = exports.addCategory = exports.getCategories = void 0;
 var index_1 = __importDefault(require("../../models/index"));
 var index_2 = require("../../error/index");
 var express_validator_1 = require("express-validator");
@@ -112,7 +112,7 @@ var addCategory = function (req, res) { return __awaiter(void 0, void 0, void 0,
 }); };
 exports.addCategory = addCategory;
 var updateCategory = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, _a, id, category;
+    var errors, _a, id, category, err_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -129,15 +129,60 @@ var updateCategory = function (req, res) { return __awaiter(void 0, void 0, void
                 _a = req.body, id = _a.id, category = _a.category;
                 return [4 /*yield*/, Category.findOne({ where: { id: id }, raw: true })];
             case 1:
-                if (!((_b.sent()) !== null)) return [3 /*break*/, 3];
-                return [4 /*yield*/, Category.update({ category: category }, { where: { id: id } })];
+                if (!((_b.sent()) !== null)) return [3 /*break*/, 6];
+                _b.label = 2;
             case 2:
+                _b.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, Category.update({ category: category }, { where: { id: id } })];
+            case 3:
                 _b.sent();
-                return [3 /*break*/, 4];
-            case 3: return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.NotExist)).send()];
-            case 4: return [2 /*return*/];
+                return [2 /*return*/, res.json({ result: true })];
+            case 4:
+                err_3 = _b.sent();
+                console.log(err_3);
+                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
+            case 5: return [3 /*break*/, 7];
+            case 6: return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.NotExist)).send()];
+            case 7: return [2 /*return*/];
         }
     });
 }); };
 exports.updateCategory = updateCategory;
+var deleteCategory = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var errors, id, err_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
+                if (!req['decoded'].isAdmin) {
+                    return [2 /*return*/, res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send()
+                        // he is not a admin
+                    ];
+                    // he is not a admin
+                }
+                errors = express_validator_1.validationResult(req);
+                if (!errors.isEmpty()) {
+                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), msg: errors.array() })];
+                }
+                id = req.body.id;
+                return [4 /*yield*/, Category.findOne({ where: { id: id }, raw: true })];
+            case 1:
+                if (!((_a.sent()) !== null)) return [3 /*break*/, 6];
+                _a.label = 2;
+            case 2:
+                _a.trys.push([2, 4, , 5]);
+                return [4 /*yield*/, Category.destroy({ where: { id: id } })];
+            case 3:
+                _a.sent();
+                return [2 /*return*/, res.json({ result: true })];
+            case 4:
+                err_4 = _a.sent();
+                console.log(err_4);
+                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
+            case 5: return [3 /*break*/, 7];
+            case 6: return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.NotExist)).send()];
+            case 7: return [2 /*return*/];
+        }
+    });
+}); };
+exports.deleteCategory = deleteCategory;
 //# sourceMappingURL=categoryController.js.map

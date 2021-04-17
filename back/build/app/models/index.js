@@ -21,6 +21,10 @@ var db = {
     Category: Category_1.CategoryFactory(sequelize)
 };
 // Category <--> Challenge
+db.Category.hasMany(db.Challenge, {
+    sourceKey: "id",
+    foreignKey: "category_id"
+});
 db.Challenge.belongsTo(db.Category, {
     foreignKey: "category_id",
     targetKey: "id"
