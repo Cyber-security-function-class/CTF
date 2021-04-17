@@ -5,6 +5,7 @@ import db from "../../models/index"
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
 import sequelize from 'sequelize'
+import category from '.'
 
 const Category = db.Category
 
@@ -57,5 +58,23 @@ export const addCategory = async (req: Request, res: Response) => {
         return res.json(newCategory)
     } else {
         return res.status(409).json(getErrorMessage(ErrorType.AlreadyExist)).send()
+    }
+}
+
+export const updateCategory = async (req:Request, res:Response) => {
+    if ( !req['decoded'].isAdmin) {
+        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
+        // he is not a admin
+    }
+    const errors = validationResult(req)
+    if ( !errors.isEmpty() ) {
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+    }
+    const { id } = req.body
+    if ( await Category.findOne({ where : { id },raw : true}) !== null ) {
+
+    } else {
+        // not exists
+        
     }
 }
