@@ -4,7 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 var express_1 = __importDefault(require("express"));
-var userValidator_1 = require("../../middlewares/userValidator");
+var userValidator_1 = require("../../middlewares/validators/userValidator");
 var authController_1 = require("./authController");
 var routes = express_1.default.Router();
 routes.post("/signUp", userValidator_1.signUpValidator(), authController_1.signUp);

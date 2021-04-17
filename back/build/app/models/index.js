@@ -5,6 +5,8 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 var sequelize_typescript_1 = require("sequelize-typescript");
 var dbconfig_1 = __importDefault(require("../config/dbconfig"));
+var Challenge_1 = require("./Challenge");
+var Category_1 = require("./Category");
 // import models
 var User_1 = require("./User");
 var sequelize = new sequelize_typescript_1.Sequelize(dbconfig_1.default.database, dbconfig_1.default.username, dbconfig_1.default.password, {
@@ -14,7 +16,14 @@ var sequelize = new sequelize_typescript_1.Sequelize(dbconfig_1.default.database
 });
 var db = {
     sequelize: sequelize,
-    User: User_1.UserFactory(sequelize)
+    User: User_1.UserFactory(sequelize),
+    Challenge: Challenge_1.ChallengeFactory(sequelize),
+    Category: Category_1.CategoryFactory(sequelize)
 };
+// Category <--> Challenge
+db.Challenge.belongsTo(db.Category, {
+    foreignKey: "category_id",
+    targetKey: "id"
+});
 exports.default = db;
 //# sourceMappingURL=index.js.map

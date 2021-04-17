@@ -96,7 +96,7 @@ var checkPassword = function (password, hashedPassword) { return __awaiter(void 
     });
 }); };
 var signUp = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, nickname, password, email, hashedPassword, isExistingUser, user, err_1;
+    var errors, nickname, password, email, hashedPassword, isExistingUser, msg, user, err_1;
     var _a;
     return __generator(this, function (_b) {
         switch (_b.label) {
@@ -122,12 +122,14 @@ var signUp = function (req, res) { return __awaiter(void 0, void 0, void 0, func
             case 2:
                 isExistingUser = _b.sent();
                 if (isExistingUser !== null) {
+                    msg = void 0;
                     if (nickname === isExistingUser.nickname) {
-                        return [2 /*return*/, res.status(409).json(index_2.getErrorMessage(index_2.ErrorType.NicknameExists)).send()];
+                        msg = "The nickname already exist.";
                     }
                     else {
-                        return [2 /*return*/, res.status(409).json(index_2.getErrorMessage(index_2.ErrorType.EmailExist)).send()];
+                        msg = "The email already exist.";
                     }
+                    return [2 /*return*/, res.status(409).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), msg: msg }).send()];
                 }
                 _b.label = 3;
             case 3:
@@ -153,24 +155,32 @@ var signUp = function (req, res) { return __awaiter(void 0, void 0, void 0, func
 }); };
 exports.signUp = signUp;
 var signIn = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, email, password, user, result, token;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
+    var errors, _a, email, password, user, err_2, result, token;
+    return __generator(this, function (_b) {
+        switch (_b.label) {
             case 0:
                 errors = express_validator_1.validationResult(req);
                 if (!errors.isEmpty()) {
                     return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), msg: errors.array() })];
                 }
-                email = req.body.email;
-                password = req.body.password;
-                return [4 /*yield*/, User.findOne({ where: { email: email }, raw: true })];
+                _a = req.body, email = _a.email, password = _a.password;
+                _b.label = 1;
             case 1:
-                user = _a.sent();
-                if (!(user === null)) return [3 /*break*/, 2];
-                return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.LoginFailed)).send()];
-            case 2: return [4 /*yield*/, checkPassword(password, user.password)]; // sign in result
+                _b.trys.push([1, 3, , 4]);
+                return [4 /*yield*/, User.findOne({ where: { email: email }, raw: true })];
+            case 2:
+                user = _b.sent();
+                return [3 /*break*/, 4];
             case 3:
-                result = _a.sent() // sign in result
+                err_2 = _b.sent();
+                console.log(err_2);
+                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
+            case 4:
+                if (!(user === null)) return [3 /*break*/, 5];
+                return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.LoginFailed)).send()];
+            case 5: return [4 /*yield*/, checkPassword(password, user.password)]; // sign in result
+            case 6:
+                result = _b.sent() // sign in result
                 ;
                 if (result) { // password correct
                     token = jwt.sign({
@@ -187,8 +197,8 @@ var signIn = function (req, res) { return __awaiter(void 0, void 0, void 0, func
                 else { // password incorrect
                     return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.LoginFailed)).send()];
                 }
-                _a.label = 4;
-            case 4: return [2 /*return*/];
+                _b.label = 7;
+            case 7: return [2 /*return*/];
         }
     });
 }); };
