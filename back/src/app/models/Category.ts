@@ -25,11 +25,12 @@ export type CategoryStatic = typeof Model & {
 // });
 
 export function CategoryFactory (sequelize: Sequelize): CategoryStatic {
-    return <CategoryStatic>sequelize.define("category", {
+    return <CategoryStatic>sequelize.define("Category", {
         id : {
             type : DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
+            unique : true
         },
         category : {
             type : DataTypes.STRING,

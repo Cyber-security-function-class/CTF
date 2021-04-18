@@ -15,34 +15,32 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CategoryFactory = exports.Category = void 0;
+exports.EmailVerifiedFactory = exports.EmailVerified = void 0;
 var sequelize_1 = require("sequelize");
-var Category = /** @class */ (function (_super) {
-    __extends(Category, _super);
-    function Category() {
+var EmailVerified = /** @class */ (function (_super) {
+    __extends(EmailVerified, _super);
+    function EmailVerified() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    return Category;
+    return EmailVerified;
 }(sequelize_1.Model));
-exports.Category = Category;
-// Category.hasOne(Project, {     // model category 와 hasMany
-//     sourceKey: "id",
-//     foreignKey: "category",
-//     as: "projects", // this determines the name in `associations`!
-// });
-function CategoryFactory(sequelize) {
-    return sequelize.define("Category", {
+exports.EmailVerified = EmailVerified;
+function EmailVerifiedFactory(sequelize) {
+    return sequelize.define("email_verified", {
         id: {
             type: sequelize_1.DataTypes.INTEGER,
-            autoIncrement: true,
             primaryKey: true,
             unique: true
         },
-        category: {
+        email: {
             type: sequelize_1.DataTypes.STRING,
             primaryKey: true,
+        },
+        token: {
+            type: sequelize_1.DataTypes.STRING,
+            allowNull: false
         }
     });
 }
-exports.CategoryFactory = CategoryFactory;
-//# sourceMappingURL=Category.js.map
+exports.EmailVerifiedFactory = EmailVerifiedFactory;
+//# sourceMappingURL=EmailVerified.js.map

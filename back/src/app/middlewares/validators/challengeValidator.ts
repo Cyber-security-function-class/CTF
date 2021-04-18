@@ -1,5 +1,5 @@
 'use strict';
-import { body } from 'express-validator';
+import { body,query} from 'express-validator';
 
 
 export const addChallengeValidator = () => {
@@ -21,9 +21,9 @@ export const addChallengeValidator = () => {
             .withMessage("score is must be number"),
         body('category_id')
             .notEmpty()
-            .withMessage('category is required')
+            .withMessage('category_id is required')
             .isNumeric()
-            .withMessage("categort_id is must be number"),
+            .withMessage("category_id is must be number"),
         body('flag')
             .notEmpty()
             .withMessage("flag is required")
@@ -56,9 +56,9 @@ export const updateChallengeValidator = () => {
             .withMessage("score is must be number"),
         body('category_id')
             .notEmpty()
-            .withMessage('category is required')
+            .withMessage('category_id is required')
             .isNumeric()
-            .withMessage("categort_id is must be number"),
+            .withMessage("category_id is must be number"),
         body('flag')
             .notEmpty()
             .withMessage("flag is required")
@@ -88,5 +88,15 @@ export const authFlagValidator = () => {
             .withMessage("flag is required")
             .isString()
             .withMessage("flag is must be string")
+    ]
+}
+
+export const getChallengeValidator = () => {
+    return [
+        query('id')
+            .notEmpty()
+            .withMessage("id is required")
+            .isNumeric()
+            .withMessage("id is must be number")
     ]
 }

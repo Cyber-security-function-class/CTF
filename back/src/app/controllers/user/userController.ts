@@ -10,6 +10,7 @@ import { UserModel } from '../../models/User'
 
 
 const User = db.User
+const Solved = db['Solved']
 
 const createHashedPassword = async (password: string) => {
     const saltRounds = 10
@@ -108,10 +109,21 @@ export const signIn = async (req,res) => {
     
 }
 
-export const getUser = async (req, res) => {
-    if ( !req['decoded'].isAdmin) { // 이거 미들웨어로 만들어야할듯
-        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
+export const getUsers = async (req,res) => {
+    try {
+        const users = await User.findAll({
+            attributes: ['id','nickname','score'],
+            raw : true
+        })
+        res.json(users)
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
     }
+}
+
+export const getUser = async (req, res) => {
+
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
@@ -120,16 +132,23 @@ export const getUser = async (req, res) => {
 
     let { id } = req.query
     id = +id
-    console.log(id)
     try {
-        const user = await User.findOne({
-            where : {
-                id : id
-            },
-            attributes : ['id','nickname','email','score','isAdmin']
-        })
-
-        return res.json(user)
+        if (await User.findOne({where : {id},raw : true}) !== null) {
+            const user = await User.findOne({
+                where : {
+                    id : id
+                },
+                attributes : ['id','nickname','email','score','isAdmin'],
+                include : [{ 
+                    model : Solved,
+                    as : "solved"
+                }]
+            })
+            return res.json(user)
+        } else {
+            return res.status(400).json({error:getErrorMessage(ErrorType.NotExist), detail:"user doesn't exist"})
+        }
+        
     } catch (err) {
         console.log(err)
         return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
@@ -161,7 +180,7 @@ export const updateUser = async (req, res) => {
         if ( isUserExist !== null ){
             try {
                 // update user
-                const updatedUser = await User.update(
+                await User.update(
                     { 
                         nickname,
                         email,

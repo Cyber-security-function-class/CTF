@@ -32,7 +32,7 @@ var signInValidator = function () {
 exports.signInValidator = signInValidator;
 var getUserValidator = function () {
     return [
-        express_validator_1.body('id')
+        express_validator_1.query('id')
             .notEmpty()
             .withMessage('id is required')
             .isNumeric()

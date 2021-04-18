@@ -58,7 +58,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.getUser = exports.signIn = exports.signUp = void 0;
+exports.deleteUser = exports.updateUser = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
 var index_1 = __importDefault(require("../../models/index"));
 var jwt = __importStar(require("jsonwebtoken"));
 var bcrypt_1 = require("bcrypt");
@@ -67,6 +67,7 @@ var config_1 = __importDefault(require("../../config/config"));
 var sequelize_1 = require("sequelize");
 var index_2 = require("../../error/index");
 var User = index_1.default.User;
+var Solved = index_1.default['Solved'];
 var createHashedPassword = function (password) { return __awaiter(void 0, void 0, void 0, function () {
     var saltRounds, salt, hashedPassword;
     return __generator(this, function (_a) {
@@ -203,44 +204,72 @@ var signIn = function (req, res) { return __awaiter(void 0, void 0, void 0, func
     });
 }); };
 exports.signIn = signIn;
-var getUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, id, user, err_3;
+var getUsers = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var users, err_3;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                if (!req['decoded'].isAdmin) { // 이거 미들웨어로 만들어야할듯
-                    return [2 /*return*/, res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send()];
-                }
+                _a.trys.push([0, 2, , 3]);
+                return [4 /*yield*/, User.findAll({
+                        attributes: ['id', 'nickname', 'score'],
+                        raw: true
+                    })];
+            case 1:
+                users = _a.sent();
+                res.json(users);
+                return [3 /*break*/, 3];
+            case 2:
+                err_3 = _a.sent();
+                console.log(err_3);
+                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
+            case 3: return [2 /*return*/];
+        }
+    });
+}); };
+exports.getUsers = getUsers;
+var getUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
+    var errors, id, user, err_4;
+    return __generator(this, function (_a) {
+        switch (_a.label) {
+            case 0:
                 errors = express_validator_1.validationResult(req);
                 if (!errors.isEmpty()) {
                     return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
                 }
                 id = req.query.id;
                 id = +id;
-                console.log(id);
                 _a.label = 1;
             case 1:
-                _a.trys.push([1, 3, , 4]);
+                _a.trys.push([1, 6, , 7]);
+                return [4 /*yield*/, User.findOne({ where: { id: id }, raw: true })];
+            case 2:
+                if (!((_a.sent()) !== null)) return [3 /*break*/, 4];
                 return [4 /*yield*/, User.findOne({
                         where: {
                             id: id
                         },
-                        attributes: ['id', 'nickname', 'email', 'score', 'isAdmin']
+                        attributes: ['id', 'nickname', 'email', 'score', 'isAdmin'],
+                        include: [{
+                                model: Solved,
+                                as: "solved"
+                            }]
                     })];
-            case 2:
+            case 3:
                 user = _a.sent();
                 return [2 /*return*/, res.json(user)];
-            case 3:
-                err_3 = _a.sent();
-                console.log(err_3);
+            case 4: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user doesn't exist" })];
+            case 5: return [3 /*break*/, 7];
+            case 6:
+                err_4 = _a.sent();
+                console.log(err_4);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 4: return [2 /*return*/];
+            case 7: return [2 /*return*/];
         }
     });
 }); };
 exports.getUser = getUser;
 var updateUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, _a, id, nickname, email, isAdmin, score, isUserExist, updatedUser, err_4, err_5;
+    var errors, _a, id, nickname, email, isAdmin, score, isUserExist, err_5, err_6;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -268,6 +297,7 @@ var updateUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 _b.label = 3;
             case 3:
                 _b.trys.push([3, 5, , 6]);
+                // update user
                 return [4 /*yield*/, User.update({
                         nickname: nickname,
                         email: email,
@@ -279,19 +309,20 @@ var updateUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                         }
                     })];
             case 4:
-                updatedUser = _b.sent();
+                // update user
+                _b.sent();
                 res.json({ result: true });
                 return [3 /*break*/, 6];
             case 5:
-                err_4 = _b.sent();
-                console.log(err_4);
+                err_5 = _b.sent();
+                console.log(err_5);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
             case 6: return [3 /*break*/, 8];
             case 7: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send()];
             case 8: return [3 /*break*/, 10];
             case 9:
-                err_5 = _b.sent();
-                console.log(err_5);
+                err_6 = _b.sent();
+                console.log(err_6);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
             case 10: return [2 /*return*/];
         }
@@ -299,7 +330,7 @@ var updateUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
 }); };
 exports.updateUser = updateUser;
 var deleteUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, id, err_6;
+    var errors, id, err_7;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
@@ -322,8 +353,8 @@ var deleteUser = function (req, res) { return __awaiter(void 0, void 0, void 0, 
                 _a.sent();
                 return [2 /*return*/, res.json({ result: true })];
             case 4:
-                err_6 = _a.sent();
-                console.log(err_6);
+                err_7 = _a.sent();
+                console.log(err_7);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
             case 5: return [3 /*break*/, 7];
             case 6: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send()];

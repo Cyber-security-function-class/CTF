@@ -8,7 +8,7 @@ const dbconfig = {
     "host" : process.env.dbHost || "localhost",
     "database" : "SkillCTF",
     "dialect" : "postgres",
-    "logging": false
+    "logging": true
 }
 
 

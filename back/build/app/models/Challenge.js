@@ -31,6 +31,7 @@ function ChallengeFactory(sequelize) {
             type: sequelize_1.DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
+            unique: true
         },
         title: {
             type: sequelize_1.DataTypes.STRING,
@@ -42,8 +43,7 @@ function ChallengeFactory(sequelize) {
         },
         category_id: {
             type: sequelize_1.DataTypes.INTEGER,
-            allowNull: false,
-            defaultValue: 0
+            allowNull: false
         },
         content: {
             type: sequelize_1.DataTypes.TEXT,

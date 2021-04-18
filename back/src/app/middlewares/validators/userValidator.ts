@@ -1,5 +1,5 @@
 'use strict';
-import { body } from 'express-validator';
+import { body, query } from 'express-validator';
 
 
 export const signUpValidator = () => {
@@ -32,7 +32,7 @@ export const signInValidator = () => {
 
 export const getUserValidator = () => {
     return [
-        body('id')
+        query('id')
             .notEmpty()
             .withMessage('id is required')
             .isNumeric()

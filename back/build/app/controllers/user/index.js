@@ -10,9 +10,11 @@ var auth_1 = __importDefault(require("../../middlewares/auth"));
 var routes = express_1.default.Router();
 routes.post("/signUp", userValidator_1.signUpValidator(), userController_1.signUp);
 routes.post("/signIn", userValidator_1.signInValidator(), userController_1.signIn);
-// only admin
 routes.get('/getUser', auth_1.default);
 routes.get('/getUser', userValidator_1.getUserValidator(), userController_1.getUser);
+routes.get('/getUsers', auth_1.default);
+routes.get('/getUsers', userController_1.getUsers);
+// only admin
 routes.post("/updateUser", auth_1.default);
 routes.post("/updateUser", userValidator_1.updateUserValidator(), userController_1.updateUser);
 routes.post("/deleteUser", auth_1.default);

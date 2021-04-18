@@ -31,18 +31,19 @@ function UserFactory(sequelize) {
             type: sequelize_1.DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
+            unique: true
         },
         nickname: {
+            type: sequelize_1.DataTypes.STRING,
+            primaryKey: true
+        },
+        email: {
             type: sequelize_1.DataTypes.STRING,
             primaryKey: true
         },
         password: {
             type: sequelize_1.DataTypes.STRING,
             allowNull: false
-        },
-        email: {
-            type: sequelize_1.DataTypes.STRING,
-            primaryKey: true
         },
         score: {
             type: sequelize_1.DataTypes.INTEGER,

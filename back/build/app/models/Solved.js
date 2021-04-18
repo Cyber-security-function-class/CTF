@@ -25,7 +25,7 @@ var Solved = /** @class */ (function (_super) {
     return Solved;
 }(sequelize_1.Model));
 exports.Solved = Solved;
-function SolvedFactory(sequelize) {
+function SolvedFactory(sequelize, User, Challenge) {
     return sequelize.define("solved", {
         id: {
             type: sequelize_1.DataTypes.INTEGER,
@@ -38,11 +38,19 @@ function SolvedFactory(sequelize) {
         },
         user_id: {
             type: sequelize_1.DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            references: {
+                model: User,
+                key: 'id'
+            }
         },
         challenge_id: {
             type: sequelize_1.DataTypes.INTEGER,
-            allowNull: false
+            allowNull: false,
+            references: {
+                model: Challenge,
+                key: 'id'
+            }
         }
     });
 }

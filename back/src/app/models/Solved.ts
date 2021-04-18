@@ -1,17 +1,19 @@
 'use strict';
 
 import { BuildOptions, DataTypes, Model, Sequelize } from "sequelize";
+import { ChallengeFactory } from "./Challenge";
+import { UserFactory } from "./User";
 
-export interface SovledAttributes {
+export interface SolvedAttributes {
     id?: number
     score : number
-    challenge_id : number
     user_id : number
+    challenge_id : number
     createdAt?: Date
     updatedAt?: Date
 }
-export interface SolvedModel extends Model<SovledAttributes>, SovledAttributes {}
-export class Solved extends Model<SolvedModel, SovledAttributes> {
+export interface SolvedModel extends Model<SolvedAttributes>, SolvedAttributes {}
+export class Solved extends Model<SolvedModel, SolvedAttributes> {
     
 }
 
@@ -20,7 +22,7 @@ export type SolvedStatic = typeof Model & {
 };
 
 
-export function SolvedFactory (sequelize: Sequelize): SolvedStatic {
+export function SolvedFactory (sequelize: Sequelize,User ,Challenge): SolvedStatic {
     return <SolvedStatic>sequelize.define("solved", {
         id : {
             type : DataTypes.INTEGER,
@@ -33,11 +35,19 @@ export function SolvedFactory (sequelize: Sequelize): SolvedStatic {
         },
         user_id : {
             type : DataTypes.INTEGER,
-            allowNull : false
+            allowNull : false,
+            references :{
+                model : User,
+                key :'id' 
+            }
         },
         challenge_id : {
             type : DataTypes.INTEGER,
-            allowNull : false
+            allowNull : false,
+            references :{
+                model : Challenge,
+                key :'id' 
+            }
         }
     });
 }

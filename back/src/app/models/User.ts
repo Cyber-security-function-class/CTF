@@ -13,10 +13,12 @@ export interface UserAttributes {
     updatedAt?: Date;
 }
 export interface UserModel extends Model<UserAttributes>, UserAttributes {}
-export class User extends Model<UserModel, UserAttributes> {}
+export class User extends Model<UserModel, UserAttributes> {
+    
+}
 
 export type UserStatic = typeof Model & {
-    new (values?: object, options?: BuildOptions): UserModel;
+    new (values?: object, options?: BuildOptions): UserModel
 };
 
 export function UserFactory (sequelize: Sequelize): UserStatic {
@@ -25,18 +27,19 @@ export function UserFactory (sequelize: Sequelize): UserStatic {
             type : DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
+            unique : true
         },
         nickname : {
+            type : DataTypes.STRING,
+            primaryKey: true
+        },
+        email : {
             type : DataTypes.STRING,
             primaryKey: true
         },
         password : {
             type : DataTypes.STRING,
             allowNull : false
-        },  
-        email : {
-            type : DataTypes.STRING,
-            primaryKey: true
         },
         score : {
             type : DataTypes.INTEGER,

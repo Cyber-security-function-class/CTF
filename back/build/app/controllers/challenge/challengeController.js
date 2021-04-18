@@ -46,26 +46,67 @@ var express_validator_1 = require("express-validator");
 var sequelize_1 = require("sequelize");
 var Challenge = index_1.default.Challenge;
 var Category = index_1.default.Category;
-var Solved = index_1.default.Solved;
+var Solved = index_1.default['Solved'];
 var User = index_1.default.User;
 var getChallenges = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var challenges, err_1;
+    var filter, challenges_1, f_1, err_1;
     return __generator(this, function (_a) {
         switch (_a.label) {
             case 0:
-                _a.trys.push([0, 2, , 3]);
+                filter = req.query['filter'];
+                _a.label = 1;
+            case 1:
+                _a.trys.push([1, 5, , 6]);
+                if (!!filter) return [3 /*break*/, 3];
                 return [4 /*yield*/, Challenge.findAll({
-                        attributes: ['id', 'title', 'score', 'category'],
+                        attributes: ['id', 'title', 'score', 'categoryId'],
                         raw: true
                     })];
-            case 1:
-                challenges = _a.sent();
-                return [2 /*return*/, res.json({ result: challenges })];
             case 2:
+                challenges_1 = _a.sent();
+                return [3 /*break*/, 4];
+            case 3:
+                f_1 = [];
+                new Promise(function (resolve) {
+                    var filterList = filter.toString().split(',');
+                    filterList.forEach(function (e, i) {
+                        var tmp = parseInt(e);
+                        if (!isNaN(tmp)) {
+                            f_1.push({ "categoryId": tmp });
+                        }
+                        if (i >= filterList.length - 1) {
+                            console.log("asd");
+                            resolve(f_1);
+                        }
+                    });
+                }).then(function (f) { return __awaiter(void 0, void 0, void 0, function () {
+                    var _a;
+                    return __generator(this, function (_b) {
+                        switch (_b.label) {
+                            case 0: return [4 /*yield*/, Challenge.findAll({
+                                    where: (_a = {},
+                                        _a[sequelize_1.Op.or] = f,
+                                        _a),
+                                    attributes: ['id', 'title', 'score', 'categoryId'],
+                                    raw: true
+                                })];
+                            case 1:
+                                challenges_1 = _b.sent();
+                                console.log("challenges ", challenges_1);
+                                return [2 /*return*/, res.json({ result: challenges_1 })];
+                        }
+                    });
+                }); }).catch(function (err) {
+                    console.log(err);
+                    return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+                });
+                _a.label = 4;
+            case 4: return [3 /*break*/, 6];
+            case 5:
                 err_1 = _a.sent();
                 console.log(err_1);
                 return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 3: return [2 /*return*/];
+            case 6: return [2 /*return*/];
         }
     });
 }); };
@@ -87,7 +128,7 @@ var getChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0
                         where: {
                             id: numId
                         },
-                        attributes: ['id', 'title', 'content', 'score', 'category_id'],
+                        attributes: ['id', 'title', 'content', 'score', 'categoryId'],
                         raw: true,
                         include: [{
                                 model: Category,
@@ -113,7 +154,7 @@ var getChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0
 }); };
 exports.getChallenge = getChallenge;
 var addChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, _a, title, score, category_id, content, flag, chall, err_3;
+    var errors, _a, title, score, categoryId, content, flag, chall, err_3;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -127,11 +168,11 @@ var addChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0
                 if (!errors.isEmpty()) {
                     return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
                 }
-                _a = req.body, title = _a.title, score = _a.score, category_id = _a.category_id, content = _a.content, flag = _a.flag;
+                _a = req.body, title = _a.title, score = _a.score, categoryId = _a.categoryId, content = _a.content, flag = _a.flag;
                 _b.label = 1;
             case 1:
                 _b.trys.push([1, 6, , 7]);
-                return [4 /*yield*/, Category.findOne({ where: { id: category_id } })];
+                return [4 /*yield*/, Category.findOne({ where: { id: categoryId } })];
             case 2:
                 if (!((_b.sent()) !== null)) return [3 /*break*/, 4];
                 return [4 /*yield*/, Challenge.create({
@@ -139,7 +180,7 @@ var addChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0
                         score: score,
                         content: content,
                         flag: flag,
-                        category_id: category_id
+                        categoryId: categoryId
                     })];
             case 3:
                 chall = _b.sent();
@@ -156,7 +197,7 @@ var addChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0
 }); };
 exports.addChallenge = addChallenge;
 var updateChallenge = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, _a, id, title, content, score, flag, category_id, err_4;
+    var errors, _a, id, title, content, score, flag, categoryId, err_4;
     return __generator(this, function (_b) {
         switch (_b.label) {
             case 0:
@@ -170,13 +211,13 @@ var updateChallenge = function (req, res) { return __awaiter(void 0, void 0, voi
                 if (!errors.isEmpty()) {
                     return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
                 }
-                _a = req.body, id = _a.id, title = _a.title, content = _a.content, score = _a.score, flag = _a.flag, category_id = _a.category_id;
+                _a = req.body, id = _a.id, title = _a.title, content = _a.content, score = _a.score, flag = _a.flag, categoryId = _a.categoryId;
                 return [4 /*yield*/, Challenge.findOne({ where: id })];
             case 1:
                 if ((_b.sent()) === null) {
                     return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "challenge doesn't exist" })];
                 }
-                return [4 /*yield*/, Category.findOne({ where: { id: category_id } })];
+                return [4 /*yield*/, Category.findOne({ where: { id: categoryId } })];
             case 2:
                 if (!((_b.sent()) !== null)) return [3 /*break*/, 7];
                 _b.label = 3;
@@ -187,7 +228,7 @@ var updateChallenge = function (req, res) { return __awaiter(void 0, void 0, voi
                         content: content,
                         score: score,
                         flag: flag,
-                        category_id: category_id
+                        categoryId: categoryId
                     }, {
                         where: { id: id }
                     })];

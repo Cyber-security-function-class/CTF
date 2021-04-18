@@ -15,34 +15,23 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CategoryFactory = exports.Category = void 0;
+exports.EmailAuthFactory = exports.EmailAuth = void 0;
 var sequelize_1 = require("sequelize");
-var Category = /** @class */ (function (_super) {
-    __extends(Category, _super);
-    function Category() {
+var EmailAuth = /** @class */ (function (_super) {
+    __extends(EmailAuth, _super);
+    function EmailAuth() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    return Category;
+    return EmailAuth;
 }(sequelize_1.Model));
-exports.Category = Category;
-// Category.hasOne(Project, {     // model category 와 hasMany
-//     sourceKey: "id",
-//     foreignKey: "category",
-//     as: "projects", // this determines the name in `associations`!
-// });
-function CategoryFactory(sequelize) {
-    return sequelize.define("Category", {
-        id: {
-            type: sequelize_1.DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-            unique: true
-        },
-        category: {
+exports.EmailAuth = EmailAuth;
+function EmailAuthFactory(sequelize) {
+    return sequelize.define("email_auth", {
+        email: {
             type: sequelize_1.DataTypes.STRING,
             primaryKey: true,
         }
     });
 }
-exports.CategoryFactory = CategoryFactory;
-//# sourceMappingURL=Category.js.map
+exports.EmailAuthFactory = EmailAuthFactory;
+//# sourceMappingURL=EmailAuth.js.map

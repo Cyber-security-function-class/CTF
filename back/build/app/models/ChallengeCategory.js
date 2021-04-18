@@ -15,34 +15,32 @@ var __extends = (this && this.__extends) || (function () {
     };
 })();
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CategoryFactory = exports.Category = void 0;
+exports.ChallengeCategoryFactory = exports.ChallengeCategory = void 0;
 var sequelize_1 = require("sequelize");
-var Category = /** @class */ (function (_super) {
-    __extends(Category, _super);
-    function Category() {
+var ChallengeCategory = /** @class */ (function (_super) {
+    __extends(ChallengeCategory, _super);
+    function ChallengeCategory() {
         return _super !== null && _super.apply(this, arguments) || this;
     }
-    return Category;
+    return ChallengeCategory;
 }(sequelize_1.Model));
-exports.Category = Category;
-// Category.hasOne(Project, {     // model category 와 hasMany
-//     sourceKey: "id",
-//     foreignKey: "category",
-//     as: "projects", // this determines the name in `associations`!
-// });
-function CategoryFactory(sequelize) {
-    return sequelize.define("Category", {
+exports.ChallengeCategory = ChallengeCategory;
+function ChallengeCategoryFactory(sequelize) {
+    return sequelize.define("ChallengeCategory", {
         id: {
             type: sequelize_1.DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
-            unique: true
         },
-        category: {
-            type: sequelize_1.DataTypes.STRING,
-            primaryKey: true,
+        categoryId: {
+            type: sequelize_1.DataTypes.INTEGER,
+            allowNull: false
+        },
+        challengeId: {
+            type: sequelize_1.DataTypes.INTEGER,
+            allowNull: false
         }
     });
 }
-exports.CategoryFactory = CategoryFactory;
-//# sourceMappingURL=Category.js.map
+exports.ChallengeCategoryFactory = ChallengeCategoryFactory;
+//# sourceMappingURL=ChallengeCategory.js.map

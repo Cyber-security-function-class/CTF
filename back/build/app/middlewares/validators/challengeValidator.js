@@ -1,6 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authFlagValidator = exports.deleteChallengeValidator = exports.updateChallengeValidator = exports.addChallengeValidator = void 0;
+exports.getChallengeValidator = exports.authFlagValidator = exports.deleteChallengeValidator = exports.updateChallengeValidator = exports.addChallengeValidator = void 0;
 var express_validator_1 = require("express-validator");
 var addChallengeValidator = function () {
     return [
@@ -21,9 +21,9 @@ var addChallengeValidator = function () {
             .withMessage("score is must be number"),
         express_validator_1.body('category_id')
             .notEmpty()
-            .withMessage('category is required')
+            .withMessage('category_id is required')
             .isNumeric()
-            .withMessage("categort_id is must be number"),
+            .withMessage("category_id is must be number"),
         express_validator_1.body('flag')
             .notEmpty()
             .withMessage("flag is required")
@@ -56,9 +56,9 @@ var updateChallengeValidator = function () {
             .withMessage("score is must be number"),
         express_validator_1.body('category_id')
             .notEmpty()
-            .withMessage('category is required')
+            .withMessage('category_id is required')
             .isNumeric()
-            .withMessage("categort_id is must be number"),
+            .withMessage("category_id is must be number"),
         express_validator_1.body('flag')
             .notEmpty()
             .withMessage("flag is required")
@@ -92,4 +92,14 @@ var authFlagValidator = function () {
     ];
 };
 exports.authFlagValidator = authFlagValidator;
+var getChallengeValidator = function () {
+    return [
+        express_validator_1.query('id')
+            .notEmpty()
+            .withMessage("id is required")
+            .isNumeric()
+            .withMessage("id is must be number")
+    ];
+};
+exports.getChallengeValidator = getChallengeValidator;
 //# sourceMappingURL=challengeValidator.js.map

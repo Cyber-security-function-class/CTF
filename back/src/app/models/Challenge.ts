@@ -6,7 +6,7 @@ export interface ChallengeAttributes {
     id?: number
     title : string
     score : number
-    category_id : number
+    categoryId : number
     content : string
     flag : string
     createdAt?: Date
@@ -28,6 +28,7 @@ export function ChallengeFactory (sequelize: Sequelize): ChallengeStatic {
             type : DataTypes.INTEGER,
             autoIncrement: true,
             primaryKey: true,
+            unique : true
         },
         title : {
             type : DataTypes.STRING,
@@ -39,8 +40,7 @@ export function ChallengeFactory (sequelize: Sequelize): ChallengeStatic {
         },  
         category_id : {
             type : DataTypes.INTEGER,
-            allowNull : false,
-            defaultValue : 0
+            allowNull : false
         },
         content : {
             type : DataTypes.TEXT,
