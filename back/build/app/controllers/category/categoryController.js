@@ -34,12 +34,12 @@ const getCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 exports.getCategories = getCategories;
 const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req['decoded'].isAdmin) {
-        return res.status(403).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
+        return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
         // he is not a admin
     }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
     }
     const { category } = req.body;
     const Scategory = category.toLowerCase();
@@ -62,18 +62,18 @@ const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.json(newCategory);
     }
     else {
-        return res.status(409).json(index_1.getErrorMessage(index_1.ErrorType.AlreadyExist)).send();
+        return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AlreadyExist)).send();
     }
 });
 exports.addCategory = addCategory;
 const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req['decoded'].isAdmin) {
-        return res.status(403).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
+        return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
         // he is not a admin
     }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
     }
     const { id, category } = req.body;
     if ((yield categoryRepository.findOne({ where: { id }, raw: true })) !== null) {
@@ -93,12 +93,12 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
 exports.updateCategory = updateCategory;
 const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req['decoded'].isAdmin) {
-        return res.status(403).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
+        return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
         // he is not a admin
     }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
     }
     const { id } = req.body;
     if ((yield categoryRepository.findOne({ where: { id }, raw: true })) !== null) {
