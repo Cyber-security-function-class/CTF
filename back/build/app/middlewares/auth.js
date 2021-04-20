@@ -19,31 +19,31 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var jwt = __importStar(require("jsonwebtoken"));
-exports.default = (function (req, res, next) {
-    var token = req.headers.authorization;
+const jwt = __importStar(require("jsonwebtoken"));
+exports.default = (req, res, next) => {
+    const token = req.headers.authorization;
     if (!token) {
         return res.status(403).json({
             success: false,
             message: 'not logged in'
         });
     }
-    var p = new Promise(function (resolve, reject) {
-        jwt.verify(token, req.app.get('jwt-secret'), function (err, decoded) {
+    const p = new Promise((resolve, reject) => {
+        jwt.verify(token, req.app.get('jwt-secret'), (err, decoded) => {
             if (err)
                 reject(err);
             resolve(decoded);
         });
     });
-    var onError = function (error) {
+    const onError = (error) => {
         res.status(403).json({
             success: false,
             message: error.message
         });
     };
-    p.then(function (decoded) {
+    p.then((decoded) => {
         req.decoded = decoded;
         next();
     }).catch(onError);
-});
+};
 //# sourceMappingURL=auth.js.map

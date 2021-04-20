@@ -3,12 +3,15 @@ import db from '../../models/index'
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
 import { Op } from 'sequelize'
-import { ChallengeModel } from '../../models/Challenge'
+import { Challenge } from '../../models/Challenge'
+import { Category } from '../../models/Category'
+import { Solved } from '../../models/Solved'
+import { User } from '../../models/User'
 
-const Challenge = db.Challenge
-const Category = db.Category
-const Solved = db['Solved']
-const User = db.User
+const challengeRepository = db.sequelize.getRepository(Challenge)
+const categoryRepository = db.sequelize.getRepository(Category)
+const solvedRepository = db.sequelize.getRepository(Solved)
+const userRepository = db.sequelize.getRepository(User)
 
 export const getChallenges = async (req:Request, res:Response) => {
     const filter = req.query['filter']
@@ -16,10 +19,16 @@ export const getChallenges = async (req:Request, res:Response) => {
     try {
         let challenges
         if (!filter){
-            challenges = await Challenge.findAll({
+            challenges = await challengeRepository.findAll({
                 attributes : ['id','title','score','categoryId'],
+                include: [{
+                    model: categoryRepository,
+                    as: 'category',
+                    attributes : ['category']
+                }],
                 raw : true
             })
+            return res.json(challenges)
         } else {
             let f = []
             new Promise ((resolve) => {
@@ -35,11 +44,16 @@ export const getChallenges = async (req:Request, res:Response) => {
                     }
                 })
             }).then( async (f) => {
-                challenges = await Challenge.findAll({
+                challenges = await challengeRepository.findAll({
                     where : {
                         [Op.or]: f
                     },
                     attributes : ['id','title','score','categoryId'],
+                    include : [{
+                        model: categoryRepository,
+                        as: 'category',
+                        attributes : ['category']
+                    }],
                     raw : true
                 })
                 console.log("challenges ",challenges)
@@ -59,20 +73,20 @@ export const getChallenges = async (req:Request, res:Response) => {
 export const getChallenge = async (req:Request, res:Response) => {
     // get by challenge id
     const { id } = req.query
-    const numId = +id
-    
-    if ( numId === undefined || numId === NaN) { 
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError) })
+    const errors = validationResult(req)
+    if ( !errors.isEmpty() ) {
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
+
     try {
-        const challenge = await Challenge.findOne({
+        const challenge = await challengeRepository.findOne({
             where : { 
-                id : numId
+                id : id
             },
             attributes : ['id','title','content','score','categoryId'],
             raw : true,
             include: [{
-                model: Category,
+                model: categoryRepository,
                 as: 'category'
             }]
         })
@@ -83,7 +97,7 @@ export const getChallenge = async (req:Request, res:Response) => {
         }
     } catch (err) {
         console.log(err)
-        
+        return res.status(500).json({error:getErrorMessage(ErrorType.UnexpectedError)})
     }
 
 }
@@ -101,15 +115,14 @@ export const addChallenge = async (req:Request, res:Response) => {
 
     const { title, score,categoryId, content, flag} = req.body
     
-
     try {
-        if ( await Category.findOne({where : {id : categoryId}}) !== null) {
-            const chall = await Challenge.create({
+        if ( await categoryRepository.findOne({where : {id : categoryId}}) !== null) {
+            const chall = await challengeRepository.create({
                 title,
                 score,
                 content,
                 flag,
-                categoryId 
+                categoryId,
             })
             return res.json(chall)
         } else {
@@ -133,13 +146,13 @@ export const updateChallenge = async (req:Request, res:Response) => {
     }
     const {id,title,content,score,flag,categoryId} = req.body
     
-    if ( await Challenge.findOne({where : id}) === null) {
+    if ( await challengeRepository.findOne({where : id}) === null) {
         return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),detail:"challenge doesn't exist"})
     }
 
     if( await Category.findOne({where : {id:categoryId}}) !== null) {
         try {
-            await Challenge.update({
+            await challengeRepository.update({
                 title,
                 content,
                 score,
@@ -170,9 +183,9 @@ export const deleteChallenge = async (req:Request, res:Response) => {
     }
     
     const { id } = req.body
-    if ( await Challenge.findOne({where:{id}}) !== null) {
+    if ( await challengeRepository.findOne({where:{id}}) !== null) {
         try {
-            await Challenge.destroy({where:{id}})
+            await challengeRepository.destroy({where:{id}})
             return res.json({result: true})
         } catch (err) {
             console.log(err)
@@ -183,6 +196,7 @@ export const deleteChallenge = async (req:Request, res:Response) => {
     }
 }
 
+/*
 export const authFlag = async (req:Request, res:Response) => {
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
@@ -191,20 +205,20 @@ export const authFlag = async (req:Request, res:Response) => {
 
     const { challenge_id, flag } = req.body
     const user_id = req['decoded'].id
-    const challenge = await Challenge.findOne({where: {id : challenge_id},raw : true})
+    const challenge = await challengeRepository.findOne({where: {id : challenge_id},raw : true})
     if (challenge !== null ) {
         if ( flag === challenge.flag ) { // flag correct
             try {
                 if ( 
-                    await Solved.findOne({where :{
+                    await solvedRepository.findOne({where :{
                         [Op.or]: [{ user_id}, {challenge_id}]
                     }}) === null) {
-                    const solved = await Solved.create({
+                    const solved = await solvedRepository.create({
                         challenge_id,
                         user_id,
                         score:challenge.score
                     })
-                    const user = await User.findOne({where: {id : user_id}})
+                    const user = await userRepository.findOne({where: {id : user_id}})
                     user.increment('score', {by: challenge.score})
                     return res.json(solved)
                 } else {
@@ -221,3 +235,4 @@ export const authFlag = async (req:Request, res:Response) => {
         return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),detail:"challenge doesn't exist"})
     }
 }
+*/

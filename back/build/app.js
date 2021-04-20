@@ -3,11 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-var strong_error_handler_1 = __importDefault(require("strong-error-handler"));
-var routes_1 = __importDefault(require("./app/routes"));
-var config_1 = __importDefault(require("./app/config/config"));
-var app = express_1.default();
+const express_1 = __importDefault(require("express"));
+const strong_error_handler_1 = __importDefault(require("strong-error-handler"));
+const routes_1 = __importDefault(require("./app/routes"));
+const config_1 = __importDefault(require("./app/config/config"));
+const app = express_1.default();
 app.use(express_1.default.json({ limit: "5mb" }));
 app.use("", routes_1.default);
 app.set('jwt-secret', config_1.default.jwt.secret);

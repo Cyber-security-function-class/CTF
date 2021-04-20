@@ -1,16 +1,20 @@
 import {Request, Response} from 'express'
-import db from '../../models/index'
 import * as jwt from 'jsonwebtoken'
 import { genSalt, hash, compare } from 'bcrypt'
 import { validationResult } from "express-validator"
 import environment from '../../config/config'
 import { Op } from 'sequelize'
+import db from '../../models/index'
 import { ErrorType, getErrorMessage } from '../../error/index'
-import { UserModel } from '../../models/User'
+import {User} from '../../models/User'
+import {Solved} from "../../models/Solved"
+import { Repository } from 'sequelize-typescript'
+import { Team } from '../../models/Team'
 
+const teamRepository:Repository<Team> = db.sequelize.getRepository(Team)
+const userRepository:Repository<User> = db.sequelize.getRepository(User)
+const solvedRepository:Repository<Solved> = db.sequelize.getRepository(Solved)
 
-const User = db.User
-const Solved = db['Solved']
 
 const createHashedPassword = async (password: string) => {
     const saltRounds = 10
@@ -37,7 +41,8 @@ export const signUp = async (req:Request, res:Response) => {
     const hashedPassword = await createHashedPassword( password )
 
     // await check('nickname')
-    const isExistingUser = await User.findOne({
+    const isExistingUser = await userRepository.findOne({
+        attributes : ['nickname','email'],
         where : {
             [Op.or]: [{ nickname: nickname}, { email : email }]
         },
@@ -55,10 +60,12 @@ export const signUp = async (req:Request, res:Response) => {
     }
 
     try {
-        const user = await User.create({
+        const user = await userRepository.create({
             nickname : nickname,
             password : hashedPassword,
-            email : email
+            email : email,
+            score : 0,
+            isAdmin : true
         })
         
         if(user) {
@@ -77,9 +84,9 @@ export const signIn = async (req,res) => {
         return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
     const { email, password } = req.body
-    let user : UserModel;
+    let user
     try {
-        user = await User.findOne({where : {email:email},raw : true})
+        user = await userRepository.findOne({where : {email:email},raw : true})
     } catch ( err ) {
         console.log(err)
         return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
@@ -111,8 +118,9 @@ export const signIn = async (req,res) => {
 
 export const getUsers = async (req,res) => {
     try {
-        const users = await User.findAll({
-            attributes: ['id','nickname','score'],
+        const users = await userRepository.findAll({
+            attributes: ['id','nickname'],
+            include: [teamRepository],
             raw : true
         })
         res.json(users)
@@ -131,21 +139,23 @@ export const getUser = async (req, res) => {
     }
 
     let { id } = req.query
-    id = +id
+
     try {
-        if (await User.findOne({where : {id},raw : true}) !== null) {
-            const user = await User.findOne({
-                where : {
-                    id : id
-                },
-                attributes : ['id','nickname','email','score','isAdmin'],
-                include : [{ 
-                    model : Solved,
-                    as : "solved"
-                }]
-            })
+        const user = await userRepository.findOne({
+            where : {
+                id : id
+            },
+            attributes : ['id','nickname','email','isAdmin'],
+            include : [{
+                model : solvedRepository
+            },{
+                model : teamRepository
+            }]
+        })
+        if ( user !== null) {
             return res.json(user)
-        } else {
+        }
+        else {
             return res.status(400).json({error:getErrorMessage(ErrorType.NotExist), detail:"user doesn't exist"})
         }
         
@@ -170,7 +180,7 @@ export const updateUser = async (req, res) => {
     const { id,nickname, email, isAdmin, score } = req.body
 
     try {
-        const isUserExist = await User.findOne({
+        const isUserExist = await userRepository.findOne({
             where : {
                 id : id
             }, 
@@ -180,12 +190,11 @@ export const updateUser = async (req, res) => {
         if ( isUserExist !== null ){
             try {
                 // update user
-                await User.update(
+                await userRepository.update(
                     { 
                         nickname,
                         email,
-                        isAdmin,
-                        score
+                        isAdmin
                     },{ 
                         where :{
                             id
@@ -220,10 +229,10 @@ export const deleteUser = async (req, res) => {
 
     const { id } = req.body
 
-    if ( await User.findOne({where : {id},raw : true, attributes:['id']}) !== null ){
+    if ( await userRepository.findOne({where : {id},raw : true, attributes:['id']}) !== null ){
         // user exist
         try {
-            await User.destroy({where : {id}})
+            await userRepository.destroy({where : {id}})
             return res.json({result : true})
         } catch (err) {
             console.log(err)

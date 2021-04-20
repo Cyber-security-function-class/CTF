@@ -35,7 +35,7 @@ export const getUserValidator = () => {
         query('id')
             .notEmpty()
             .withMessage('id is required')
-            .isNumeric()
+            .isString()
             .withMessage('id must be number')
     ]
 }
@@ -52,11 +52,6 @@ export const updateUserValidator = () => {
             .withMessage('email is required')
             .isEmail()
             .withMessage("Email must be validatable email"),
-        body('score')
-            .notEmpty()
-            .withMessage('score is required')
-            .isNumeric()
-            .withMessage("score is must be number"),
         body('isAdmin')
             .notEmpty()
             .withMessage("isAdmin is required")
@@ -70,7 +65,7 @@ export const deleteUserValidator = () => {
         body('id')
             .notEmpty()
             .withMessage('id is required')
-            .isNumeric()
+            .isString()
             .withMessage('id must be number')
     ]
 }

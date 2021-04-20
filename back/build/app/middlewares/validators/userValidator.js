@@ -1,14 +1,14 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUserValidator = exports.updateUserValidator = exports.getUserValidator = exports.signInValidator = exports.signUpValidator = void 0;
-var express_validator_1 = require("express-validator");
-var signUpValidator = function () {
+const express_validator_1 = require("express-validator");
+const signUpValidator = () => {
     return [
         express_validator_1.body('nickname')
             .notEmpty()
             .withMessage('nickname is required')
             .not()
-            .custom(function (val) { return /[^A-za-z0-9\s]/g.test(val); })
+            .custom((val) => /[^A-za-z0-9\s]/g.test(val))
             .withMessage('nickname not use uniq characters'),
         express_validator_1.body('password')
             .notEmpty()
@@ -23,24 +23,24 @@ var signUpValidator = function () {
     ];
 };
 exports.signUpValidator = signUpValidator;
-var signInValidator = function () {
+const signInValidator = () => {
     return [
         express_validator_1.body('email').notEmpty().withMessage('email is required'),
         express_validator_1.body('password').notEmpty().withMessage('password is required')
     ];
 };
 exports.signInValidator = signInValidator;
-var getUserValidator = function () {
+const getUserValidator = () => {
     return [
         express_validator_1.query('id')
             .notEmpty()
             .withMessage('id is required')
-            .isNumeric()
+            .isString()
             .withMessage('id must be number')
     ];
 };
 exports.getUserValidator = getUserValidator;
-var updateUserValidator = function () {
+const updateUserValidator = () => {
     return [
         express_validator_1.body('nickname')
             .notEmpty()
@@ -52,11 +52,6 @@ var updateUserValidator = function () {
             .withMessage('email is required')
             .isEmail()
             .withMessage("Email must be validatable email"),
-        express_validator_1.body('score')
-            .notEmpty()
-            .withMessage('score is required')
-            .isNumeric()
-            .withMessage("score is must be number"),
         express_validator_1.body('isAdmin')
             .notEmpty()
             .withMessage("isAdmin is required")
@@ -65,12 +60,12 @@ var updateUserValidator = function () {
     ];
 };
 exports.updateUserValidator = updateUserValidator;
-var deleteUserValidator = function () {
+const deleteUserValidator = () => {
     return [
         express_validator_1.body('id')
             .notEmpty()
             .withMessage('id is required')
-            .isNumeric()
+            .isString()
             .withMessage('id must be number')
     ];
 };

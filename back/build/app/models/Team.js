@@ -9,50 +9,40 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.Solved = void 0;
+exports.Team = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
 const User_1 = require("./User");
-const Challenge_1 = require("./Challenge");
-let Solved = class Solved extends sequelize_typescript_1.Model {
+let Team = class Team extends sequelize_typescript_1.Model {
 };
 __decorate([
+    sequelize_typescript_1.IsUUID(4),
     sequelize_typescript_1.PrimaryKey,
-    sequelize_typescript_1.AutoIncrement,
-    sequelize_typescript_1.Column,
-    __metadata("design:type", Number)
-], Solved.prototype, "id", void 0);
-__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Column,
-    __metadata("design:type", Number)
-], Solved.prototype, "score", void 0);
-__decorate([
-    sequelize_typescript_1.BelongsTo(() => Challenge_1.Challenge),
-    __metadata("design:type", Challenge_1.Challenge)
-], Solved.prototype, "challenge", void 0);
-__decorate([
-    sequelize_typescript_1.ForeignKey(() => Challenge_1.Challenge),
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Column,
-    __metadata("design:type", Number)
-], Solved.prototype, "challengeId", void 0);
-__decorate([
-    sequelize_typescript_1.BelongsTo(() => User_1.User),
-    __metadata("design:type", User_1.User)
-], Solved.prototype, "user", void 0);
-__decorate([
-    sequelize_typescript_1.ForeignKey(() => User_1.User),
-    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Default(sequelize_typescript_1.DataType.UUIDV4),
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
-], Solved.prototype, "userId", void 0);
+], Team.prototype, "id", void 0);
 __decorate([
-    sequelize_typescript_1.AllowNull(false),
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
-], Solved.prototype, "teamId", void 0);
-Solved = __decorate([
+], Team.prototype, "teamName", void 0);
+__decorate([
+    sequelize_typescript_1.Column,
+    __metadata("design:type", String)
+], Team.prototype, "leader", void 0);
+__decorate([
+    sequelize_typescript_1.HasMany(() => User_1.User),
+    __metadata("design:type", Array)
+], Team.prototype, "users", void 0);
+__decorate([
+    sequelize_typescript_1.Column,
+    __metadata("design:type", Number)
+], Team.prototype, "score", void 0);
+__decorate([
+    sequelize_typescript_1.Column,
+    __metadata("design:type", String)
+], Team.prototype, "teamPassword", void 0);
+Team = __decorate([
     sequelize_typescript_1.Table
-], Solved);
-exports.Solved = Solved;
-//# sourceMappingURL=Solved.js.map
+], Team);
+exports.Team = Team;
+//# sourceMappingURL=Team.js.map

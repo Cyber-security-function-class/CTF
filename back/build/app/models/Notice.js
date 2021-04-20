@@ -9,33 +9,21 @@ var __metadata = (this && this.__metadata) || function (k, v) {
     if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EmailVerified = void 0;
+exports.Notice = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
-const User_1 = require("./User");
-let EmailVerified = class EmailVerified extends sequelize_typescript_1.Model {
+let Notice = class Notice extends sequelize_typescript_1.Model {
 };
 __decorate([
     sequelize_typescript_1.PrimaryKey,
-    sequelize_typescript_1.AutoIncrement,
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
-], EmailVerified.prototype, "id", void 0);
+], Notice.prototype, "id", void 0);
 __decorate([
-    sequelize_typescript_1.ForeignKey(() => User_1.User),
-    sequelize_typescript_1.Column,
-    __metadata("design:type", Number)
-], EmailVerified.prototype, "userId", void 0);
-__decorate([
-    sequelize_typescript_1.AllowNull(false),
-    sequelize_typescript_1.Column,
+    sequelize_typescript_1.Column(sequelize_typescript_1.DataType.JSON),
     __metadata("design:type", String)
-], EmailVerified.prototype, "token", void 0);
-__decorate([
-    sequelize_typescript_1.BelongsTo(() => User_1.User),
-    __metadata("design:type", User_1.User)
-], EmailVerified.prototype, "user", void 0);
-EmailVerified = __decorate([
+], Notice.prototype, "content", void 0);
+Notice = __decorate([
     sequelize_typescript_1.Table
-], EmailVerified);
-exports.EmailVerified = EmailVerified;
-//# sourceMappingURL=EmailVerified.js.map
+], Notice);
+exports.Notice = Notice;
+//# sourceMappingURL=Notice.js.map

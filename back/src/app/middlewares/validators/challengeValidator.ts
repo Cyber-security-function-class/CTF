@@ -19,11 +19,11 @@ export const addChallengeValidator = () => {
             .withMessage('score is required')
             .isNumeric()
             .withMessage("score is must be number"),
-        body('category_id')
+        body('categoryId')
             .notEmpty()
-            .withMessage('category_id is required')
+            .withMessage('categoryId is required')
             .isNumeric()
-            .withMessage("category_id is must be number"),
+            .withMessage("categoryId is must be number"),
         body('flag')
             .notEmpty()
             .withMessage("flag is required")
@@ -54,11 +54,11 @@ export const updateChallengeValidator = () => {
             .withMessage('score is required')
             .isNumeric()
             .withMessage("score is must be number"),
-        body('category_id')
+        body('categoryId')
             .notEmpty()
-            .withMessage('category_id is required')
+            .withMessage('categoryId is required')
             .isNumeric()
-            .withMessage("category_id is must be number"),
+            .withMessage("categoryId is must be number"),
         body('flag')
             .notEmpty()
             .withMessage("flag is required")
