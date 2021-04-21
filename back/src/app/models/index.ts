@@ -8,7 +8,7 @@ import { Solved } from './Solved';
 import { User} from './User'
 import { Team } from './Team';
 import { Notice } from './Notice';
-
+import { EmailVerified } from './EmailVerified';
 const db = {
     sequelize : new Sequelize(
         dbconfig.database,
@@ -18,7 +18,7 @@ const db = {
             host: dbconfig.host,
             dialect: 'postgres',
             logging : dbconfig.logging,
-            models: [User, Category,Challenge,Solved,Team,Notice],
+            models: [User, Category,Challenge,Solved,Team,Notice,EmailVerified],
             repositoryMode: true,
         }
     )

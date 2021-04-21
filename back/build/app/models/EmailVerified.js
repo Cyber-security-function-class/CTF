@@ -23,7 +23,7 @@ __decorate([
 __decorate([
     sequelize_typescript_1.ForeignKey(() => User_1.User),
     sequelize_typescript_1.Column,
-    __metadata("design:type", Number)
+    __metadata("design:type", String)
 ], EmailVerified.prototype, "userId", void 0);
 __decorate([
     sequelize_typescript_1.AllowNull(false),
@@ -34,6 +34,11 @@ __decorate([
     sequelize_typescript_1.BelongsTo(() => User_1.User),
     __metadata("design:type", User_1.User)
 ], EmailVerified.prototype, "user", void 0);
+__decorate([
+    sequelize_typescript_1.Default(false),
+    sequelize_typescript_1.Column,
+    __metadata("design:type", Boolean)
+], EmailVerified.prototype, "isVerified", void 0);
 EmailVerified = __decorate([
     sequelize_typescript_1.Table
 ], EmailVerified);

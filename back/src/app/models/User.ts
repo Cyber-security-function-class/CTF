@@ -29,8 +29,9 @@ export class User extends Model<User> {
     @Column
     email : string
     
-    // @HasOne(() => EmailVerified)
-    // emailVerified : EmailVerified
+    @HasOne(() => EmailVerified)
+    emailVerified : EmailVerified
+    
     @BelongsTo(() => Team)
     team : Team
     

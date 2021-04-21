@@ -11,12 +11,13 @@ const Solved_1 = require("./Solved");
 const User_1 = require("./User");
 const Team_1 = require("./Team");
 const Notice_1 = require("./Notice");
+const EmailVerified_1 = require("./EmailVerified");
 const db = {
     sequelize: new sequelize_typescript_1.Sequelize(dbconfig_1.default.database, dbconfig_1.default.username, dbconfig_1.default.password, {
         host: dbconfig_1.default.host,
         dialect: 'postgres',
         logging: dbconfig_1.default.logging,
-        models: [User_1.User, Category_1.Category, Challenge_1.Challenge, Solved_1.Solved, Team_1.Team, Notice_1.Notice],
+        models: [User_1.User, Category_1.Category, Challenge_1.Challenge, Solved_1.Solved, Team_1.Team, Notice_1.Notice, EmailVerified_1.EmailVerified],
         repositoryMode: true,
     })
 };

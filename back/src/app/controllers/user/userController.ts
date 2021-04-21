@@ -10,11 +10,12 @@ import {User} from '../../models/User'
 import {Solved} from "../../models/Solved"
 import { Repository } from 'sequelize-typescript'
 import { Team } from '../../models/Team'
+import { EmailVerified } from '../../models/EmailVerified'
 
 const teamRepository:Repository<Team> = db.sequelize.getRepository(Team)
 const userRepository:Repository<User> = db.sequelize.getRepository(User)
 const solvedRepository:Repository<Solved> = db.sequelize.getRepository(Solved)
-
+const emailVerifiedRepository:Repository<EmailVerified> = db.sequelize.getRepository(EmailVerified)
 
 const createHashedPassword = async (password: string) => {
     const saltRounds = 10
@@ -26,6 +27,16 @@ const createHashedPassword = async (password: string) => {
 const checkPassword = async (password: string, hashedPassword: string) => {
     const isPasswordCorrect = await compare(password, hashedPassword) // hash.toString for type checking hack
     return isPasswordCorrect
+}
+
+const createToken = async (): Promise<string> => {
+    var result           = [];
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < 32; i++ ) {
+      result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+   }
+   return result.join('');
 }
 
 export const signUp = async (req:Request, res:Response) => {
@@ -69,6 +80,11 @@ export const signUp = async (req:Request, res:Response) => {
         })
         
         if(user) {
+            emailVerifiedRepository.create({
+                userId : user.id,
+                token : await createToken(),
+                isVerified : false
+            })
             res.json({ result: true })
         }
     } catch(err) {
@@ -86,7 +102,15 @@ export const signIn = async (req,res) => {
     const { email, password } = req.body
     let user
     try {
-        user = await userRepository.findOne({where : {email:email},raw : true})
+        user = await userRepository.findOne({
+            where : {email:email},
+            raw : true,
+            attributes : ['id','password','isAdmin','nickname'],
+            include : [{
+                model : emailVerifiedRepository,
+                attributes : ['isVerified']
+            }]
+        })
     } catch ( err ) {
         console.log(err)
         return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
@@ -95,21 +119,28 @@ export const signIn = async (req,res) => {
     if ( user === null ) { // user not exist
         return res.status(400).json(getErrorMessage(ErrorType.NotExist)).send()
     } else { // user exist
+        
         const result = await checkPassword (password,user.password) // sign in result
+        
         if ( result ) { // password correct
-            // make token
-            const token = jwt.sign({    // payload
-                id: user.id, 
-                email : user.email, 
-                name : user.nickname,
-                isAdmin : user.isAdmin
-            },
-                req.app.get('jwt-secret'),   // secret
-            {                            // policy
-                expiresIn : environment.jwt.expiresIn
-            });
-            return res.json({ token : "Bearer "+token }).send()
-        } else { // password incorrect
+            try {
+                // make token
+                const token = jwt.sign({    // payload
+                    id: user.id,
+                    nickname : user.nickname,
+                    isAdmin : user.isAdmin,
+                    emailVerified : user['emailVerified.isVerified'],
+                },
+                    req.app.get('jwt-secret'),   // secret
+                {                            // policy
+                    expiresIn : environment.jwt.expiresIn
+                });
+                return res.json({ token : "Bearer "+token }).send()
+            } catch (err) {
+                return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError))
+            }
+        } 
+        else { // password incorrect
             return res.status(400).json(getErrorMessage(ErrorType.LoginFailed)).send()
         }
     }
@@ -181,7 +212,6 @@ export const updateUser = async (req, res) => {
     }
     
     const { id, nickname, email, isAdmin } = req.body
-    
     try {
         const isUserExist = await userRepository.findOne({
             where : {

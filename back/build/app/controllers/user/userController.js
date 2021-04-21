@@ -42,9 +42,11 @@ const index_2 = require("../../error/index");
 const User_1 = require("../../models/User");
 const Solved_1 = require("../../models/Solved");
 const Team_1 = require("../../models/Team");
+const EmailVerified_1 = require("../../models/EmailVerified");
 const teamRepository = index_1.default.sequelize.getRepository(Team_1.Team);
 const userRepository = index_1.default.sequelize.getRepository(User_1.User);
 const solvedRepository = index_1.default.sequelize.getRepository(Solved_1.Solved);
+const emailVerifiedRepository = index_1.default.sequelize.getRepository(EmailVerified_1.EmailVerified);
 const createHashedPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
     const saltRounds = 10;
     const salt = yield bcrypt_1.genSalt(saltRounds);
@@ -54,6 +56,15 @@ const createHashedPassword = (password) => __awaiter(void 0, void 0, void 0, fun
 const checkPassword = (password, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
     const isPasswordCorrect = yield bcrypt_1.compare(password, hashedPassword); // hash.toString for type checking hack
     return isPasswordCorrect;
+});
+const createToken = () => __awaiter(void 0, void 0, void 0, function* () {
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < 32; i++) {
+        result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+    }
+    return result.join('');
 });
 const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
@@ -92,6 +103,11 @@ const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             isAdmin: false
         });
         if (user) {
+            emailVerifiedRepository.create({
+                userId: user.id,
+                token: yield createToken(),
+                isVerified: false
+            });
             res.json({ result: true });
         }
     }
@@ -109,7 +125,15 @@ const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { email, password } = req.body;
     let user;
     try {
-        user = yield userRepository.findOne({ where: { email: email }, raw: true });
+        user = yield userRepository.findOne({
+            where: { email: email },
+            raw: true,
+            attributes: ['id', 'password', 'isAdmin', 'nickname'],
+            include: [{
+                    model: emailVerifiedRepository,
+                    attributes: ['isVerified']
+                }]
+        });
     }
     catch (err) {
         console.log(err);
@@ -121,17 +145,23 @@ const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     else { // user exist
         const result = yield checkPassword(password, user.password); // sign in result
         if (result) { // password correct
-            // make token
-            const token = jwt.sign({
-                id: user.id,
-                email: user.email,
-                name: user.nickname,
-                isAdmin: user.isAdmin
-            }, req.app.get('jwt-secret'), // secret
-            {
-                expiresIn: config_1.default.jwt.expiresIn
-            });
-            return res.json({ token: "Bearer " + token }).send();
+            try {
+                console.log("controller user ", user);
+                // make token
+                const token = jwt.sign({
+                    id: user.id,
+                    nickname: user.nickname,
+                    isAdmin: user.isAdmin,
+                    emailVerified: user['emailVerified.isVerified'],
+                }, req.app.get('jwt-secret'), // secret
+                {
+                    expiresIn: config_1.default.jwt.expiresIn
+                });
+                return res.json({ token: "Bearer " + token }).send();
+            }
+            catch (err) {
+                return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError));
+            }
         }
         else { // password incorrect
             return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.LoginFailed)).send();

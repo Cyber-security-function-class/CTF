@@ -1,4 +1,4 @@
-import { Table, Column, Model, PrimaryKey, AutoIncrement, BelongsTo, ForeignKey, AllowNull } from 'sequelize-typescript'
+import { Table, Column, Model, PrimaryKey, AutoIncrement, BelongsTo, ForeignKey, AllowNull, Default } from 'sequelize-typescript'
 import { User } from './User';
 
 @Table
@@ -10,7 +10,7 @@ export class EmailVerified extends Model<EmailVerified> {
 
     @ForeignKey(() => User)
     @Column
-    userId : number;
+    userId : string;
 
     @AllowNull(false)
     @Column
@@ -18,4 +18,8 @@ export class EmailVerified extends Model<EmailVerified> {
 
     @BelongsTo(() => User)
     user : User;
+
+    @Default(false)
+    @Column
+    isVerified : boolean;
 }

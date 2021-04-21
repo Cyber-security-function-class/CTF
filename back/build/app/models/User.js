@@ -13,6 +13,7 @@ exports.User = void 0;
 const sequelize_typescript_1 = require("sequelize-typescript");
 const Solved_1 = require("./Solved");
 const Team_1 = require("./Team");
+const EmailVerified_1 = require("./EmailVerified");
 let User = class User extends sequelize_typescript_1.Model {
 };
 __decorate([
@@ -40,6 +41,10 @@ __decorate([
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
 ], User.prototype, "email", void 0);
+__decorate([
+    sequelize_typescript_1.HasOne(() => EmailVerified_1.EmailVerified),
+    __metadata("design:type", EmailVerified_1.EmailVerified)
+], User.prototype, "emailVerified", void 0);
 __decorate([
     sequelize_typescript_1.BelongsTo(() => Team_1.Team),
     __metadata("design:type", Team_1.Team)
