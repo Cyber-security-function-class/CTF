@@ -24,6 +24,9 @@ export const server = async (PORT,app) => {
                 console.log('database sync success');
             };
             driver(); // sequelize sync
+
+
+            app.emit( "app_started" )
         })
         .catch((e) => {
             console.log("database connection failed\n",e)

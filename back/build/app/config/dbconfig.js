@@ -27,7 +27,7 @@ const dbconfig = {
     "host": process.env.dbHost || "localhost",
     "database": "SkillCTF",
     "dialect": "postgres",
-    "logging": true
+    "logging": false
 };
 exports.default = dbconfig;
 //# sourceMappingURL=dbconfig.js.map

@@ -58,7 +58,7 @@ const checkPassword = (password, hashedPassword) => __awaiter(void 0, void 0, vo
 const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
     }
     // id,nickname,password,email,score,isAdmin,isVerified
     const nickname = req.body.nickname;
@@ -81,7 +81,7 @@ const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         else {
             msg = "The email already exist.";
         }
-        return res.status(409).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: msg }).send();
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: msg }).send();
     }
     try {
         const user = yield userRepository.create({
@@ -89,7 +89,7 @@ const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             password: hashedPassword,
             email: email,
             score: 0,
-            isAdmin: true
+            isAdmin: false
         });
         if (user) {
             res.json({ result: true });

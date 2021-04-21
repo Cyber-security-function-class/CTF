@@ -31,7 +31,7 @@ const checkPassword = async (password: string, hashedPassword: string) => {
 export const signUp = async (req:Request, res:Response) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     // id,nickname,password,email,score,isAdmin,isVerified
@@ -56,7 +56,7 @@ export const signUp = async (req:Request, res:Response) => {
         } else {
             msg = "The email already exist."
         }
-        return res.status(409).json({error : getErrorMessage(ErrorType.AlreadyExist),detail : msg}).send()
+        return res.status(400).json({error : getErrorMessage(ErrorType.AlreadyExist),detail : msg}).send()
     }
 
     try {
@@ -65,7 +65,7 @@ export const signUp = async (req:Request, res:Response) => {
             password : hashedPassword,
             email : email,
             score : 0,
-            isAdmin : true
+            isAdmin : false
         })
         
         if(user) {
