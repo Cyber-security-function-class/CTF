@@ -35,7 +35,7 @@
     "prestart": "tsc",
     "start": "nodemon --exec ts-node build/index.js",
     "usertest": "yarn mocha ./src/__test__/user.spec.ts -r ts-node/register",
-    "teamtest": "yarn mocha ./src/__test__/team.spec.ts -r ts-node/register",
+    "teamtest": "yarn mocha ./src/__test__/test.spec.ts -r ts-node/register",
     "coverage": "npy yarn test"
   },
   "devDependencies": {

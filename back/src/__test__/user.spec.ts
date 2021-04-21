@@ -4,6 +4,8 @@ import { preStart, dbclient } from "./index.spec"
 import jwt_decode from "jwt-decode";
 import db from "../app/models/index"
 import {User} from "../app/models/User"
+
+
 const userRepository = db.sequelize.getRepository(User)
 
 const ADDRESS = "http://localhost"

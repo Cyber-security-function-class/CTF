@@ -3,7 +3,6 @@ import request from 'request'
 import { preStart, dbclient } from "./index.spec"
 import jwt_decode from "jwt-decode";
 import db from "../app/models/index"
-import {User} from "../app/models/User"
 
 const ADDRESS = "http://localhost"
 const PORT = 7000
