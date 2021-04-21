@@ -6,11 +6,14 @@ import { User } from '../../models/User'
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { genSalt, hash, compare } from 'bcrypt'
 import { validationResult } from "express-validator";
+import { Solved } from "../../models/Solved";
+import { Challenge } from "../../models/Challenge";
 
 
 const teamRepository: Repository<Team> = db.sequelize.getRepository(Team)
 const userRepository:Repository<User> = db.sequelize.getRepository(User)
-
+const solvedRepository:Repository<Solved> = db.sequelize.getRepository(Solved)
+const challengeRepository:Repository<Challenge> = db.sequelize.getRepository(Challenge)
 
 const createHashedPassword = async (password: string) => {
     const saltRounds = 10
@@ -35,6 +38,16 @@ export const getTeam = async (req : Request, res : Response) => { // get
             include: [
                 {
                 model: userRepository,
+                attributes : ['id','nickname'],
+                include : [{
+                    model : solvedRepository,
+                    attributes : ['score'],
+                    required : false,
+                    include : [{
+                        model : challengeRepository,
+                        attributes : ['id','title']
+                    }]
+                }],
                 required: false
             }]
         })
@@ -49,10 +62,20 @@ export const getTeam = async (req : Request, res : Response) => { // get
     }
 }
 
+export const getTeams = async (req: Request, res: Response) => {
+    try {
+        const teams = await teamRepository.findAll({attributes:['id','teamName','score']})
+        
+        return res.json(teams)
+    } catch (err) {
+        return res.status(500).json({error:getErrorMessage(ErrorType.UnexpectedError)})
+    }
+}
+
 export const createTeam = async(req: Request, res: Response) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     const { teamName, teamPassword } = req.body
@@ -90,7 +113,6 @@ export const createTeam = async(req: Request, res: Response) => {
             },{
                 where : { id : leaderId },
             })
-            console.log(newTeam)
             return res.json({
                 result : newTeam[1],
                 team : {
@@ -105,4 +127,50 @@ export const createTeam = async(req: Request, res: Response) => {
         return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist),detail:"you already joined another team!"})
     }
    
+}
+
+export const joinTeam = async(req: Request, res: Response) => {
+    const errors = validationResult(req)
+    if (!errors.isEmpty()) {
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+    }
+    const { teamName, teamPassword} = req.body
+    const userId = req['decoded'].id
+
+    try {
+        const team = await teamRepository.findOne({
+            where : { 
+                teamName
+            },
+            attributes : ['id','leader','teamPassword'],
+            include: [{
+                model : userRepository,
+                attributes : ['id','nickname']
+            }]
+        })
+        if ( team !== null) {
+            if ( team.users.length >= 3 ) {
+                return res.status(400).json({error:getErrorMessage(ErrorType.AccessDenied), detail:"team is full"})
+            }
+            if ( await checkPassword(teamPassword,team.teamPassword) ) {
+                await userRepository.update({
+                    teamId : team.id,
+                },{
+                    where : {
+                        id : userId
+                    }
+                })
+                return res.json({result: true})
+            } else {
+                return res.status(400).json({error:getErrorMessage(ErrorType.AccessDenied), detail:"password incorrect"})
+            }
+        } else {
+            return res.status(400).json({error:getErrorMessage(ErrorType.NotExist), detail:"team not exist"})
+        }
+    } catch (err){
+        console.log(err)
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+    }
+    
+    
 }

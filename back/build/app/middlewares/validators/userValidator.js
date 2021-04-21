@@ -52,11 +52,6 @@ const updateUserValidator = () => {
             .withMessage('email is required')
             .isEmail()
             .withMessage("Email must be validatable email"),
-        express_validator_1.body('teamId')
-            .notEmpty()
-            .withMessage("teamId is required")
-            .isString()
-            .withMessage("teamId is must be string or null"),
         express_validator_1.body('isAdmin')
             .notEmpty()
             .withMessage("isAdmin is required")

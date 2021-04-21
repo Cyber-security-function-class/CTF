@@ -131,7 +131,7 @@ const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             {
                 expiresIn: config_1.default.jwt.expiresIn
             });
-            return res.json({ token: token }).send();
+            return res.json({ token: "Bearer " + token }).send();
         }
         else { // password incorrect
             return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.LoginFailed)).send();
@@ -196,7 +196,7 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     if (!errors.isEmpty()) {
         return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
     }
-    const { id, nickname, email, teamId, isAdmin } = req.body;
+    const { id, nickname, email, isAdmin } = req.body;
     try {
         const isUserExist = yield userRepository.findOne({
             where: {
@@ -209,13 +209,12 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             try {
                 // update user
                 yield userRepository.update({
-                    nickname, email, teamId, isAdmin
+                    nickname, email, isAdmin
                 }, {
                     where: {
                         id
                     }
                 });
-                console.log(email);
                 res.json({ result: true });
             }
             catch (err) {

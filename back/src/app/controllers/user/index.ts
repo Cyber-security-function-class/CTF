@@ -1,9 +1,9 @@
 
 import express from "express"
 import { signInValidator, signUpValidator, getUserValidator, updateUserValidator, deleteUserValidator} from "../../middlewares/validators/userValidator"
-import {createTeamValidator} from "../../middlewares/validators/teamValidator"
+import {createTeamValidator, joinTeamValidator, getTeamValidator} from "../../middlewares/validators/teamValidator"
 import { signUp, signIn, getUser,getUsers, deleteUser, updateUser} from './userController'
-import { createTeam } from './teamController'
+import { createTeam, getTeam, getTeams, joinTeam } from './teamController'
 import authMiddleware from '../../middlewares/auth'
 
 const routes = express.Router()
@@ -20,6 +20,14 @@ routes.get('/getUsers',getUsers)
 routes.post('/createTeam',authMiddleware)
 routes.post('/createTeam',createTeamValidator(),createTeam)
 
+routes.get('/getTeam',authMiddleware)
+routes.get('/getTeam',getTeamValidator(),getTeam)
+
+routes.get('/getTeams',authMiddleware)
+routes.get('/getTeams',getTeams)
+
+routes.post("/joinTeam",authMiddleware)
+routes.post("/joinTeam",joinTeamValidator(),joinTeam)
 
 
 

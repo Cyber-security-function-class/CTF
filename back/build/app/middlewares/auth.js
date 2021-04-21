@@ -22,7 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = __importStar(require("jsonwebtoken"));
 const index_1 = require("../error/index");
 exports.default = (req, res, next) => {
-    const token = req.headers.authorization;
+    let token = req.headers.authorization;
     if (!token) {
         return res.status(403).json({
             error: index_1.getErrorMessage(index_1.ErrorType.AccessDenied),
@@ -30,6 +30,7 @@ exports.default = (req, res, next) => {
         });
     }
     const p = new Promise((resolve, reject) => {
+        token = token.split(' ')[1];
         jwt.verify(token, req.app.get('jwt-secret'), (err, decoded) => {
             if (err)
                 reject(err);

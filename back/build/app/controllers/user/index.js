@@ -18,6 +18,12 @@ routes.get('/getUsers', auth_1.default);
 routes.get('/getUsers', userController_1.getUsers);
 routes.post('/createTeam', auth_1.default);
 routes.post('/createTeam', teamValidator_1.createTeamValidator(), teamController_1.createTeam);
+routes.get('/getTeam', auth_1.default);
+routes.get('/getTeam', teamValidator_1.getTeamValidator(), teamController_1.getTeam);
+routes.get('/getTeams', auth_1.default);
+routes.get('/getTeams', teamController_1.getTeams);
+routes.post("/joinTeam", auth_1.default);
+routes.post("/joinTeam", teamValidator_1.joinTeamValidator(), teamController_1.joinTeam);
 // only admin
 routes.post("/updateUser", auth_1.default);
 routes.post("/updateUser", userValidator_1.updateUserValidator(), userController_1.updateUser);

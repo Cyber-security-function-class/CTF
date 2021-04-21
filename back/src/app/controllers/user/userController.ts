@@ -108,7 +108,7 @@ export const signIn = async (req,res) => {
             {                            // policy
                 expiresIn : environment.jwt.expiresIn
             });
-            return res.json({ token : token }).send()
+            return res.json({ token : "Bearer "+token }).send()
         } else { // password incorrect
             return res.status(400).json(getErrorMessage(ErrorType.LoginFailed)).send()
         }
