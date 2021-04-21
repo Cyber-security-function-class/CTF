@@ -36,7 +36,7 @@ export const getUserValidator = () => {
             .notEmpty()
             .withMessage('id is required')
             .isString()
-            .withMessage('id must be number')
+            .withMessage('id must be string')
     ]
 }
 
@@ -56,7 +56,7 @@ export const updateUserValidator = () => {
             .notEmpty()
             .withMessage("isAdmin is required")
             .isBoolean()
-            .withMessage("isAdmin is must be boolean")
+            .withMessage("isAdmin is must be boolean"),
     ]
 }
 
@@ -66,6 +66,6 @@ export const deleteUserValidator = () => {
             .notEmpty()
             .withMessage('id is required')
             .isString()
-            .withMessage('id must be number')
+            .withMessage('id must be string')
     ]
 }

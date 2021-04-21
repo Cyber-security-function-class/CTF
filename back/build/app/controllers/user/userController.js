@@ -143,7 +143,10 @@ const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const users = yield userRepository.findAll({
             attributes: ['id', 'nickname'],
-            include: [teamRepository],
+            include: [{
+                    model: teamRepository,
+                    attributes: ['id', 'teamName', 'leader']
+                }],
             raw: true
         });
         res.json(users);
@@ -193,12 +196,11 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     if (!errors.isEmpty()) {
         return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
     }
-    // check required things
-    const { id, nickname, email, isAdmin, score } = req.body;
+    const { id, nickname, email, teamId, isAdmin } = req.body;
     try {
         const isUserExist = yield userRepository.findOne({
             where: {
-                id: id
+                id
             },
             attributes: ['id'],
             raw: true
@@ -207,14 +209,13 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             try {
                 // update user
                 yield userRepository.update({
-                    nickname,
-                    email,
-                    isAdmin
+                    nickname, email, teamId, isAdmin
                 }, {
                     where: {
                         id
                     }
                 });
+                console.log(email);
                 res.json({ result: true });
             }
             catch (err) {

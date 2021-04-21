@@ -1,4 +1,6 @@
 import * as jwt from "jsonwebtoken"
+import { ErrorType, getErrorMessage } from '../error/index'
+import { validationResult } from "express-validator"
 
 
 export default (req, res, next) => {
@@ -7,8 +9,8 @@ export default (req, res, next) => {
 
     if(!token) {
         return res.status(403).json({
-            success: false,
-            message: 'not logged in'
+            error : getErrorMessage(ErrorType.AccessDenied),
+            detail: 'not logged in'
         })
     }
 
@@ -23,8 +25,8 @@ export default (req, res, next) => {
 
     const onError = (error) => {
         res.status(403).json({
-            success: false,
-            message: error.message
+            error : getErrorMessage(ErrorType.UnexpectedError),
+            detail: error.message
         })
     }
     p.then((decoded)=>{

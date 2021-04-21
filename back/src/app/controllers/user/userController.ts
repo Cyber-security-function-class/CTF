@@ -120,7 +120,10 @@ export const getUsers = async (req,res) => {
     try {
         const users = await userRepository.findAll({
             attributes: ['id','nickname'],
-            include: [teamRepository],
+            include: [{
+                model : teamRepository,
+                attributes : ['id','teamName','leader']
+            }],
             raw : true
         })
         res.json(users)
@@ -176,26 +179,26 @@ export const updateUser = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
-    // check required things
-    const { id,nickname, email, isAdmin, score } = req.body
-
+    
+    const { id, nickname, email, isAdmin } = req.body
+    
     try {
         const isUserExist = await userRepository.findOne({
             where : {
-                id : id
+                id
             }, 
             attributes : ['id'],
             raw : true
         })
+        
         if ( isUserExist !== null ){
             try {
                 // update user
                 await userRepository.update(
+                    {
+                        nickname,email,isAdmin
+                    },
                     { 
-                        nickname,
-                        email,
-                        isAdmin
-                    },{ 
                         where :{
                             id
                         }

@@ -20,12 +20,13 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = __importStar(require("jsonwebtoken"));
+const index_1 = require("../error/index");
 exports.default = (req, res, next) => {
     const token = req.headers.authorization;
     if (!token) {
         return res.status(403).json({
-            success: false,
-            message: 'not logged in'
+            error: index_1.getErrorMessage(index_1.ErrorType.AccessDenied),
+            detail: 'not logged in'
         });
     }
     const p = new Promise((resolve, reject) => {
@@ -37,8 +38,8 @@ exports.default = (req, res, next) => {
     });
     const onError = (error) => {
         res.status(403).json({
-            success: false,
-            message: error.message
+            error: index_1.getErrorMessage(index_1.ErrorType.UnexpectedError),
+            detail: error.message
         });
     };
     p.then((decoded) => {
