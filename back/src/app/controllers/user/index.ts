@@ -2,7 +2,7 @@
 import express from "express"
 import { signInValidator, signUpValidator, getUserValidator, updateUserValidator, deleteUserValidator, verifyEmailValidator} from "../../middlewares/validators/userValidator"
 import {createTeamValidator, joinTeamValidator, getTeamValidator} from "../../middlewares/validators/teamValidator"
-import { signUp, signIn, getUser,getUsers, deleteUser, updateUser, verifyEmail} from './userController'
+import { signUp, signIn, getUser,getUsers, deleteUser, updateUser, verifyEmail, resendEmail} from './userController'
 import { createTeam, getTeam, getTeams, joinTeam } from './teamController'
 import authMiddleware from '../../middlewares/auth'
 
@@ -21,6 +21,9 @@ routes.get('/getUsers',authMiddleware)
 
 routes.post("/verifyEmail",authMiddleware)
 routes.post("/verifyEmail",verifyEmailValidator(),verifyEmail)
+
+routes.post("/resendEmail",authMiddleware)
+routes.post("/resendEmail",resendEmail)
 
 routes.post('/createTeam',authMiddleware)
 routes.post('/createTeam',createTeamValidator(),createTeam)

@@ -2,6 +2,10 @@ import * as jwt from "jsonwebtoken"
 import { ErrorType, getErrorMessage } from '../error/index'
 import { validationResult } from "express-validator"
 
+let allowUrl = [
+    "/api/user/verifyEmail",
+    "/api/user/resendEmail",
+]
 
 export default (req, res, next) => {
     
@@ -19,25 +23,28 @@ export default (req, res, next) => {
             token = token.split(' ')[1]
             jwt.verify(token, req.app.get('jwt-secret'), (err, decoded) => { 
                 if(err) reject(err)
-                if(req.originalUrl == "/api/user/verifyEmail") {
+                else { 
+                    if(!decoded.emailVerified) {
+                        if(allowUrl.includes(req.originalUrl)) {
+                            resolve(decoded)
+                        }
+                        reject({
+                            error : getErrorMessage(ErrorType.NotVerifiedEmail),
+                            detail:"email not verified"
+                        })
+                    } 
                     resolve(decoded)
                 }
-                if(!decoded.emailVerified) {
-                    reject({
-                        error : getErrorMessage(ErrorType.NotVerifiedEmail),
-                        detail:"email not verified"
-                    })
-                }
-                resolve(decoded)
             })
         }
     )
 
     const onError = (error) => {
-        if(!error.error && error.error.errorType === 'notVerifiedEmail') {
+        if(error.error && error.error.errorType === 'notVerifiedEmail') {
             res.status(400).json(error)
         } else {
-            res.status(400).json({
+            console.log(error)
+            res.status(500).json({
                 error : getErrorMessage(ErrorType.UnexpectedError),
                 detail: error.message
             })
@@ -45,6 +52,11 @@ export default (req, res, next) => {
     }
     p.then((decoded)=>{
         req.decoded = decoded
+        
+        req["LogIp"] = req.headers["x-forwarded-for"] ||
+        req.connection.remoteAddress ||
+        req.socket.remoteAddress ||
+        req.connection.socket.remoteAddress;
         next()
     }).catch(onError)
 }

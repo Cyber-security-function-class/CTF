@@ -49,8 +49,27 @@ const transporter = nodemailer.createTransport({
       pass: environment.mail.pass
     }
 });
+
+const send_auth_mail = (email,token) => {
+    const mailOptions = {
+        from: environment.mail.user,
+        to: email ,
+        subject: '이메일 인증',
+        text: '가입완료를 위해 <'+token+'> 를 입력해주세요!'
+    };
+    
+    transporter.sendMail(mailOptions, (err, res) => {
+        if(err){
+            console.log(err)
+        } else {
+            console.log("auth mail to ",email)
+        }
+    });
+}
+
 export const signUp = async (req:Request, res:Response) => {
     const errors = validationResult(req)
+    
     if (!errors.isEmpty()) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
@@ -88,16 +107,19 @@ export const signUp = async (req:Request, res:Response) => {
             score : 0,
             isAdmin : false
         })
-
-        
-        
+        const token = await createToken()
         if(user) {
             emailVerifiedRepository.create({
                 userId : user.id,
-                token : await createToken(),
+                token : token,
                 isVerified : false
-            })
-            res.json({ result: true })
+            }) 
+            console.log("sending auth mail")
+            send_auth_mail(email,token)
+            
+            return res.json({ result: true })
+        } else {
+            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
         }
     } catch(err) {
         console.log(err)
@@ -297,6 +319,8 @@ export const verifyEmail = async (req, res) => {
 
     const { token } = req.body 
     const userId = req['decoded'].id
+
+    console.log(req['decoded'])
     const emailVerified = await emailVerifiedRepository.findOne({
         where : {
             userId
@@ -305,6 +329,7 @@ export const verifyEmail = async (req, res) => {
         raw : true
     })
     if ( emailVerified === null) {
+        console.log("unknown user try to email verify")
         return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
     }
     if(!emailVerified['isVerified']) {
@@ -335,3 +360,39 @@ export const verifyEmail = async (req, res) => {
     }
 }
 
+export const resendEmail = async (req,res) => {
+    const userId = req['decoded'].id
+    let user
+    try{
+        user = await userRepository.findOne({
+            where : {id : userId},
+            raw : true,
+            include : [{
+                model : emailVerifiedRepository
+            }]
+        })
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({error : getErrorMessage(ErrorType.UnexpectedError),detail:"maybe user is not Exist"})
+    }
+    let now = new Date()
+    
+    if ( user.updatedAt.valueOf() + (30 * 1000) < now.valueOf() ) { // 30 second
+        if ( user.emailVerified.isVerified ) {
+            return res.status(400).json({error : getErrorMessage(ErrorType.AlreadyExist),detail:"already verified"})
+        }
+        const token = await createToken()
+        send_auth_mail(user.email,token)
+
+        emailVerifiedRepository.update({
+            token
+        },{
+            where : { 
+                id : user.emailVerified.id
+            }
+        })
+        res.json({result : true})
+    } else {
+        res.json({error : getErrorMessage(ErrorType.AccessDenied),detail:"Only one mail can be sent per 30 seconds."})
+    }
+}

@@ -19,6 +19,8 @@ routes.get('/getUsers', userController_1.getUsers);
 routes.get('/getUsers', auth_1.default);
 routes.post("/verifyEmail", auth_1.default);
 routes.post("/verifyEmail", userValidator_1.verifyEmailValidator(), userController_1.verifyEmail);
+routes.post("/resendEmail", auth_1.default);
+routes.post("/resendEmail", userController_1.resendEmail);
 routes.post('/createTeam', auth_1.default);
 routes.post('/createTeam', teamValidator_1.createTeamValidator(), teamController_1.createTeam);
 routes.get('/getTeam', auth_1.default);

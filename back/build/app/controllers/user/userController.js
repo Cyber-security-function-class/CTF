@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyEmail = exports.deleteUser = exports.updateUser = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
+exports.resendEmail = exports.verifyEmail = exports.deleteUser = exports.updateUser = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt_1 = require("bcrypt");
 const express_validator_1 = require("express-validator");
@@ -75,6 +75,22 @@ const transporter = nodemailer_1.default.createTransport({
         pass: config_1.default.mail.pass
     }
 });
+const send_auth_mail = (email, token) => {
+    const mailOptions = {
+        from: config_1.default.mail.user,
+        to: email,
+        subject: '이메일 인증',
+        text: '가입완료를 위해 <' + token + '> 를 입력해주세요!'
+    };
+    transporter.sendMail(mailOptions, (err, res) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            console.log("auth mail to ", email);
+        }
+    });
+};
 const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
@@ -111,13 +127,19 @@ const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             score: 0,
             isAdmin: false
         });
+        const token = yield createToken();
         if (user) {
             emailVerifiedRepository.create({
                 userId: user.id,
-                token: yield createToken(),
+                token: token,
                 isVerified: false
             });
-            res.json({ result: true });
+            console.log("sending auth mail");
+            send_auth_mail(email, token);
+            return res.json({ result: true });
+        }
+        else {
+            return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
         }
     }
     catch (err) {
@@ -302,6 +324,7 @@ const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
     const { token } = req.body;
     const userId = req['decoded'].id;
+    console.log(req['decoded']);
     const emailVerified = yield emailVerifiedRepository.findOne({
         where: {
             userId
@@ -310,6 +333,7 @@ const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         raw: true
     });
     if (emailVerified === null) {
+        console.log("unknown user try to email verify");
         return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
     }
     if (!emailVerified['isVerified']) {
@@ -342,4 +366,41 @@ const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.verifyEmail = verifyEmail;
+const resendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req['decoded'].id;
+    let user;
+    try {
+        user = yield userRepository.findOne({
+            where: { id: userId },
+            raw: true,
+            include: [{
+                    model: emailVerifiedRepository
+                }]
+        });
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: index_2.getErrorMessage(index_2.ErrorType.UnexpectedError), detail: "maybe user is not Exist" });
+    }
+    let now = new Date();
+    if (user.updatedAt.valueOf() + (30 * 1000) < now.valueOf()) { // 30 second
+        if (user.emailVerified.isVerified) {
+            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "already verified" });
+        }
+        const token = yield createToken();
+        send_auth_mail(user.email, token);
+        emailVerifiedRepository.update({
+            token
+        }, {
+            where: {
+                id: user.emailVerified.id
+            }
+        });
+        res.json({ result: true });
+    }
+    else {
+        res.json({ error: index_2.getErrorMessage(index_2.ErrorType.AccessDenied), detail: "Only one mail can be sent per 30 seconds." });
+    }
+});
+exports.resendEmail = resendEmail;
 //# sourceMappingURL=userController.js.map

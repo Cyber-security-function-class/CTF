@@ -160,9 +160,10 @@ describe(addDescribeFormat("team_test"), function () {
     }
   })
   it("verify emails", (done)=>{
-    emailVerifiedRepository.update({isVerified:true},{where : { 1:1 }})
+    emailVerifiedRepository.findAll({raw: true,attributes:['id']})
     .then(e=>{
-      assert(e[0] == [ 1 ])
+      console.log("verifying users",e)
+      emailVerifiedRepository.update({isVerified:true},{where:e})
       done()
     }).catch(err=>{
       done()

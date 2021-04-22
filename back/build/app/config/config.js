@@ -23,11 +23,11 @@ const dotenv = __importStar(require("dotenv"));
 dotenv.config();
 const environment = {
     mail: {
-        service: "gmail",
-        host: "smtp.gmail.com",
-        port: "587",
-        user: "logconmail2021@gmail.com",
-        pass: "P4sSvv0rd@2021"
+        service: process.env.mail_service,
+        host: process.env.mail_host,
+        port: process.env.mail_port,
+        user: process.env.mail_user,
+        pass: process.env.mail_pass,
     },
     jwt: {
         secret: process.env.jwtSecret || "secretjuju",

@@ -21,6 +21,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const jwt = __importStar(require("jsonwebtoken"));
 const index_1 = require("../error/index");
+let allowUrl = [
+    "/api/user/verifyEmail",
+    "/api/user/resendEmail",
+];
 exports.default = (req, res, next) => {
     let token = req.headers.authorization;
     if (!token) {
@@ -34,24 +38,27 @@ exports.default = (req, res, next) => {
         jwt.verify(token, req.app.get('jwt-secret'), (err, decoded) => {
             if (err)
                 reject(err);
-            if (req.originalUrl == "/api/user/verifyEmail") {
+            else {
+                if (!decoded.emailVerified) {
+                    if (allowUrl.includes(req.originalUrl)) {
+                        resolve(decoded);
+                    }
+                    reject({
+                        error: index_1.getErrorMessage(index_1.ErrorType.NotVerifiedEmail),
+                        detail: "email not verified"
+                    });
+                }
                 resolve(decoded);
             }
-            if (!decoded.emailVerified) {
-                reject({
-                    error: index_1.getErrorMessage(index_1.ErrorType.NotVerifiedEmail),
-                    detail: "email not verified"
-                });
-            }
-            resolve(decoded);
         });
     });
     const onError = (error) => {
-        if (!error.error && error.error.errorType === 'notVerifiedEmail') {
+        if (error.error && error.error.errorType === 'notVerifiedEmail') {
             res.status(400).json(error);
         }
         else {
-            res.status(400).json({
+            console.log(error);
+            res.status(500).json({
                 error: index_1.getErrorMessage(index_1.ErrorType.UnexpectedError),
                 detail: error.message
             });
@@ -59,6 +66,10 @@ exports.default = (req, res, next) => {
     };
     p.then((decoded) => {
         req.decoded = decoded;
+        req["LogIp"] = req.headers["x-forwarded-for"] ||
+            req.connection.remoteAddress ||
+            req.socket.remoteAddress ||
+            req.connection.socket.remoteAddress;
         next();
     }).catch(onError);
 };
