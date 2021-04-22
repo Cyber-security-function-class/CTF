@@ -5,6 +5,7 @@ import jwt_decode from "jwt-decode";
 import db from "../app/models/index"
 import {User} from "../app/models/User"
 import { EmailVerified } from '../app/models/EmailVerified';
+import { Op } from 'sequelize';
 
 
 const userRepository = db.sequelize.getRepository(User)
@@ -60,7 +61,7 @@ describe(addDescribeFormat("user_test"), function () {
   it("verify emails", (done)=>{
     emailVerifiedRepository.findAll({raw: true,attributes:['id']})
     .then(e=>{
-      emailVerifiedRepository.update({isVerified:true},{where:e})
+      emailVerifiedRepository.update({isVerified:true},{where:{[Op.or]: e}})
       done()
     }).catch(err=>{
       done()

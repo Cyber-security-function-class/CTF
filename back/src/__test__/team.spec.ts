@@ -5,7 +5,7 @@ import jwt_decode from "jwt-decode";
 import db from "../app/models/index"
 import {User} from "../app/models/User"
 import { EmailVerified } from '../app/models/EmailVerified';
-
+import { Op} from 'sequelize'
 const userRepository = db.sequelize.getRepository(User)
 const emailVerifiedRepository = db.sequelize.getRepository(EmailVerified)
 
@@ -105,21 +105,6 @@ describe(addDescribeFormat("team_test"), function () {
       done()
     })
   })
-  it("login user1",(done)=>{
-    try {
-      request.post(BASEURI+"/api/user/signIn",{
-        body : userInfo,
-        json : true
-      },(err, res, body) => {
-        users.user1.token = body.token
-        users.user1.decoded = jwt_decode(users.user1.token);
-        assert(users.user1.token)
-        done()
-      })
-    } catch (err) {
-      done()
-    }
-  })
   it("register user2",(done)=>{
     try{
       request.post(BASEURI+"/api/user/signUp",{
@@ -160,16 +145,33 @@ describe(addDescribeFormat("team_test"), function () {
     }
   })
   it("verify emails", (done)=>{
-    emailVerifiedRepository.findAll({raw: true,attributes:['id']})
-    .then(e=>{
-      console.log("verifying users",e)
-      emailVerifiedRepository.update({isVerified:true},{where:e})
-      done()
-    }).catch(err=>{
-      done()
-    })
+    setTimeout(()=>{
+      emailVerifiedRepository.findAll({raw: true,attributes:['id']})
+      .then(e=>{
+        console.log(e)
+        emailVerifiedRepository.update({isVerified:true},{where:{[Op.or]: e}})
+        done()
+      }).catch(err=>{
+        done()
+      })
+    },1000)
   })
-  it("createTeam leader : user1",(done)=>{
+  it("login user1",(done)=>{
+    try {
+      request.post(BASEURI+"/api/user/signIn",{
+        body : userInfo,
+        json : true
+      },(err, res, body) => {
+        users.user1.token = body.token
+        users.user1.decoded = jwt_decode(users.user1.token);
+        assert(users.user1.token)
+        done()
+      })
+    } catch (err) {
+      done()
+    }
+  })
+  it("createTeam (leader : user1)",(done)=>{
     try {
         request.post(BASEURI+"/api/user/createTeam",{
           headers : {
@@ -288,7 +290,7 @@ describe(addDescribeFormat("team_test"), function () {
       done()
     }
   })
-  it("join team (user3) - wrong teamName",(done) => {
+  it("join team (user3)",(done) => {
     try {
       request.post(BASEURI+"/api/user/joinTeam",{
         headers : {
@@ -307,7 +309,7 @@ describe(addDescribeFormat("team_test"), function () {
       done()
     }
   })
-  it("join team (user4) - wrong teamName",(done) => {
+  it("join team (user4)",(done) => {
     try {
       request.post(BASEURI+"/api/user/joinTeam",{
         headers : {
@@ -319,6 +321,7 @@ describe(addDescribeFormat("team_test"), function () {
         },
         json : true
       },(err, res, body) => {
+        console.log(body)
         assert(body.error.errorType == "accessDenied")
         done()
       })

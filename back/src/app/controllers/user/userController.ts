@@ -320,7 +320,6 @@ export const verifyEmail = async (req, res) => {
     const { token } = req.body 
     const userId = req['decoded'].id
 
-    console.log(req['decoded'])
     const emailVerified = await emailVerifiedRepository.findOne({
         where : {
             userId
