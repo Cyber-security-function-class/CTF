@@ -4,10 +4,11 @@ import { preStart, dbclient } from "./index.spec"
 import jwt_decode from "jwt-decode";
 import db from "../app/models/index"
 import {User} from "../app/models/User"
+import { EmailVerified } from '../app/models/EmailVerified';
 
 
 const userRepository = db.sequelize.getRepository(User)
-
+const emailVerifiedRepository = db.sequelize.getRepository(EmailVerified)
 const ADDRESS = "http://localhost"
 const PORT = 7000
 const BASEURI = ADDRESS+":"+PORT
@@ -56,6 +57,15 @@ describe(addDescribeFormat("user_test"), function () {
       done()
     }
   })
+  it("verify emails", (done)=>{
+    emailVerifiedRepository.findAll({raw: true,attributes:['id']})
+    .then(e=>{
+      emailVerifiedRepository.update({isVerified:true},{where:e})
+      done()
+    }).catch(err=>{
+      done()
+    })
+  })
   it("login",(done)=>{
     try {
       request.post(BASEURI+"/api/user/signIn",{
@@ -63,7 +73,7 @@ describe(addDescribeFormat("user_test"), function () {
         json : true
       },(err, res, body) => {
         token = body.token
-        decoded = jwt_decode(token);
+        decoded = jwt_decode(token.split(' ')[1])
         assert(token)
         done()
       })
@@ -71,7 +81,6 @@ describe(addDescribeFormat("user_test"), function () {
       done()
     }
   })
-
   it("getUsers(no login)",(done)=>{
     request.get(BASEURI+"/api/user/getUsers",(err,res,body)=>{
       body = JSON.parse(body)
@@ -200,7 +209,7 @@ describe(addDescribeFormat("user_test"), function () {
         json : true
       },(err, res, body) => {
         token = body.token
-        decoded = jwt_decode(token);
+        decoded = jwt_decode(token.split(' ')[1]);
         assert(token)
         done()
       })

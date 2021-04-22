@@ -11,6 +11,8 @@ import {Solved} from "../../models/Solved"
 import { Repository } from 'sequelize-typescript'
 import { Team } from '../../models/Team'
 import { EmailVerified } from '../../models/EmailVerified'
+import nodemailer from 'nodemailer'
+
 
 const teamRepository:Repository<Team> = db.sequelize.getRepository(Team)
 const userRepository:Repository<User> = db.sequelize.getRepository(User)
@@ -39,6 +41,14 @@ const createToken = async (): Promise<string> => {
    return result.join('');
 }
 
+const transporter = nodemailer.createTransport({
+    service: environment.mail.service,
+    host: environment.mail.host,
+    auth: {
+      user: environment.mail.user,
+      pass: environment.mail.pass
+    }
+});
 export const signUp = async (req:Request, res:Response) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
@@ -78,6 +88,8 @@ export const signUp = async (req:Request, res:Response) => {
             score : 0,
             isAdmin : false
         })
+
+        
         
         if(user) {
             emailVerifiedRepository.create({
@@ -275,3 +287,51 @@ export const deleteUser = async (req, res) => {
         return res.status(400).json({error : getErrorMessage(ErrorType.NotExist),detail:"user not exist"}).send()
     }
 }
+
+export const verifyEmail = async (req, res) => {
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+    }
+
+    const { token } = req.body 
+    const userId = req['decoded'].id
+    const emailVerified = await emailVerifiedRepository.findOne({
+        where : {
+            userId
+        },
+        attributes : ['id','token','isVerified'],
+        raw : true
+    })
+    if ( emailVerified === null) {
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+    }
+    if(!emailVerified['isVerified']) {
+        try {
+            if (token === emailVerified['token']) {
+                await emailVerifiedRepository.update({isVerified : true},{where :{ id:emailVerified['id']}})
+                const token = jwt.sign({    // payload
+                    id: userId,
+                    nickname : req['decoded'].nickname,
+                    isAdmin : req['decoded'].isAdmin,
+                    emailVerified : true
+                },
+                    req.app.get('jwt-secret'),   // secret
+                {                            // policy
+                    expiresIn : environment.jwt.expiresIn
+                });
+                return res.json({ token : "Bearer "+token }).send()
+            } else {
+                return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: "token is not validate"})
+            }
+        } catch (err) {
+            console.log(err)
+            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+        }
+    } else {
+        // already verified
+        return res.status(400).json({error : getErrorMessage(ErrorType.AlreadyExist), detail:"already verified"})
+    }
+}
+

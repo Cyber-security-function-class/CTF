@@ -4,7 +4,10 @@ import { preStart, dbclient } from "./index.spec"
 import jwt_decode from "jwt-decode";
 import db from "../app/models/index"
 import {User} from "../app/models/User"
+import { EmailVerified } from '../app/models/EmailVerified';
+
 const userRepository = db.sequelize.getRepository(User)
+const emailVerifiedRepository = db.sequelize.getRepository(EmailVerified)
 
 
 const ADDRESS = "http://localhost"
@@ -117,22 +120,6 @@ describe(addDescribeFormat("team_test"), function () {
       done()
     }
   })
-  it("createTeam leader : user1",(done)=>{
-    try {
-        request.post(BASEURI+"/api/user/createTeam",{
-          headers : {
-            Authorization: users.user1.token
-          },
-          body : teamInfo,
-          json : true
-        },(err, res, body) => {
-          assert(body.result)
-          done()
-        })
-    } catch (err) {
-        done()
-    }
-  })
   it("register user2",(done)=>{
     try{
       request.post(BASEURI+"/api/user/signUp",{
@@ -172,7 +159,31 @@ describe(addDescribeFormat("team_test"), function () {
       done()
     }
   })
-  
+  it("verify emails", (done)=>{
+    emailVerifiedRepository.update({isVerified:true},{where : { 1:1 }})
+    .then(e=>{
+      assert(e[0] == [ 1 ])
+      done()
+    }).catch(err=>{
+      done()
+    })
+  })
+  it("createTeam leader : user1",(done)=>{
+    try {
+        request.post(BASEURI+"/api/user/createTeam",{
+          headers : {
+            Authorization: users.user1.token
+          },
+          body : teamInfo,
+          json : true
+        },(err, res, body) => {
+          assert(body.result)
+          done()
+        })
+    } catch (err) {
+        done()
+    }
+  })
   it("login user2",(done) => {
     try {
       request.post(BASEURI+"/api/user/signIn",{

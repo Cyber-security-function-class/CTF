@@ -11,6 +11,7 @@ routes.use(authMiddleware)
 
 routes.get('/getCategories',getCategories)
 
+
 routes.post('/addCategory',addCategoryValidator() ,addCategory)
 routes.post('/updateCategory',updateCategoryValidator() ,updateCategory)
 routes.post('/deleteCategory',deleteCategoryValidator() ,deleteCategory)

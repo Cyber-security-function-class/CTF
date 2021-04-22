@@ -1,6 +1,6 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserValidator = exports.updateUserValidator = exports.getUserValidator = exports.signInValidator = exports.signUpValidator = void 0;
+exports.verifyEmailValidator = exports.deleteUserValidator = exports.updateUserValidator = exports.getUserValidator = exports.signInValidator = exports.signUpValidator = void 0;
 const express_validator_1 = require("express-validator");
 const signUpValidator = () => {
     return [
@@ -70,4 +70,14 @@ const deleteUserValidator = () => {
     ];
 };
 exports.deleteUserValidator = deleteUserValidator;
+const verifyEmailValidator = () => {
+    return [
+        express_validator_1.body('token')
+            .notEmpty()
+            .withMessage('token is required')
+            .isString()
+            .withMessage('token must be string')
+    ];
+};
+exports.verifyEmailValidator = verifyEmailValidator;
 //# sourceMappingURL=userValidator.js.map

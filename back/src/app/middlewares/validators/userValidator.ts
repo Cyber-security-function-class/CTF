@@ -69,3 +69,13 @@ export const deleteUserValidator = () => {
             .withMessage('id must be string')
     ]
 }
+
+export const verifyEmailValidator = () => {
+    return [
+        body('token')
+            .notEmpty()
+            .withMessage('token is required')
+            .isString()
+            .withMessage('token must be string')
+    ]
+}

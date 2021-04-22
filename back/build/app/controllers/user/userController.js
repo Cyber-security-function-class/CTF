@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
+exports.verifyEmail = exports.deleteUser = exports.updateUser = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt_1 = require("bcrypt");
 const express_validator_1 = require("express-validator");
@@ -43,6 +43,7 @@ const User_1 = require("../../models/User");
 const Solved_1 = require("../../models/Solved");
 const Team_1 = require("../../models/Team");
 const EmailVerified_1 = require("../../models/EmailVerified");
+const nodemailer_1 = __importDefault(require("nodemailer"));
 const teamRepository = index_1.default.sequelize.getRepository(Team_1.Team);
 const userRepository = index_1.default.sequelize.getRepository(User_1.User);
 const solvedRepository = index_1.default.sequelize.getRepository(Solved_1.Solved);
@@ -65,6 +66,14 @@ const createToken = () => __awaiter(void 0, void 0, void 0, function* () {
         result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
     }
     return result.join('');
+});
+const transporter = nodemailer_1.default.createTransport({
+    service: config_1.default.mail.service,
+    host: config_1.default.mail.host,
+    auth: {
+        user: config_1.default.mail.user,
+        pass: config_1.default.mail.pass
+    }
 });
 const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
@@ -146,7 +155,6 @@ const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const result = yield checkPassword(password, user.password); // sign in result
         if (result) { // password correct
             try {
-                console.log("controller user ", user);
                 // make token
                 const token = jwt.sign({
                     id: user.id,
@@ -287,4 +295,51 @@ const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.deleteUser = deleteUser;
+const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+    }
+    const { token } = req.body;
+    const userId = req['decoded'].id;
+    const emailVerified = yield emailVerifiedRepository.findOne({
+        where: {
+            userId
+        },
+        attributes: ['id', 'token', 'isVerified'],
+        raw: true
+    });
+    if (emailVerified === null) {
+        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+    }
+    if (!emailVerified['isVerified']) {
+        try {
+            if (token === emailVerified['token']) {
+                yield emailVerifiedRepository.update({ isVerified: true }, { where: { id: emailVerified['id'] } });
+                const token = jwt.sign({
+                    id: userId,
+                    nickname: req['decoded'].nickname,
+                    isAdmin: req['decoded'].isAdmin,
+                    emailVerified: true
+                }, req.app.get('jwt-secret'), // secret
+                {
+                    expiresIn: config_1.default.jwt.expiresIn
+                });
+                return res.json({ token: "Bearer " + token }).send();
+            }
+            else {
+                return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: "token is not validate" });
+            }
+        }
+        catch (err) {
+            console.log(err);
+            return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+        }
+    }
+    else {
+        // already verified
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "already verified" });
+    }
+});
+exports.verifyEmail = verifyEmail;
 //# sourceMappingURL=userController.js.map

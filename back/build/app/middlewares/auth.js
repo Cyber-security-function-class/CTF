@@ -34,14 +34,28 @@ exports.default = (req, res, next) => {
         jwt.verify(token, req.app.get('jwt-secret'), (err, decoded) => {
             if (err)
                 reject(err);
+            if (req.originalUrl == "/api/user/verifyEmail") {
+                resolve(decoded);
+            }
+            if (!decoded.emailVerified) {
+                reject({
+                    error: index_1.getErrorMessage(index_1.ErrorType.NotVerifiedEmail),
+                    detail: "email not verified"
+                });
+            }
             resolve(decoded);
         });
     });
     const onError = (error) => {
-        res.status(403).json({
-            error: index_1.getErrorMessage(index_1.ErrorType.UnexpectedError),
-            detail: error.message
-        });
+        if (!error.error && error.error.errorType === 'notVerifiedEmail') {
+            res.status(400).json(error);
+        }
+        else {
+            res.status(400).json({
+                error: index_1.getErrorMessage(index_1.ErrorType.UnexpectedError),
+                detail: error.message
+            });
+        }
     };
     p.then((decoded) => {
         req.decoded = decoded;
