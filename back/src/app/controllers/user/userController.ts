@@ -131,7 +131,7 @@ export const signIn = async (req,res) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
     const { email, password } = req.body
     let user

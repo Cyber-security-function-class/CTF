@@ -17,8 +17,6 @@ routes.get('/getUser',getUserValidator(),getUser)
 routes.get('/getUsers',authMiddleware)
 routes.get('/getUsers',getUsers)
 
-routes.get('/getUsers',authMiddleware)
-
 routes.post("/verifyEmail",authMiddleware)
 routes.post("/verifyEmail",verifyEmailValidator(),verifyEmail)
 
