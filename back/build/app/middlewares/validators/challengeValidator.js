@@ -79,11 +79,6 @@ const deleteChallengeValidator = () => {
 exports.deleteChallengeValidator = deleteChallengeValidator;
 const authFlagValidator = () => {
     return [
-        express_validator_1.body('challenge_id')
-            .notEmpty()
-            .withMessage("challenge_id is required")
-            .isNumeric()
-            .withMessage("challenge_id is must be number"),
         express_validator_1.body('flag')
             .notEmpty()
             .withMessage("flag is required")

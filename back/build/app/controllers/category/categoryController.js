@@ -54,7 +54,7 @@ const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
     }
     if (isExistCategory === null) {
-        const newCategory = yield categoryRepository.create({
+        yield categoryRepository.create({
             category: Lcategory,
         });
         return res.json({ result: true });

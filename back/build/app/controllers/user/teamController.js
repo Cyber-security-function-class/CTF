@@ -130,7 +130,7 @@ const createTeam = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             });
         }
         else {
-            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "same team is already exist." });
+            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "same teamName is already exist." });
         }
     }
     else {

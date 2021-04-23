@@ -121,7 +121,7 @@ export const createTeam = async(req: Request, res: Response) => {
                 }
             })
         } else {
-            return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist),detail:"same team is already exist."})
+            return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist),detail:"same teamName is already exist."})
         }
     } else {
         return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist),detail:"you already joined another team!"})

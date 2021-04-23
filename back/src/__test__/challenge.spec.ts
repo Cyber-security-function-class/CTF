@@ -133,7 +133,7 @@ describe(addDescribeFormat("category_test"), function () {
         try {
             request.post(BASEURI+"/api/challenge/addChallenge",{
                 body : { 
-                    categoryId : 0,
+                    categoryId : 1,
                     title :"first web chall",
                     content : "this is test challenge",
                     score : 300,
@@ -143,6 +143,178 @@ describe(addDescribeFormat("category_test"), function () {
                 headers : { 
                     Authorization : token
                 }
+            },(err, res, body) => {
+                assert(body.result)
+                done()
+            })
+        } catch (err) {
+            console.log(err)
+            done()
+        }
+    })
+    it("add web challenge2",(done) =>{
+        try {
+            request.post(BASEURI+"/api/challenge/addChallenge",{
+                body : { 
+                    categoryId : 1,
+                    title :"second web chall",
+                    content : "this is test challenge",
+                    score : 300,
+                    flag : "skillCTF{helloworld111}"
+                },
+                json : true,
+                headers : { 
+                    Authorization : token
+                }
+            },(err, res, body) => {
+                assert(body.result)
+                done()
+            })
+        } catch (err) {
+            console.log(err)
+            done()
+        }
+    })
+    it("add pwn challenge1",(done) =>{
+        try {
+            request.post(BASEURI+"/api/challenge/addChallenge",{
+                body : {
+                    id : 1,
+                    categoryId : 2,
+                    title :"second web chall",
+                    content : "this is test challenge",
+                    score : 300,
+                    flag : "skillCTF{helloworld222}"
+                },
+                json : true,
+                headers : { 
+                    Authorization : token
+                }
+            },(err, res, body) => {
+                assert(body.result)
+                done()
+            })
+        } catch (err) {
+            console.log(err)
+            done()
+        }
+    })
+    it("get challenges",(done) =>{
+        try {
+            request.get(BASEURI+"/api/challenge/getchallenges",{
+                headers : {
+                    Authorization : token
+                },
+                json : true
+            },
+            (err,res,body)=>{
+                assert(body.length == 3)
+                done()
+            })
+        } catch (err){
+            done()
+        }
+    })
+    it("get challenges category filter",(done) =>{
+        try {
+            request.get(BASEURI+"/api/challenge/getchallenges?category=1",{
+                headers : {
+                    Authorization : token
+                },
+                json :true
+            },
+            (err,res,body)=>{
+                assert(body.length == 2)
+                done()
+            })
+        } catch (err){
+            done()
+        }
+    })
+    it("update challenge",(done) => {
+        try {
+            request.post(BASEURI+"/api/challenge/updateChallenge",{
+                body : { 
+                    id : 1,
+                    title : "updatedChallenge",
+                    content : "update challenge content",
+                    score : 1000,
+                    categoryId : 2,
+                    flag : "skillCtf{123}"
+                },
+                headers : {
+                    Authorization : token
+                },
+                json : true
+            },(err, res, body) => {
+                assert(body.result)
+                done()
+            })
+        } catch(err) {
+            done()
+        }
+    })
+    it("delete challenge",(done) =>{
+        try {
+            request.post(BASEURI+"/api/challenge/deleteChallenge",{
+                headers : {
+                    Authorization : token
+                },body : {
+                    id : 1
+                },json : true
+            },(err, res, body) => {
+                assert(body.result)
+                done()
+            })
+        } catch (err) {
+            console.log(err)
+            done()
+        }
+    })
+    it("createTeam (leader : user1)",(done)=>{
+        try {
+            request.post(BASEURI+"/api/user/createTeam",{
+              headers : {
+                Authorization: token
+              },
+              body : {
+                  teamName:"helloteam",
+                  teamPassword : "hellopass"
+              },
+              json : true
+            },(err, res, body) => {
+              assert(body.result)
+              done()
+            })
+        } catch (err) {
+            done()
+        }
+      })
+    it("auth flag ( wrong flag ) ", (done)=> {
+        try {
+            request.post(BASEURI+"/api/challenge/authFlag",{
+                headers : {
+                    Authorization : token
+                },body : {
+                    flag : "skillCTF{asdad}"
+                },json : true
+            },(err, res, body) => {
+                assert(!body.result)
+                done()
+            })
+        } catch (err) {
+            console.log(err)
+            done()
+        }
+    })
+    it("auth flag ", (done)=> {
+        try {
+            request.post(BASEURI+"/api/challenge/authFlag",{
+                headers : {
+                    Authorization : token
+                },body : {
+                    flag : "skillCTF{helloworld111}"
+                },json : true
             },(err, res, body) => {
                 assert(body.result)
                 done()

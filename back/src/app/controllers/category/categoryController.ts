@@ -50,7 +50,7 @@ export const addCategory = async (req: Request, res: Response) => {
     }
 
     if ( isExistCategory === null) {
-        const newCategory = await categoryRepository.create({
+        await categoryRepository.create({
             category : Lcategory,
         })
         return res.json({result : true})

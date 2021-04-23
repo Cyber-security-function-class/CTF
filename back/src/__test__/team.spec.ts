@@ -205,6 +205,22 @@ describe(addDescribeFormat("team_test"), function () {
       done()
     }
   })
+  it("create duplicate team (leader : user2)",(done) => {
+    try {
+      request.post(BASEURI+"/api/user/createTeam",{
+        headers : {
+          Authorization: users.user2.token
+        },
+        body : teamInfo,
+        json : true
+      },(err, res, body) => {
+        assert(body?.error.errorType == "alreadyExist")
+        done()
+      })
+  } catch (err) {
+      done()
+  }
+  })
   it("login user3",(done) => {
     try {
       request.post(BASEURI+"/api/user/signIn",{

@@ -12,7 +12,7 @@ routes.use(auth_1.default);
 // normal user
 routes.get('/getChallenges', challengeController_1.getChallenges);
 routes.get('/getChallenge', challengeValidator_1.getChallengeValidator(), challengeController_1.getChallenge);
-// routes.post('/authFlag',authFlagValidator(),authFlag)
+routes.post('/authFlag', challengeValidator_1.authFlagValidator(), challengeController_1.authFlag);
 // admin
 routes.post('/addChallenge', challengeValidator_1.addChallengeValidator(), challengeController_1.addChallenge);
 routes.post('/updateChallenge', challengeValidator_1.updateChallengeValidator(), challengeController_1.updateChallenge);
