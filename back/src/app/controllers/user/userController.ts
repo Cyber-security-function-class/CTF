@@ -236,13 +236,13 @@ export const getUser = async (req, res) => {
 
 export const updateUser = async (req, res) => { 
     if ( !req['decoded'].isAdmin) {
-        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
+        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
     }
 
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
     
     const { id, nickname, email, isAdmin } = req.body
@@ -285,13 +285,13 @@ export const updateUser = async (req, res) => {
 
 export const deleteUser = async (req, res) => {
     if ( !req['decoded'].isAdmin) {
-        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
+        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
     }
 
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     const { id } = req.body
@@ -314,7 +314,7 @@ export const verifyEmail = async (req, res) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     const { token } = req.body 
