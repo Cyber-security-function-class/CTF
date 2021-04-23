@@ -6,12 +6,15 @@ import db from "../app/models/index"
 import {User} from "../app/models/User"
 import { EmailVerified } from '../app/models/EmailVerified';
 import { Op} from 'sequelize'
+import * as dotenv from 'dotenv';
+dotenv.config();
+
 const userRepository = db.sequelize.getRepository(User)
 const emailVerifiedRepository = db.sequelize.getRepository(EmailVerified)
 
 
 const ADDRESS = "http://localhost"
-const PORT = 7000
+const PORT = process.env.PORT || 7000
 const BASEURI = ADDRESS+":"+PORT
 
 const userInfo = {

@@ -14,7 +14,7 @@ const dbconfig = {
     database: "SkillCTF",
     port: 5432
 };
-const PORT = 7000
+
 const dbClient = new Client(dbconfig)
 
 export const preStart = async(done) => {

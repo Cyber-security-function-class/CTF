@@ -37,7 +37,9 @@
     "prestart": "tsc",
     "start": "nodemon --exec ts-node build/index.js",
     "usertest": "yarn mocha ./src/__test__/user.spec.ts -r ts-node/register",
-    "teamtest": "yarn mocha ./src/__test__/team.spec.ts -r ts-node/register"
+    "teamtest": "yarn mocha ./src/__test__/team.spec.ts -r ts-node/register",
+    "categorytest" : "yarn mocha ./src/__test__/category.spec.ts -r ts-node/register",
+    "challengetest" : "yarn mocha ./src/__test__/challenge.spec.ts -r ts-node/register"
   },
   "devDependencies": {
     "@types/chai": "^4.2.16",
@@ -46,7 +48,6 @@
     "@types/validator": "^13.1.3",
     "chai": "^4.3.4",
     "mocha": "^8.3.2",
-    "nodemon": "^2.0.7",
-    "npy": "^1.0.0"
+    "nodemon": "^2.0.7"
   }
 }

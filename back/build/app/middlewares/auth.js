@@ -26,7 +26,8 @@ let allowUrl = [
     "/api/user/resendEmail",
 ];
 exports.default = (req, res, next) => {
-    let token = req.headers.authorization;
+    var _a;
+    let token = (_a = req.headers) === null || _a === void 0 ? void 0 : _a.authorization;
     if (!token) {
         return res.status(403).json({
             error: index_1.getErrorMessage(index_1.ErrorType.AccessDenied),

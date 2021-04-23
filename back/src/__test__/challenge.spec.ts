@@ -129,10 +129,16 @@ describe(addDescribeFormat("category_test"), function () {
             done()
         }
     })
-    it("category - net",(done) => {
+    it("add web challenge1",(done) =>{
         try {
-            request.post(BASEURI+"/api/category/addCategory",{
-                body : { category : "net"},
+            request.post(BASEURI+"/api/challenge/addChallenge",{
+                body : { 
+                    categoryId : 0,
+                    title :"first web chall",
+                    content : "this is test challenge",
+                    score : 300,
+                    flag : "skillCTF{helloworld}"
+                },
                 json : true,
                 headers : { 
                     Authorization : token
@@ -146,57 +152,4 @@ describe(addDescribeFormat("category_test"), function () {
             done()
         }
     })
-    let category_1
-    it("get categories", (done) =>{
-        try {
-            request.get(BASEURI+"/api/category/getCategories",{
-                json : true,
-                headers : { 
-                    Authorization : token
-                }
-            },(err, res, body) => {
-                category_1 = body[0].id
-                assert(body.length >= 3)
-                done()
-            })
-        } catch (err) {
-            console.log(err)
-            done()
-        }
-    })
-    it("category - udpate",(done) => {
-        try {
-            request.post(BASEURI+"/api/category/updateCategory",{
-                body : { id : category_1,category : "webweb"},
-                json : true,
-                headers : { 
-                    Authorization : token
-                }
-            },(err, res, body) => {
-                assert(body.result)
-                done()
-            })
-        } catch (err) {
-            console.log(err)
-            done()
-        }
-    })
-    it("category - delete",(done) => {
-        try {
-            request.post(BASEURI+"/api/category/deleteCategory",{
-                body : { id : category_1},
-                json : true,
-                headers : { 
-                    Authorization : token
-                }
-            },(err, res, body) => {
-                assert(body.result)
-                done()
-            })
-        } catch (err) {
-            console.log(err)
-            done()
-        }
-    })
-    
 })

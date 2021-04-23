@@ -124,7 +124,7 @@ export const addChallenge = async (req:Request, res:Response) => {
                 flag,
                 categoryId,
             })
-            return res.json(chall)
+            return res.json({result : true})
         } else {
             return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),"detail":"category not exist"})
         } 

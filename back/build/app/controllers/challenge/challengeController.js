@@ -133,7 +133,7 @@ const addChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 flag,
                 categoryId,
             });
-            return res.json(chall);
+            return res.json({ result: true });
         }
         else {
             return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), "detail": "category not exist" });

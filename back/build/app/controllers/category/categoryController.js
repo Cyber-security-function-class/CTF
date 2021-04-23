@@ -35,18 +35,17 @@ exports.getCategories = getCategories;
 const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req['decoded'].isAdmin) {
         return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
-        // he is not a admin
     }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
     }
     const { category } = req.body;
-    const Scategory = category.toLowerCase();
+    const Lcategory = category.toLowerCase();
     let isExistCategory;
     try {
         isExistCategory = yield categoryRepository.findOne({
-            where: sequelize_1.default.where(sequelize_1.default.fn('lower', sequelize_1.default.col('category')), sequelize_1.default.fn('lower', Scategory)),
+            where: sequelize_1.default.where(sequelize_1.default.fn('lower', sequelize_1.default.col('category')), sequelize_1.default.fn('lower', Lcategory)),
             raw: true
         });
     }
@@ -55,11 +54,10 @@ const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
     }
     if (isExistCategory === null) {
-        // make new category
         const newCategory = yield categoryRepository.create({
-            category: Scategory,
+            category: Lcategory,
         });
-        return res.json(newCategory);
+        return res.json({ result: true });
     }
     else {
         return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AlreadyExist)).send();

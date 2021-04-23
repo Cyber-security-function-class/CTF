@@ -9,7 +9,7 @@ let allowUrl = [
 
 export default (req, res, next) => {
     
-    let token = req.headers.authorization
+    let token = req.headers?.authorization
 
     if(!token) {
         return res.status(403).json({

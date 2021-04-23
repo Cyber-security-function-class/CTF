@@ -324,7 +324,6 @@ const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
     const { token } = req.body;
     const userId = req['decoded'].id;
-    console.log(req['decoded']);
     const emailVerified = yield emailVerifiedRepository.findOne({
         where: {
             userId

@@ -26,21 +26,20 @@ export const getCategories = async (req: Request, res: Response) => {
 export const addCategory = async (req: Request, res: Response) => {
     if ( !req['decoded'].isAdmin) {
         return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-        // he is not a admin
     }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
     }
     const { category } = req.body
-    const Scategory:string = category.toLowerCase()
+    const Lcategory:string = category.toLowerCase()
 
     let isExistCategory
     try {
         isExistCategory = await categoryRepository.findOne({
             where : sequelize.where(
                 sequelize.fn('lower', sequelize.col('category')), 
-                sequelize.fn('lower', Scategory
+                sequelize.fn('lower', Lcategory
                 )
             ),
             raw : true
@@ -51,11 +50,10 @@ export const addCategory = async (req: Request, res: Response) => {
     }
 
     if ( isExistCategory === null) {
-        // make new category
         const newCategory = await categoryRepository.create({
-            category : Scategory,
+            category : Lcategory,
         })
-        return res.json(newCategory)
+        return res.json({result : true})
     } else {
         return res.status(400).json(getErrorMessage(ErrorType.AlreadyExist)).send()
     }

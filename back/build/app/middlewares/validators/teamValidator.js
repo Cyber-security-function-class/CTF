@@ -11,9 +11,9 @@ const createTeamValidator = () => {
             .withMessage("teamName must be string"),
         express_validator_1.body('teamPassword')
             .notEmpty()
-            .withMessage("teamPassword is required")
-            .isString()
-            .withMessage("teamPassword must be string")
+            .withMessage('password is required')
+            .isLength({ min: 8 })
+            .withMessage('password must be 8 characters'),
     ];
 };
 exports.createTeamValidator = createTeamValidator;
