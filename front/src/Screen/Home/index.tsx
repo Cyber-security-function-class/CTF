@@ -1,12 +1,10 @@
 import React from 'react';
-import Modal from '../../Components/modal'
+import Server from './Server'
 
 const HomePage: React.FC = () => {
     return (
         <div>
-            <Modal>
-                <div>aaaaa</div>
-            </Modal>
+            <Server />
         </div>
     )
 }
