@@ -1,53 +1,36 @@
-'use strict';
+import { Table, Column, Model, ForeignKey, DataType, PrimaryKey, AllowNull, AutoIncrement, BelongsTo} from 'sequelize-typescript'
+import { User } from './User'
+import { Challenge } from './Challenge'
+import belongsTo from 'sequelize/types/lib/associations/belongs-to'
 
-import { BuildOptions, DataTypes, Model, Sequelize } from "sequelize";
-import { ChallengeFactory } from "./Challenge";
-import { UserFactory } from "./User";
+@Table
+export class Solved extends Model<Solved> {
+    @PrimaryKey
+    @AutoIncrement
+    @Column
+    id : number
 
-export interface SolvedAttributes {
-    id?: number
+    @AllowNull(false)
+    @Column
     score : number
-    user_id : number
-    challenge_id : number
-    createdAt?: Date
-    updatedAt?: Date
-}
-export interface SolvedModel extends Model<SolvedAttributes>, SolvedAttributes {}
-export class Solved extends Model<SolvedModel, SolvedAttributes> {
     
-}
+    @BelongsTo(() => Challenge)
+    challenge : Challenge
 
-export type SolvedStatic = typeof Model & {
-    new (values?: object, options?: BuildOptions): SolvedModel
-};
+    @ForeignKey(() =>Challenge)
+    @AllowNull(false)
+    @Column
+    challengeId : number
 
+    @BelongsTo(() => User)
+    user : User
+    
+    @ForeignKey(() =>User)
+    @AllowNull(false)
+    @Column
+    userId : string // uuid
 
-export function SolvedFactory (sequelize: Sequelize,User ,Challenge): SolvedStatic {
-    return <SolvedStatic>sequelize.define("solved", {
-        id : {
-            type : DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-        },
-        score : {
-            type : DataTypes.INTEGER,
-            allowNull : false
-        },
-        user_id : {
-            type : DataTypes.INTEGER,
-            allowNull : false,
-            references :{
-                model : User,
-                key :'id' 
-            }
-        },
-        challenge_id : {
-            type : DataTypes.INTEGER,
-            allowNull : false,
-            references :{
-                model : Challenge,
-                key :'id' 
-            }
-        }
-    });
+    @AllowNull(false)
+    @Column
+    teamId : string // uuid
 }

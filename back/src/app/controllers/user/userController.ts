@@ -1,16 +1,21 @@
 import {Request, Response} from 'express'
-import db from '../../models/index'
 import * as jwt from 'jsonwebtoken'
 import { genSalt, hash, compare } from 'bcrypt'
 import { validationResult } from "express-validator"
 import environment from '../../config/config'
 import { Op } from 'sequelize'
+import db from '../../models/index'
 import { ErrorType, getErrorMessage } from '../../error/index'
-import { UserModel } from '../../models/User'
+import {User} from '../../models/User'
+import {Solved} from "../../models/Solved"
+import { Repository } from 'sequelize-typescript'
+import { Team } from '../../models/Team'
+import { EmailVerified } from '../../models/EmailVerified'
 
-
-const User = db.User
-const Solved = db['Solved']
+const teamRepository:Repository<Team> = db.sequelize.getRepository(Team)
+const userRepository:Repository<User> = db.sequelize.getRepository(User)
+const solvedRepository:Repository<Solved> = db.sequelize.getRepository(Solved)
+const emailVerifiedRepository:Repository<EmailVerified> = db.sequelize.getRepository(EmailVerified)
 
 const createHashedPassword = async (password: string) => {
     const saltRounds = 10
@@ -24,10 +29,20 @@ const checkPassword = async (password: string, hashedPassword: string) => {
     return isPasswordCorrect
 }
 
+const createToken = async (): Promise<string> => {
+    var result           = [];
+    var characters       = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for ( var i = 0; i < 32; i++ ) {
+      result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+   }
+   return result.join('');
+}
+
 export const signUp = async (req:Request, res:Response) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     // id,nickname,password,email,score,isAdmin,isVerified
@@ -37,7 +52,8 @@ export const signUp = async (req:Request, res:Response) => {
     const hashedPassword = await createHashedPassword( password )
 
     // await check('nickname')
-    const isExistingUser = await User.findOne({
+    const isExistingUser = await userRepository.findOne({
+        attributes : ['nickname','email'],
         where : {
             [Op.or]: [{ nickname: nickname}, { email : email }]
         },
@@ -51,17 +67,24 @@ export const signUp = async (req:Request, res:Response) => {
         } else {
             msg = "The email already exist."
         }
-        return res.status(409).json({error : getErrorMessage(ErrorType.AlreadyExist),detail : msg}).send()
+        return res.status(400).json({error : getErrorMessage(ErrorType.AlreadyExist),detail : msg}).send()
     }
 
     try {
-        const user = await User.create({
+        const user = await userRepository.create({
             nickname : nickname,
             password : hashedPassword,
-            email : email
+            email : email,
+            score : 0,
+            isAdmin : false
         })
         
         if(user) {
+            emailVerifiedRepository.create({
+                userId : user.id,
+                token : await createToken(),
+                isVerified : false
+            })
             res.json({ result: true })
         }
     } catch(err) {
@@ -77,9 +100,17 @@ export const signIn = async (req,res) => {
         return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
     const { email, password } = req.body
-    let user : UserModel;
+    let user
     try {
-        user = await User.findOne({where : {email:email},raw : true})
+        user = await userRepository.findOne({
+            where : {email:email},
+            raw : true,
+            attributes : ['id','password','isAdmin','nickname'],
+            include : [{
+                model : emailVerifiedRepository,
+                attributes : ['isVerified']
+            }]
+        })
     } catch ( err ) {
         console.log(err)
         return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
@@ -88,21 +119,28 @@ export const signIn = async (req,res) => {
     if ( user === null ) { // user not exist
         return res.status(400).json(getErrorMessage(ErrorType.NotExist)).send()
     } else { // user exist
+        
         const result = await checkPassword (password,user.password) // sign in result
+        
         if ( result ) { // password correct
-            // make token
-            const token = jwt.sign({    // payload
-                id: user.id, 
-                email : user.email, 
-                name : user.nickname,
-                isAdmin : user.isAdmin
-            },
-                req.app.get('jwt-secret'),   // secret
-            {                            // policy
-                expiresIn : environment.jwt.expiresIn
-            });
-            return res.json({ token : token }).send()
-        } else { // password incorrect
+            try {
+                // make token
+                const token = jwt.sign({    // payload
+                    id: user.id,
+                    nickname : user.nickname,
+                    isAdmin : user.isAdmin,
+                    emailVerified : user['emailVerified.isVerified'],
+                },
+                    req.app.get('jwt-secret'),   // secret
+                {                            // policy
+                    expiresIn : environment.jwt.expiresIn
+                });
+                return res.json({ token : "Bearer "+token }).send()
+            } catch (err) {
+                return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError))
+            }
+        } 
+        else { // password incorrect
             return res.status(400).json(getErrorMessage(ErrorType.LoginFailed)).send()
         }
     }
@@ -111,8 +149,12 @@ export const signIn = async (req,res) => {
 
 export const getUsers = async (req,res) => {
     try {
-        const users = await User.findAll({
-            attributes: ['id','nickname','score'],
+        const users = await userRepository.findAll({
+            attributes: ['id','nickname'],
+            include: [{
+                model : teamRepository,
+                attributes : ['id','teamName','leader']
+            }],
             raw : true
         })
         res.json(users)
@@ -131,21 +173,23 @@ export const getUser = async (req, res) => {
     }
 
     let { id } = req.query
-    id = +id
+
     try {
-        if (await User.findOne({where : {id},raw : true}) !== null) {
-            const user = await User.findOne({
-                where : {
-                    id : id
-                },
-                attributes : ['id','nickname','email','score','isAdmin'],
-                include : [{ 
-                    model : Solved,
-                    as : "solved"
-                }]
-            })
+        const user = await userRepository.findOne({
+            where : {
+                id : id
+            },
+            attributes : ['id','nickname','email','isAdmin'],
+            include : [{
+                model : solvedRepository
+            },{
+                model : teamRepository
+            }]
+        })
+        if ( user !== null) {
             return res.json(user)
-        } else {
+        }
+        else {
             return res.status(400).json({error:getErrorMessage(ErrorType.NotExist), detail:"user doesn't exist"})
         }
         
@@ -166,27 +210,25 @@ export const updateUser = async (req, res) => {
     if (!errors.isEmpty()) {
         return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
-    // check required things
-    const { id,nickname, email, isAdmin, score } = req.body
-
+    
+    const { id, nickname, email, isAdmin } = req.body
     try {
-        const isUserExist = await User.findOne({
+        const isUserExist = await userRepository.findOne({
             where : {
-                id : id
+                id
             }, 
             attributes : ['id'],
             raw : true
         })
+        
         if ( isUserExist !== null ){
             try {
                 // update user
-                await User.update(
+                await userRepository.update(
+                    {
+                        nickname,email,isAdmin
+                    },
                     { 
-                        nickname,
-                        email,
-                        isAdmin,
-                        score
-                    },{ 
                         where :{
                             id
                         }
@@ -220,10 +262,10 @@ export const deleteUser = async (req, res) => {
 
     const { id } = req.body
 
-    if ( await User.findOne({where : {id},raw : true, attributes:['id']}) !== null ){
+    if ( await userRepository.findOne({where : {id},raw : true, attributes:['id']}) !== null ){
         // user exist
         try {
-            await User.destroy({where : {id}})
+            await userRepository.destroy({where : {id}})
             return res.json({result : true})
         } catch (err) {
             console.log(err)

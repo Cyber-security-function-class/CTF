@@ -1,16 +1,18 @@
 'use strict'
 
 import {Request, Response} from 'express'
-import db from "../../models/index"
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
+import db from '../../models/index'
+import {Category} from '../../models/Category'
 import sequelize from 'sequelize'
-const Category = db.Category
+
+const categoryRepository = db.sequelize.getRepository(Category)
 
 export const getCategories = async (req: Request, res: Response) => {
 
     try {
-        const categories = await Category.findAll({ 
+        const categories = await categoryRepository.findAll({ 
             raw : true
         })
 
@@ -23,22 +25,22 @@ export const getCategories = async (req: Request, res: Response) => {
 
 export const addCategory = async (req: Request, res: Response) => {
     if ( !req['decoded'].isAdmin) {
-        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
+        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
         // he is not a admin
     }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
     }
-    let { category } = req.body
-    category = category.toLowerCase()
+    const { category } = req.body
+    const Scategory:string = category.toLowerCase()
 
     let isExistCategory
     try {
-        isExistCategory = await Category.findOne({
+        isExistCategory = await categoryRepository.findOne({
             where : sequelize.where(
                 sequelize.fn('lower', sequelize.col('category')), 
-                sequelize.fn('lower', category
+                sequelize.fn('lower', Scategory
                 )
             ),
             raw : true
@@ -50,28 +52,28 @@ export const addCategory = async (req: Request, res: Response) => {
 
     if ( isExistCategory === null) {
         // make new category
-        const newCategory = await Category.create({
-            category : category
+        const newCategory = await categoryRepository.create({
+            category : Scategory,
         })
         return res.json(newCategory)
     } else {
-        return res.status(409).json(getErrorMessage(ErrorType.AlreadyExist)).send()
+        return res.status(400).json(getErrorMessage(ErrorType.AlreadyExist)).send()
     }
 }
 
 export const updateCategory = async (req:Request, res:Response) => {
     if ( !req['decoded'].isAdmin) {
-        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
+        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
         // he is not a admin
     }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
     }
     const { id, category} = req.body
-    if ( await Category.findOne({ where : { id },raw : true}) !== null ) {
+    if ( await categoryRepository.findOne({ where : { id },raw : true}) !== null ) {
         try {
-            await Category.update({category},{where : {id}})
+            await categoryRepository.update({category},{where : {id}})
             return res.json({result: true})
         } catch (err) {
             console.log(err)
@@ -84,17 +86,17 @@ export const updateCategory = async (req:Request, res:Response) => {
 
 export const deleteCategory = async (req:Request, res:Response) => {
     if ( !req['decoded'].isAdmin) {
-        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
+        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
         // he is not a admin
     }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
     }
     const { id } = req.body
-    if ( await Category.findOne({ where : { id },raw : true}) !== null ) {
+    if ( await categoryRepository.findOne({ where : { id },raw : true}) !== null ) {
         try {
-            await Category.destroy({where : { id }})
+            await categoryRepository.destroy({where : { id }})
             return res.json({result: true})
         } catch (err) {
             console.log(err)

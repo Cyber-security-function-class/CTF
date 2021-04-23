@@ -7,10 +7,10 @@ import 'dotenv'
 
 
 const PORT = process.env.PORT || 7000;
+let initCallback
 
 app.listen ( PORT , async () => {
-    await db.sequelize.authenticate()
-    .then(async () => {
+    await db.sequelize.authenticate().then(async () => {
         console.log("database connection success");
         const driver = async () => {
             try {
@@ -20,15 +20,22 @@ app.listen ( PORT , async () => {
                 console.error(err);
                 return;
             }
-         
+        
             console.log('database sync success');
         };
-        driver(); // sequelize sync
+        await driver(); // sequelize sync
+
+        
     })
     .catch((e) => {
         console.log("database connection failed\n",e)
     })
-
-
     console.info(`Server running on port ${PORT}`)
+    if(initCallback) {
+        initCallback();
+    }
 })
+
+export const init = (cb) => {
+    initCallback = cb;
+}

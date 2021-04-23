@@ -19,15 +19,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var dotenv = __importStar(require("dotenv"));
+const dotenv = __importStar(require("dotenv"));
 dotenv.config();
-var dbconfig = {
+const dbconfig = {
     "username": process.env.dbUser || "skilluser",
     "password": process.env.dbPassword || "imskilluser",
     "host": process.env.dbHost || "localhost",
     "database": "SkillCTF",
     "dialect": "postgres",
-    "logging": true
+    "logging": false
 };
 exports.default = dbconfig;
 //# sourceMappingURL=dbconfig.js.map

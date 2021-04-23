@@ -3,16 +3,16 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-var express_1 = __importDefault(require("express"));
-var auth_1 = __importDefault(require("../../middlewares/auth"));
-var challengeController_1 = require("./challengeController");
-var challengeValidator_1 = require("../../middlewares/validators/challengeValidator");
-var routes = express_1.default.Router();
+const express_1 = __importDefault(require("express"));
+const auth_1 = __importDefault(require("../../middlewares/auth"));
+const challengeController_1 = require("./challengeController");
+const challengeValidator_1 = require("../../middlewares/validators/challengeValidator");
+const routes = express_1.default.Router();
 routes.use(auth_1.default);
 // normal user
 routes.get('/getChallenges', challengeController_1.getChallenges);
 routes.get('/getChallenge', challengeValidator_1.getChallengeValidator(), challengeController_1.getChallenge);
-routes.post('/authFlag', challengeValidator_1.authFlagValidator(), challengeController_1.authFlag);
+// routes.post('/authFlag',authFlagValidator(),authFlag)
 // admin
 routes.post('/addChallenge', challengeValidator_1.addChallengeValidator(), challengeController_1.addChallenge);
 routes.post('/updateChallenge', challengeValidator_1.updateChallengeValidator(), challengeController_1.updateChallenge);

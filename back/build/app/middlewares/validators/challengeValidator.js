@@ -1,8 +1,8 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getChallengeValidator = exports.authFlagValidator = exports.deleteChallengeValidator = exports.updateChallengeValidator = exports.addChallengeValidator = void 0;
-var express_validator_1 = require("express-validator");
-var addChallengeValidator = function () {
+const express_validator_1 = require("express-validator");
+const addChallengeValidator = () => {
     return [
         express_validator_1.body('title')
             .notEmpty()
@@ -19,11 +19,11 @@ var addChallengeValidator = function () {
             .withMessage('score is required')
             .isNumeric()
             .withMessage("score is must be number"),
-        express_validator_1.body('category_id')
+        express_validator_1.body('categoryId')
             .notEmpty()
-            .withMessage('category_id is required')
+            .withMessage('categoryId is required')
             .isNumeric()
-            .withMessage("category_id is must be number"),
+            .withMessage("categoryId is must be number"),
         express_validator_1.body('flag')
             .notEmpty()
             .withMessage("flag is required")
@@ -32,7 +32,7 @@ var addChallengeValidator = function () {
     ];
 };
 exports.addChallengeValidator = addChallengeValidator;
-var updateChallengeValidator = function () {
+const updateChallengeValidator = () => {
     return [
         express_validator_1.body('id')
             .notEmpty()
@@ -54,11 +54,11 @@ var updateChallengeValidator = function () {
             .withMessage('score is required')
             .isNumeric()
             .withMessage("score is must be number"),
-        express_validator_1.body('category_id')
+        express_validator_1.body('categoryId')
             .notEmpty()
-            .withMessage('category_id is required')
+            .withMessage('categoryId is required')
             .isNumeric()
-            .withMessage("category_id is must be number"),
+            .withMessage("categoryId is must be number"),
         express_validator_1.body('flag')
             .notEmpty()
             .withMessage("flag is required")
@@ -67,7 +67,7 @@ var updateChallengeValidator = function () {
     ];
 };
 exports.updateChallengeValidator = updateChallengeValidator;
-var deleteChallengeValidator = function () {
+const deleteChallengeValidator = () => {
     return [
         express_validator_1.body('id')
             .notEmpty()
@@ -77,7 +77,7 @@ var deleteChallengeValidator = function () {
     ];
 };
 exports.deleteChallengeValidator = deleteChallengeValidator;
-var authFlagValidator = function () {
+const authFlagValidator = () => {
     return [
         express_validator_1.body('challenge_id')
             .notEmpty()
@@ -92,7 +92,7 @@ var authFlagValidator = function () {
     ];
 };
 exports.authFlagValidator = authFlagValidator;
-var getChallengeValidator = function () {
+const getChallengeValidator = () => {
     return [
         express_validator_1.query('id')
             .notEmpty()

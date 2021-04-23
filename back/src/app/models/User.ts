@@ -1,54 +1,52 @@
-'use strict';
-
-import { BuildOptions, DataTypes, Model, Sequelize } from "sequelize";
-
-export interface UserAttributes {
-    id?: number;
-    nickname: string;
-    password : string;
-    score?: number;
-    email: string;
-    isAdmin ?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
-}
-export interface UserModel extends Model<UserAttributes>, UserAttributes {}
-export class User extends Model<UserModel, UserAttributes> {
+import { Table, Column, Model, HasMany, PrimaryKey, DataType,BelongsToMany,BelongsTo, HasOne, IsUUID, Unique, AllowNull, IsEmail, Default, ForeignKey } from 'sequelize-typescript'
+import { Challenge } from './Challenge'
+import { Solved } from './Solved'
+import { Team } from './Team'
+import { EmailVerified } from './EmailVerified'
+@Table
+export class User extends Model<User> {
     
-}
+    @IsUUID(4)
+    @PrimaryKey
+    @Default(DataType.UUIDV4)
+    @Column
+    id: string
 
-export type UserStatic = typeof Model & {
-    new (values?: object, options?: BuildOptions): UserModel
-};
+    @Unique
+    @AllowNull(false)
+    @Column
+    nickname: string
 
-export function UserFactory (sequelize: Sequelize): UserStatic {
-    return <UserStatic>sequelize.define("user", {
-        id : {
-            type : DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-            unique : true
-        },
-        nickname : {
-            type : DataTypes.STRING,
-            primaryKey: true
-        },
-        email : {
-            type : DataTypes.STRING,
-            primaryKey: true
-        },
-        password : {
-            type : DataTypes.STRING,
-            allowNull : false
-        },
-        score : {
-            type : DataTypes.INTEGER,
-            allowNull : false,
-            defaultValue :0
-        },
-        isAdmin : {
-            type : DataTypes.BOOLEAN,
-            defaultValue : false
-        }
-    });
+    
+    @AllowNull(false)
+    @Column
+    password : string
+
+    
+    @Unique
+    @AllowNull(false)
+    @IsEmail
+    @Column
+    email : string
+    
+    @HasOne(() => EmailVerified)
+    emailVerified : EmailVerified
+    
+    @BelongsTo(() => Team)
+    team : Team
+    
+    @ForeignKey(() => Team)
+    @Default(null)
+    @Column
+    teamId : string
+
+    
+    @Default(false)
+    @Column
+    isAdmin : boolean
+
+    @HasMany(()=>Solved)
+    solveds: Solved[]
+    
+
 }

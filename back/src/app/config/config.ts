@@ -1,6 +1,5 @@
 'use strict';
 import * as dotenv from 'dotenv';
-import { env } from 'node:process';
 dotenv.config();
 
 const environment = {

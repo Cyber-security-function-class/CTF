@@ -2,43 +2,27 @@
 
 import { Sequelize } from 'sequelize-typescript'
 import dbconfig from '../config/dbconfig'
-import { Challenge, ChallengeFactory } from './Challenge';
-import { CategoryFactory } from './Category';
-import { Solved, SolvedFactory } from './Solved';
-import { User, UserFactory } from './User'
-import { EmailVerifiedFactory } from './EmailVerified';
-// import models
-
-
-
-const sequelize = new Sequelize(
-    dbconfig.database,
-    dbconfig.username,
-    dbconfig.password,
-    {
-        host: dbconfig.host,
-        dialect: 'postgres',
-        logging : dbconfig.logging
-    }
-)
-
-
+import { Category } from './Category';
+import { Challenge } from './Challenge';
+import { Solved } from './Solved';
+import { User} from './User'
+import { Team } from './Team';
+import { Notice } from './Notice';
+import { EmailVerified } from './EmailVerified';
 const db = {
-    sequelize,
-    User : UserFactory(sequelize),
-    Challenge : ChallengeFactory(sequelize),
-    Category : CategoryFactory(sequelize),
-    EmailVerified : EmailVerifiedFactory(sequelize),
+    sequelize : new Sequelize(
+        dbconfig.database,
+        dbconfig.username,
+        dbconfig.password,
+        {
+            host: dbconfig.host,
+            dialect: 'postgres',
+            logging : dbconfig.logging,
+            models: [User, Category,Challenge,Solved,Team,Notice,EmailVerified],
+            repositoryMode: true,
+        }
+    )
 }
 
-db['Solved'] = SolvedFactory(sequelize,User,Challenge)
-// User <--> solved <--> challenge
-
-db.User.belongsToMany(db.Challenge,{
-    through : Solved,
-})
-db.Challenge.belongsToMany(db.User,{
-    through : Solved,
-})
 
 export default db

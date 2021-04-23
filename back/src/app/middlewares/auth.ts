@@ -1,19 +1,22 @@
 import * as jwt from "jsonwebtoken"
+import { ErrorType, getErrorMessage } from '../error/index'
+import { validationResult } from "express-validator"
 
 
 export default (req, res, next) => {
     
-    const token = req.headers.authorization
+    let token = req.headers.authorization
 
     if(!token) {
         return res.status(403).json({
-            success: false,
-            message: 'not logged in'
+            error : getErrorMessage(ErrorType.AccessDenied),
+            detail: 'not logged in'
         })
     }
 
     const p = new Promise(
         (resolve, reject) => {
+            token = token.split(' ')[1]
             jwt.verify(token, req.app.get('jwt-secret'), (err, decoded) => { 
                 if(err) reject(err)
                 resolve(decoded)
@@ -23,8 +26,8 @@ export default (req, res, next) => {
 
     const onError = (error) => {
         res.status(403).json({
-            success: false,
-            message: error.message
+            error : getErrorMessage(ErrorType.UnexpectedError),
+            detail: error.message
         })
     }
     p.then((decoded)=>{

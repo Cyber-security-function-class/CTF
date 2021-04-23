@@ -27,340 +27,264 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __generator = (this && this.__generator) || function (thisArg, body) {
-    var _ = { label: 0, sent: function() { if (t[0] & 1) throw t[1]; return t[1]; }, trys: [], ops: [] }, f, y, t, g;
-    return g = { next: verb(0), "throw": verb(1), "return": verb(2) }, typeof Symbol === "function" && (g[Symbol.iterator] = function() { return this; }), g;
-    function verb(n) { return function (v) { return step([n, v]); }; }
-    function step(op) {
-        if (f) throw new TypeError("Generator is already executing.");
-        while (_) try {
-            if (f = 1, y && (t = op[0] & 2 ? y["return"] : op[0] ? y["throw"] || ((t = y["return"]) && t.call(y), 0) : y.next) && !(t = t.call(y, op[1])).done) return t;
-            if (y = 0, t) op = [op[0] & 2, t.value];
-            switch (op[0]) {
-                case 0: case 1: t = op; break;
-                case 4: _.label++; return { value: op[1], done: false };
-                case 5: _.label++; y = op[1]; op = [0]; continue;
-                case 7: op = _.ops.pop(); _.trys.pop(); continue;
-                default:
-                    if (!(t = _.trys, t = t.length > 0 && t[t.length - 1]) && (op[0] === 6 || op[0] === 2)) { _ = 0; continue; }
-                    if (op[0] === 3 && (!t || (op[1] > t[0] && op[1] < t[3]))) { _.label = op[1]; break; }
-                    if (op[0] === 6 && _.label < t[1]) { _.label = t[1]; t = op; break; }
-                    if (t && _.label < t[2]) { _.label = t[2]; _.ops.push(op); break; }
-                    if (t[2]) _.ops.pop();
-                    _.trys.pop(); continue;
-            }
-            op = body.call(thisArg, _);
-        } catch (e) { op = [6, e]; y = 0; } finally { f = t = 0; }
-        if (op[0] & 5) throw op[1]; return { value: op[0] ? op[1] : void 0, done: true };
-    }
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteUser = exports.updateUser = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
-var index_1 = __importDefault(require("../../models/index"));
-var jwt = __importStar(require("jsonwebtoken"));
-var bcrypt_1 = require("bcrypt");
-var express_validator_1 = require("express-validator");
-var config_1 = __importDefault(require("../../config/config"));
-var sequelize_1 = require("sequelize");
-var index_2 = require("../../error/index");
-var User = index_1.default.User;
-var Solved = index_1.default['Solved'];
-var createHashedPassword = function (password) { return __awaiter(void 0, void 0, void 0, function () {
-    var saltRounds, salt, hashedPassword;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                saltRounds = 10;
-                return [4 /*yield*/, bcrypt_1.genSalt(saltRounds)];
-            case 1:
-                salt = _a.sent();
-                return [4 /*yield*/, bcrypt_1.hash(password, salt)];
-            case 2:
-                hashedPassword = _a.sent();
-                return [2 /*return*/, hashedPassword];
-        }
+const jwt = __importStar(require("jsonwebtoken"));
+const bcrypt_1 = require("bcrypt");
+const express_validator_1 = require("express-validator");
+const config_1 = __importDefault(require("../../config/config"));
+const sequelize_1 = require("sequelize");
+const index_1 = __importDefault(require("../../models/index"));
+const index_2 = require("../../error/index");
+const User_1 = require("../../models/User");
+const Solved_1 = require("../../models/Solved");
+const Team_1 = require("../../models/Team");
+const EmailVerified_1 = require("../../models/EmailVerified");
+const teamRepository = index_1.default.sequelize.getRepository(Team_1.Team);
+const userRepository = index_1.default.sequelize.getRepository(User_1.User);
+const solvedRepository = index_1.default.sequelize.getRepository(Solved_1.Solved);
+const emailVerifiedRepository = index_1.default.sequelize.getRepository(EmailVerified_1.EmailVerified);
+const createHashedPassword = (password) => __awaiter(void 0, void 0, void 0, function* () {
+    const saltRounds = 10;
+    const salt = yield bcrypt_1.genSalt(saltRounds);
+    const hashedPassword = yield bcrypt_1.hash(password, salt);
+    return hashedPassword;
+});
+const checkPassword = (password, hashedPassword) => __awaiter(void 0, void 0, void 0, function* () {
+    const isPasswordCorrect = yield bcrypt_1.compare(password, hashedPassword); // hash.toString for type checking hack
+    return isPasswordCorrect;
+});
+const createToken = () => __awaiter(void 0, void 0, void 0, function* () {
+    var result = [];
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    var charactersLength = characters.length;
+    for (var i = 0; i < 32; i++) {
+        result.push(characters.charAt(Math.floor(Math.random() * charactersLength)));
+    }
+    return result.join('');
+});
+const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+    }
+    // id,nickname,password,email,score,isAdmin,isVerified
+    const nickname = req.body.nickname;
+    const password = req.body.password;
+    const email = req.body.email;
+    const hashedPassword = yield createHashedPassword(password);
+    // await check('nickname')
+    const isExistingUser = yield userRepository.findOne({
+        attributes: ['nickname', 'email'],
+        where: {
+            [sequelize_1.Op.or]: [{ nickname: nickname }, { email: email }]
+        },
+        raw: true
     });
-}); };
-var checkPassword = function (password, hashedPassword) { return __awaiter(void 0, void 0, void 0, function () {
-    var isPasswordCorrect;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0: return [4 /*yield*/, bcrypt_1.compare(password, hashedPassword)]; // hash.toString for type checking hack
-            case 1:
-                isPasswordCorrect = _a.sent() // hash.toString for type checking hack
-                ;
-                return [2 /*return*/, isPasswordCorrect];
+    if (isExistingUser !== null) {
+        let msg;
+        if (nickname === isExistingUser.nickname) {
+            msg = "The nickname already exist.";
         }
-    });
-}); };
-var signUp = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, nickname, password, email, hashedPassword, isExistingUser, msg, user, err_1;
-    var _a;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                errors = express_validator_1.validationResult(req);
-                if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
-                }
-                nickname = req.body.nickname;
-                password = req.body.password;
-                email = req.body.email;
-                return [4 /*yield*/, createHashedPassword(password)
-                    // await check('nickname')
-                ];
-            case 1:
-                hashedPassword = _b.sent();
-                return [4 /*yield*/, User.findOne({
-                        where: (_a = {},
-                            _a[sequelize_1.Op.or] = [{ nickname: nickname }, { email: email }],
-                            _a),
-                        raw: true
-                    })];
-            case 2:
-                isExistingUser = _b.sent();
-                if (isExistingUser !== null) {
-                    msg = void 0;
-                    if (nickname === isExistingUser.nickname) {
-                        msg = "The nickname already exist.";
-                    }
-                    else {
-                        msg = "The email already exist.";
-                    }
-                    return [2 /*return*/, res.status(409).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: msg }).send()];
-                }
-                _b.label = 3;
-            case 3:
-                _b.trys.push([3, 5, , 6]);
-                return [4 /*yield*/, User.create({
-                        nickname: nickname,
-                        password: hashedPassword,
-                        email: email
-                    })];
-            case 4:
-                user = _b.sent();
-                if (user) {
-                    res.json({ result: true });
-                }
-                return [3 /*break*/, 6];
-            case 5:
-                err_1 = _b.sent();
-                console.log(err_1);
-                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 6: return [2 /*return*/];
+        else {
+            msg = "The email already exist.";
         }
-    });
-}); };
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: msg }).send();
+    }
+    try {
+        const user = yield userRepository.create({
+            nickname: nickname,
+            password: hashedPassword,
+            email: email,
+            score: 0,
+            isAdmin: false
+        });
+        if (user) {
+            emailVerifiedRepository.create({
+                userId: user.id,
+                token: yield createToken(),
+                isVerified: false
+            });
+            res.json({ result: true });
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+    }
+});
 exports.signUp = signUp;
-var signIn = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, _a, email, password, user, err_2, result, token;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                errors = express_validator_1.validationResult(req);
-                if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
-                }
-                _a = req.body, email = _a.email, password = _a.password;
-                _b.label = 1;
-            case 1:
-                _b.trys.push([1, 3, , 4]);
-                return [4 /*yield*/, User.findOne({ where: { email: email }, raw: true })];
-            case 2:
-                user = _b.sent();
-                return [3 /*break*/, 4];
-            case 3:
-                err_2 = _b.sent();
-                console.log(err_2);
-                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 4:
-                if (!(user === null)) return [3 /*break*/, 5];
-                return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.NotExist)).send()];
-            case 5: return [4 /*yield*/, checkPassword(password, user.password)]; // sign in result
-            case 6:
-                result = _b.sent() // sign in result
-                ;
-                if (result) { // password correct
-                    token = jwt.sign({
-                        id: user.id,
-                        email: user.email,
-                        name: user.nickname,
-                        isAdmin: user.isAdmin
-                    }, req.app.get('jwt-secret'), // secret
-                    {
-                        expiresIn: config_1.default.jwt.expiresIn
-                    });
-                    return [2 /*return*/, res.json({ token: token }).send()];
-                }
-                else { // password incorrect
-                    return [2 /*return*/, res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.LoginFailed)).send()];
-                }
-                _b.label = 7;
-            case 7: return [2 /*return*/];
+const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+    }
+    const { email, password } = req.body;
+    let user;
+    try {
+        user = yield userRepository.findOne({
+            where: { email: email },
+            raw: true,
+            attributes: ['id', 'password', 'isAdmin', 'nickname'],
+            include: [{
+                    model: emailVerifiedRepository,
+                    attributes: ['isVerified']
+                }]
+        });
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+    }
+    if (user === null) { // user not exist
+        return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.NotExist)).send();
+    }
+    else { // user exist
+        const result = yield checkPassword(password, user.password); // sign in result
+        if (result) { // password correct
+            try {
+                console.log("controller user ", user);
+                // make token
+                const token = jwt.sign({
+                    id: user.id,
+                    nickname: user.nickname,
+                    isAdmin: user.isAdmin,
+                    emailVerified: user['emailVerified.isVerified'],
+                }, req.app.get('jwt-secret'), // secret
+                {
+                    expiresIn: config_1.default.jwt.expiresIn
+                });
+                return res.json({ token: "Bearer " + token }).send();
+            }
+            catch (err) {
+                return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError));
+            }
         }
-    });
-}); };
+        else { // password incorrect
+            return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.LoginFailed)).send();
+        }
+    }
+});
 exports.signIn = signIn;
-var getUsers = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var users, err_3;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                _a.trys.push([0, 2, , 3]);
-                return [4 /*yield*/, User.findAll({
-                        attributes: ['id', 'nickname', 'score'],
-                        raw: true
-                    })];
-            case 1:
-                users = _a.sent();
-                res.json(users);
-                return [3 /*break*/, 3];
-            case 2:
-                err_3 = _a.sent();
-                console.log(err_3);
-                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 3: return [2 /*return*/];
-        }
-    });
-}); };
+const getUsers = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    try {
+        const users = yield userRepository.findAll({
+            attributes: ['id', 'nickname'],
+            include: [{
+                    model: teamRepository,
+                    attributes: ['id', 'teamName', 'leader']
+                }],
+            raw: true
+        });
+        res.json(users);
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+    }
+});
 exports.getUsers = getUsers;
-var getUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, id, user, err_4;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                errors = express_validator_1.validationResult(req);
-                if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
-                }
-                id = req.query.id;
-                id = +id;
-                _a.label = 1;
-            case 1:
-                _a.trys.push([1, 6, , 7]);
-                return [4 /*yield*/, User.findOne({ where: { id: id }, raw: true })];
-            case 2:
-                if (!((_a.sent()) !== null)) return [3 /*break*/, 4];
-                return [4 /*yield*/, User.findOne({
-                        where: {
-                            id: id
-                        },
-                        attributes: ['id', 'nickname', 'email', 'score', 'isAdmin'],
-                        include: [{
-                                model: Solved,
-                                as: "solved"
-                            }]
-                    })];
-            case 3:
-                user = _a.sent();
-                return [2 /*return*/, res.json(user)];
-            case 4: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user doesn't exist" })];
-            case 5: return [3 /*break*/, 7];
-            case 6:
-                err_4 = _a.sent();
-                console.log(err_4);
-                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 7: return [2 /*return*/];
+const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+    }
+    let { id } = req.query;
+    try {
+        const user = yield userRepository.findOne({
+            where: {
+                id: id
+            },
+            attributes: ['id', 'nickname', 'email', 'isAdmin'],
+            include: [{
+                    model: solvedRepository
+                }, {
+                    model: teamRepository
+                }]
+        });
+        if (user !== null) {
+            return res.json(user);
         }
-    });
-}); };
+        else {
+            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user doesn't exist" });
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+    }
+});
 exports.getUser = getUser;
-var updateUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, _a, id, nickname, email, isAdmin, score, isUserExist, err_5, err_6;
-    return __generator(this, function (_b) {
-        switch (_b.label) {
-            case 0:
-                if (!req['decoded'].isAdmin) {
-                    return [2 /*return*/, res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send()];
-                }
-                errors = express_validator_1.validationResult(req);
-                if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
-                }
-                _a = req.body, id = _a.id, nickname = _a.nickname, email = _a.email, isAdmin = _a.isAdmin, score = _a.score;
-                _b.label = 1;
-            case 1:
-                _b.trys.push([1, 9, , 10]);
-                return [4 /*yield*/, User.findOne({
-                        where: {
-                            id: id
-                        },
-                        attributes: ['id'],
-                        raw: true
-                    })];
-            case 2:
-                isUserExist = _b.sent();
-                if (!(isUserExist !== null)) return [3 /*break*/, 7];
-                _b.label = 3;
-            case 3:
-                _b.trys.push([3, 5, , 6]);
+const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req['decoded'].isAdmin) {
+        return res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
+    }
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+    }
+    const { id, nickname, email, isAdmin } = req.body;
+    try {
+        const isUserExist = yield userRepository.findOne({
+            where: {
+                id
+            },
+            attributes: ['id'],
+            raw: true
+        });
+        if (isUserExist !== null) {
+            try {
                 // update user
-                return [4 /*yield*/, User.update({
-                        nickname: nickname,
-                        email: email,
-                        isAdmin: isAdmin,
-                        score: score
-                    }, {
-                        where: {
-                            id: id
-                        }
-                    })];
-            case 4:
-                // update user
-                _b.sent();
+                yield userRepository.update({
+                    nickname, email, isAdmin
+                }, {
+                    where: {
+                        id
+                    }
+                });
                 res.json({ result: true });
-                return [3 /*break*/, 6];
-            case 5:
-                err_5 = _b.sent();
-                console.log(err_5);
-                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 6: return [3 /*break*/, 8];
-            case 7: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send()];
-            case 8: return [3 /*break*/, 10];
-            case 9:
-                err_6 = _b.sent();
-                console.log(err_6);
-                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 10: return [2 /*return*/];
+            }
+            catch (err) {
+                console.log(err);
+                return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+            }
         }
-    });
-}); };
+        else {
+            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send();
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+    }
+});
 exports.updateUser = updateUser;
-var deleteUser = function (req, res) { return __awaiter(void 0, void 0, void 0, function () {
-    var errors, id, err_7;
-    return __generator(this, function (_a) {
-        switch (_a.label) {
-            case 0:
-                if (!req['decoded'].isAdmin) {
-                    return [2 /*return*/, res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send()];
-                }
-                errors = express_validator_1.validationResult(req);
-                if (!errors.isEmpty()) {
-                    return [2 /*return*/, res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() })];
-                }
-                id = req.body.id;
-                return [4 /*yield*/, User.findOne({ where: { id: id }, raw: true, attributes: ['id'] })];
-            case 1:
-                if (!((_a.sent()) !== null)) return [3 /*break*/, 6];
-                _a.label = 2;
-            case 2:
-                _a.trys.push([2, 4, , 5]);
-                return [4 /*yield*/, User.destroy({ where: { id: id } })];
-            case 3:
-                _a.sent();
-                return [2 /*return*/, res.json({ result: true })];
-            case 4:
-                err_7 = _a.sent();
-                console.log(err_7);
-                return [2 /*return*/, res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send()];
-            case 5: return [3 /*break*/, 7];
-            case 6: return [2 /*return*/, res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send()];
-            case 7: return [2 /*return*/];
+const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    if (!req['decoded'].isAdmin) {
+        return res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
+    }
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+    }
+    const { id } = req.body;
+    if ((yield userRepository.findOne({ where: { id }, raw: true, attributes: ['id'] })) !== null) {
+        // user exist
+        try {
+            yield userRepository.destroy({ where: { id } });
+            return res.json({ result: true });
         }
-    });
-}); };
+        catch (err) {
+            console.log(err);
+            return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+        }
+    }
+    else {
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send();
+    }
+});
 exports.deleteUser = deleteUser;
 //# sourceMappingURL=userController.js.map

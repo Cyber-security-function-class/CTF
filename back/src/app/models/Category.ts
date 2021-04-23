@@ -1,40 +1,18 @@
-'use strict';
+import { Table, Column, Model, DataType, HasMany, AutoIncrement, PrimaryKey, AllowNull, Unique } from "sequelize-typescript"
+import { Challenge } from "./Challenge"
 
-import { BuildOptions, DataTypes, Model, Sequelize } from "sequelize";
+@Table
+export class Category extends Model<Category> {
+    @PrimaryKey
+    @AutoIncrement
+    @Column
+    id : number
 
-
-export interface CategoryAttributes {
-    id?: number
+    @AllowNull
+    @Unique
+    @Column
     category : string
-    createdAt?: Date
-    updatedAt?: Date
-}
-export interface CategoryModel extends Model<CategoryAttributes>, CategoryAttributes {}
-export class Category extends Model<CategoryModel, CategoryAttributes> {
-    
-}
 
-export type CategoryStatic = typeof Model & {
-    new (values?: object, options?: BuildOptions): CategoryModel
-};
-
-// Category.hasOne(Project, {     // model category 와 hasMany
-//     sourceKey: "id",
-//     foreignKey: "category",
-//     as: "projects", // this determines the name in `associations`!
-// });
-
-export function CategoryFactory (sequelize: Sequelize): CategoryStatic {
-    return <CategoryStatic>sequelize.define("Category", {
-        id : {
-            type : DataTypes.INTEGER,
-            autoIncrement: true,
-            primaryKey: true,
-            unique : true
-        },
-        category : {
-            type : DataTypes.STRING,
-            primaryKey: true,
-        }
-    });
+    @HasMany(() => Challenge)
+    challenges: Challenge[]
 }
