@@ -138,6 +138,10 @@ export const joinTeam = async(req: Request, res: Response) => {
     const userId = req['decoded'].id
 
     try {
+        const user = await userRepository.findOne({where : {id : userId},attributes:['teamId'],raw : true})
+        if (user.teamId !== null) {
+            return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist), detail:"already joined a team"})
+        }
         const team = await teamRepository.findOne({
             where : { 
                 teamName
@@ -149,6 +153,7 @@ export const joinTeam = async(req: Request, res: Response) => {
             }]
         })
         if ( team !== null) {
+            // max population of team == 3
             if ( team.users.length >= 3 ) {
                 return res.status(400).json({error:getErrorMessage(ErrorType.AccessDenied), detail:"team is full"})
             }

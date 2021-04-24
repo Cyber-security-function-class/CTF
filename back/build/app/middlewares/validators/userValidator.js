@@ -4,6 +4,11 @@ exports.verifyEmailValidator = exports.deleteUserValidator = exports.updateUserV
 const express_validator_1 = require("express-validator");
 const signUpValidator = () => {
     return [
+        express_validator_1.body("id")
+            .notEmpty()
+            .withMessage('id is required')
+            .isString()
+            .withMessage('id is must be string'),
         express_validator_1.body('nickname')
             .notEmpty()
             .withMessage('nickname is required')

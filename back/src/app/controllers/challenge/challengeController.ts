@@ -212,6 +212,9 @@ export const authFlag = async (req: Request, res: Response) => {
             attributes : ['id']
         }]
     })
+    if ( user === null) {
+        return res.status(500).json({error:getErrorMessage(ErrorType.UnexpectedError)})
+    }
     
     const teamId = user['team.id']
     const challenge = await challengeRepository.findOne({where : {flag},raw : true})

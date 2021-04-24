@@ -146,6 +146,10 @@ const joinTeam = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { teamName, teamPassword } = req.body;
     const userId = req['decoded'].id;
     try {
+        const user = yield userRepository.findOne({ where: { id: userId }, attributes: ['teamId'], raw: true });
+        if (user.teamId !== null) {
+            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "already joined a team" });
+        }
         const team = yield teamRepository.findOne({
             where: {
                 teamName
@@ -157,6 +161,7 @@ const joinTeam = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 }]
         });
         if (team !== null) {
+            // max population of team == 3
             if (team.users.length >= 3) {
                 return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AccessDenied), detail: "team is full" });
             }

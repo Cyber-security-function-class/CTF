@@ -250,11 +250,11 @@ const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.getUser = getUser;
 const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req['decoded'].isAdmin) {
-        return res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
+        return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
     }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
     }
     const { id, nickname, email, isAdmin } = req.body;
     try {
@@ -294,11 +294,11 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 exports.updateUser = updateUser;
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     if (!req['decoded'].isAdmin) {
-        return res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
+        return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
     }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
     }
     const { id } = req.body;
     if ((yield userRepository.findOne({ where: { id }, raw: true, attributes: ['id'] })) !== null) {
@@ -320,7 +320,7 @@ exports.deleteUser = deleteUser;
 const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
     }
     const { token } = req.body;
     const userId = req['decoded'].id;
