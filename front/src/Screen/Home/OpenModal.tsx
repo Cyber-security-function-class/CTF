@@ -31,7 +31,7 @@ class HomePage extends Component {
             <Modal>
                 <BaseStyle classs="Login" onClose={this.handleCloseModal} >
                     <CUI>
-
+                        
                     </CUI>
                 </BaseStyle>
             </Modal>
