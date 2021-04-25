@@ -40,7 +40,7 @@ export const getNotices = async (req :Request, res :Response) => {
 
     }
 }
-export const createNotice = async (req :Request, res :Response) => {
+export const addNotice = async (req :Request, res :Response) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {

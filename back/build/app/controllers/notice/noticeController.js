@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteNotice = exports.updateNotice = exports.createNotice = exports.getNotices = exports.getNotice = void 0;
+exports.deleteNotice = exports.updateNotice = exports.addNotice = exports.getNotices = exports.getNotice = void 0;
 const express_validator_1 = require("express-validator");
 const error_1 = require("../../error");
 const index_1 = __importDefault(require("../../models/index"));
@@ -50,7 +50,7 @@ const getNotices = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
     }
 });
 exports.getNotices = getNotices;
-const createNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const addNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ error: error_1.getErrorMessage(error_1.ErrorType.ValidationError), detail: errors.array() });
@@ -65,7 +65,7 @@ const createNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         return res.status(500).json({ error: error_1.getErrorMessage(error_1.ErrorType.UnexpectedError) });
     }
 });
-exports.createNotice = createNotice;
+exports.addNotice = addNotice;
 const updateNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {

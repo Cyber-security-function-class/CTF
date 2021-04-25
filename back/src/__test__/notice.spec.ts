@@ -27,96 +27,96 @@ const addDescribeFormat = (descripbe:string) => {
 
 
 describe(addDescribeFormat("user_test"), function () {
-  let service
-  let token:string
-  let decoded
-  let notices
-  before(done => {
+    let service
+    let token:string
+    let decoded
+    let notices
+    before(done => {
     service = preStart(done)
-  })
-  it("register",(done)=>{
+    })
+    it("register",(done)=>{
     try{
-        request.post(BASEURI+"/api/user/signUp",{
-        body : userInfo,
-        json: true
+    request.post(BASEURI+"/api/user/signUp",{
+    body : userInfo,
+    json: true
     },(err, res, body)=>{
-        console.log(body)
-        expect(body.result).to.equal(true)
-        done()
+    console.log(body)
+    expect(body.result).to.equal(true)
+    done()
     })
     } catch (err) {
-      done()
+    done()
     }
-  })
-  it("verify emails", (done)=>{
+    })
+    it("verify emails", (done)=>{
     emailVerifiedRepository.findAll({raw: true,attributes:['id']})
     .then(e=>{
-      emailVerifiedRepository.update({isVerified:true},{where:{[Op.or]: e}})
-      done()
+    emailVerifiedRepository.update({isVerified:true},{where:{[Op.or]: e}})
+    done()
     }).catch(err=>{
-      done()
+    done()
     })
-  })
-  it("login",(done)=>{
-    try {
-      request.post(BASEURI+"/api/user/signIn",{
-        body : userInfo,
-        json : true
-      },(err, res, body) => {
-        token = body.token
-        decoded = jwt_decode(token.split(' ')[1])
-        assert(token)
-        done()
-      })
-    } catch (err) {
-      done()
-    }
-  })
-  it("Make user to Admin", (done)=>{
-    userRepository.update({isAdmin:true},{where:{id:decoded['id']}})
-    .then(e=>{
-      assert(e[0] == [ 1 ])
-      done()
-    }).catch(err=>{
-      done()
     })
-  })
-  it("login",(done)=>{
+    it("login",(done)=>{
     try {
-      request.post(BASEURI+"/api/user/signIn",{
-        body : userInfo,
-        json : true
-      },(err, res, body) => {
-        token = body.token
-        decoded = jwt_decode(token.split(' ')[1])
-        assert(token)
-        done()
-      })
+    request.post(BASEURI+"/api/user/signIn",{
+    body : userInfo,
+    json : true
+    },(err, res, body) => {
+    token = body.token
+    decoded = jwt_decode(token.split(' ')[1])
+    assert(token)
+    done()
+    })
     } catch (err) {
-      done()
+    done()
     }
-  })
-  it("create notice (need isAdmin)",(done) => {
+    })
+    it("Make user to Admin", (done)=>{
+        userRepository.update({isAdmin:true},{where:{id:decoded['id']}})
+        .then(e=>{
+            assert(e[0] == [ 1 ])
+            done()
+        }).catch(err=>{
+            done()
+        })
+    })
+    it("login",(done)=>{
     try {
-      request.post(BASEURI+"/api/notice/createNotice",{
-        headers:{
-          Authorization : token
-        },
-        body : {
-            content : {
-                title : "hello",
-                content : "hihihi"
-            }
-        },
-        json : true
-      },(err, res, body) => {
-        assert(body.result)
-        done()
-      })
+    request.post(BASEURI+"/api/user/signIn",{
+    body : userInfo,
+    json : true
+    },(err, res, body) => {
+    token = body.token
+    decoded = jwt_decode(token.split(' ')[1])
+    assert(token)
+    done()
+    })
     } catch (err) {
-      done()
+    done()
     }
-  })
+    })
+    it("add notice (need isAdmin)",(done) => {
+    try {
+    request.post(BASEURI+"/api/notice/addNotice",{
+    headers:{
+        Authorization : token
+    },
+    body : {
+        content : {
+            title : "hello",
+            content : "hihihi"
+        }
+    },
+    json : true
+    },(err, res, body) => {
+    assert(body.result)
+    done()
+    })
+    } catch (err) {
+    done()
+    }
+    })
     it("get notices", (done) => {
         try {
             request.get(BASEURI+"/api/notice/getNotices",{
