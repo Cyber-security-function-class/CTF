@@ -1,6 +1,7 @@
 
 import express, { Request, Response, NextFunction } from "express"
 import authMiddleware from "../../middlewares/auth"
+import adminMiddleware from "../../middlewares/admin"
 import { getChallenges, getChallenge, addChallenge, updateChallenge,deleteChallenge,authFlag} from './challengeController'
 
 import { 
@@ -22,9 +23,9 @@ routes.get('/getChallenge',getChallengeValidator(),getChallenge)
 routes.post('/authFlag',authFlagValidator(),authFlag)
 
 // admin
-routes.post('/addChallenge',addChallengeValidator() ,addChallenge)
-routes.post('/updateChallenge',updateChallengeValidator() ,updateChallenge)
-routes.post('/deleteChallenge',deleteChallengeValidator() ,deleteChallenge)
+routes.post('/addChallenge',adminMiddleware,addChallengeValidator() ,addChallenge)
+routes.post('/updateChallenge',adminMiddleware,updateChallengeValidator() ,updateChallenge)
+routes.post('/deleteChallenge',adminMiddleware,deleteChallengeValidator() ,deleteChallenge)
 
 
 export default routes

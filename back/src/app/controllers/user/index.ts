@@ -4,6 +4,7 @@ import {createTeamValidator, joinTeamValidator, getTeamValidator} from "../../mi
 import { signUp, signIn, getUser,getUsers, deleteUser, updateUser, verifyEmail, resendEmail} from './userController'
 import { createTeam, getTeam, getTeams, joinTeam } from './teamController'
 import authMiddleware from '../../middlewares/auth'
+import adminMiddleware from '../../middlewares/admin'
 
 const routes = express.Router()
 
@@ -38,10 +39,10 @@ routes.post("/joinTeam",joinTeamValidator(),joinTeam)
 
 
 // only admin
-routes.post("/updateUser",authMiddleware)
+routes.post("/updateUser",authMiddleware,adminMiddleware)
 routes.post("/updateUser",updateUserValidator(),updateUser)
 
-routes.post("/deleteUser",authMiddleware)
+routes.post("/deleteUser",authMiddleware,adminMiddleware)
 routes.post("/deleteUser",deleteUserValidator(),deleteUser)
 
 

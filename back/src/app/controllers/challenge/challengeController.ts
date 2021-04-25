@@ -103,11 +103,6 @@ export const getChallenge = async (req:Request, res:Response) => {
 }
 
 export const addChallenge = async (req:Request, res:Response) => {
-    
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-        // he is not a admin
-    }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
@@ -139,10 +134,6 @@ export const addChallenge = async (req:Request, res:Response) => {
 }
 
 export const updateChallenge = async (req:Request, res:Response) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-        // he is not a admin
-    }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
@@ -175,10 +166,6 @@ export const updateChallenge = async (req:Request, res:Response) => {
 }
 
 export const deleteChallenge = async (req:Request, res:Response) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-        // he is not a admin
-    }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })

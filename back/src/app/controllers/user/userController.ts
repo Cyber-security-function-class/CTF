@@ -234,82 +234,6 @@ export const getUser = async (req, res) => {
 
 }
 
-export const updateUser = async (req, res) => { 
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-    }
-
-    const errors = validationResult(req)
-
-    if (!errors.isEmpty()) {
-        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
-    }
-    
-    const { id, nickname, email, isAdmin } = req.body
-    try {
-        const isUserExist = await userRepository.findOne({
-            where : {
-                id
-            }, 
-            attributes : ['id'],
-            raw : true
-        })
-        
-        if ( isUserExist !== null ){
-            try {
-                // update user
-                await userRepository.update(
-                    {
-                        nickname,email,isAdmin
-                    },
-                    { 
-                        where :{
-                            id
-                        }
-                    }
-                )
-                res.json({result : true})
-            } catch ( err ) {
-                console.log(err)
-                return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
-            }
-        } else {
-            return res.status(400).json({error : getErrorMessage(ErrorType.NotExist),detail:"user not exist"}).send()
-        }
-    } catch (err) {
-        console.log(err)
-        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
-    }
-    
-}
-
-export const deleteUser = async (req, res) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-    }
-
-    const errors = validationResult(req)
-
-    if (!errors.isEmpty()) {
-        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
-    }
-
-    const { id } = req.body
-
-    if ( await userRepository.findOne({where : {id},raw : true, attributes:['id']}) !== null ){
-        // user exist
-        try {
-            await userRepository.destroy({where : {id}})
-            return res.json({result : true})
-        } catch (err) {
-            console.log(err)
-            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send() 
-        }
-    } else {
-        return res.status(400).json({error : getErrorMessage(ErrorType.NotExist),detail:"user not exist"}).send()
-    }
-}
-
 export const verifyEmail = async (req, res) => {
     const errors = validationResult(req)
 
@@ -393,5 +317,75 @@ export const resendEmail = async (req,res) => {
         res.json({result : true})
     } else {
         res.json({error : getErrorMessage(ErrorType.AccessDenied),detail:"Only one mail can be sent per 30 seconds."})
+    }
+}
+
+export const updateUser = async (req, res) => { 
+    
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+    }
+    
+    const { id, nickname, email, isAdmin } = req.body
+    try {
+        const isUserExist = await userRepository.findOne({
+            where : {
+                id
+            }, 
+            attributes : ['id'],
+            raw : true
+        })
+        
+        if ( isUserExist !== null ){
+            try {
+                // update user
+                await userRepository.update(
+                    {
+                        nickname,email,isAdmin
+                    },
+                    { 
+                        where :{
+                            id
+                        }
+                    }
+                )
+                res.json({result : true})
+            } catch ( err ) {
+                console.log(err)
+                return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+            }
+        } else {
+            return res.status(400).json({error : getErrorMessage(ErrorType.NotExist),detail:"user not exist"}).send()
+        }
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+    }
+    
+}
+
+export const deleteUser = async (req, res) => {
+    
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+    }
+
+    const { id } = req.body
+
+    if ( await userRepository.findOne({where : {id},raw : true, attributes:['id']}) !== null ){
+        // user exist
+        try {
+            await userRepository.destroy({where : {id}})
+            return res.json({result : true})
+        } catch (err) {
+            console.log(err)
+            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send() 
+        }
+    } else {
+        return res.status(400).json({error : getErrorMessage(ErrorType.NotExist),detail:"user not exist"}).send()
     }
 }

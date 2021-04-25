@@ -24,9 +24,6 @@ export const getCategories = async (req: Request, res: Response) => {
 }
 
 export const addCategory = async (req: Request, res: Response) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-    }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
@@ -60,10 +57,6 @@ export const addCategory = async (req: Request, res: Response) => {
 }
 
 export const updateCategory = async (req:Request, res:Response) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-        // he is not a admin
-    }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
@@ -83,10 +76,6 @@ export const updateCategory = async (req:Request, res:Response) => {
 }
 
 export const deleteCategory = async (req:Request, res:Response) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-        // he is not a admin
-    }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
