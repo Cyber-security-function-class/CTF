@@ -49,15 +49,53 @@ export const createNotice = async (req :Request, res :Response) => {
     
     const { content } = req.body
     try {
+        
         await noticeRepository.create({content})
         return res.json({result : true})
     } catch (err) {
+        console.log(err)
         return res.status(500).json({error:getErrorMessage(ErrorType.UnexpectedError)})
     }
 }
 export const updateNotice = async (req :Request, res :Response) => {
-    
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+    }
+
+    const { id, content } = req.body
+
+    try {
+        if ( await noticeRepository.findOne({where : {id }}) !== null) {
+            await noticeRepository.update({content},{where : {id}})
+            return res.json({result : true})
+        } else {
+            return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),detail:"the notice that match with id is not exist"})
+        }
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+    }
 }
 export const deleteNotice = async (req :Request, res :Response) => {
+    const errors = validationResult(req)
     
+    if (!errors.isEmpty()) {
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+    }
+
+    const { id } = req.body
+
+    try {
+        if ( await noticeRepository.findOne({where : {id }}) !== null) {
+            await noticeRepository.destroy({where : {id}})
+            return res.json({result : true})
+        } else {
+            return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),detail:"the notice that match with id is not exist"})
+        }
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+    }
 }

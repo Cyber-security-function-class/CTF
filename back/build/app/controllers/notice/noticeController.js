@@ -61,14 +61,51 @@ const createNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* (
         return res.json({ result: true });
     }
     catch (err) {
+        console.log(err);
         return res.status(500).json({ error: error_1.getErrorMessage(error_1.ErrorType.UnexpectedError) });
     }
 });
 exports.createNotice = createNotice;
 const updateNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: error_1.getErrorMessage(error_1.ErrorType.ValidationError), detail: errors.array() });
+    }
+    const { id, content } = req.body;
+    try {
+        if ((yield noticeRepository.findOne({ where: { id } })) !== null) {
+            yield noticeRepository.update({ content }, { where: { id } });
+            return res.json({ result: true });
+        }
+        else {
+            return res.status(400).json({ error: error_1.getErrorMessage(error_1.ErrorType.NotExist), detail: "the notice that match with id is not exist" });
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json(error_1.getErrorMessage(error_1.ErrorType.UnexpectedError)).send();
+    }
 });
 exports.updateNotice = updateNotice;
 const deleteNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: error_1.getErrorMessage(error_1.ErrorType.ValidationError), detail: errors.array() });
+    }
+    const { id } = req.body;
+    try {
+        if ((yield noticeRepository.findOne({ where: { id } })) !== null) {
+            yield noticeRepository.destroy({ where: { id } });
+            return res.json({ result: true });
+        }
+        else {
+            return res.status(400).json({ error: error_1.getErrorMessage(error_1.ErrorType.NotExist), detail: "the notice that match with id is not exist" });
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json(error_1.getErrorMessage(error_1.ErrorType.UnexpectedError)).send();
+    }
 });
 exports.deleteNotice = deleteNotice;
 //# sourceMappingURL=noticeController.js.map
