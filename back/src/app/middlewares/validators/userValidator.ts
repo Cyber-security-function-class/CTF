@@ -4,11 +4,6 @@ import { body, query } from 'express-validator';
 
 export const signUpValidator = () => {
     return [
-        body("id")
-            .notEmpty()
-            .withMessage('id is required')
-            .isString()
-            .withMessage('id is must be string'),
         body('nickname')
             .notEmpty()
             .withMessage('nickname is required')

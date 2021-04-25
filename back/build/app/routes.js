@@ -7,9 +7,11 @@ const express_1 = __importDefault(require("express"));
 const user_1 = __importDefault(require("./controllers/user"));
 const challenge_1 = __importDefault(require("./controllers/challenge"));
 const category_1 = __importDefault(require("./controllers/category"));
+const notice_1 = __importDefault(require("./controllers/notice"));
 const router = express_1.default.Router();
 router.use('/api/user', user_1.default);
 router.use('/api/challenge', challenge_1.default);
 router.use('/api/category', category_1.default);
+router.use('/api/notice', notice_1.default);
 exports.default = router;
 //# sourceMappingURL=routes.js.map

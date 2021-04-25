@@ -1,4 +1,3 @@
-
 import express from "express"
 import { signInValidator, signUpValidator, getUserValidator, updateUserValidator, deleteUserValidator, verifyEmailValidator} from "../../middlewares/validators/userValidator"
 import {createTeamValidator, joinTeamValidator, getTeamValidator} from "../../middlewares/validators/teamValidator"

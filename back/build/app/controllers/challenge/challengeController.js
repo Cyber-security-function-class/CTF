@@ -223,6 +223,9 @@ const authFlag = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
                 attributes: ['id']
             }]
     });
+    if (user === null) {
+        return res.status(500).json({ error: index_2.getErrorMessage(index_2.ErrorType.UnexpectedError) });
+    }
     const teamId = user['team.id'];
     const challenge = yield challengeRepository.findOne({ where: { flag }, raw: true });
     if (challenge !== null && teamId !== null) {

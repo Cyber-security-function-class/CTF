@@ -39,7 +39,8 @@
     "usertest": "yarn mocha ./src/__test__/user.spec.ts -r ts-node/register",
     "teamtest": "yarn mocha ./src/__test__/team.spec.ts -r ts-node/register",
     "categorytest" : "yarn mocha ./src/__test__/category.spec.ts -r ts-node/register",
-    "challengetest" : "yarn mocha ./src/__test__/challenge.spec.ts -r ts-node/register"
+    "challengetest" : "yarn mocha ./src/__test__/challenge.spec.ts -r ts-node/register",
+    "noticetest" : "yarn mocha ./src/__test__/notice.spec.ts -r ts-node/register"
   },
   "devDependencies": {
     "@types/chai": "^4.2.16",
