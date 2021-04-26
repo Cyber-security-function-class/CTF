@@ -27,7 +27,7 @@ services:
             context: ./
             dockerfile: ./Dockerfile
         ports:
-            - "80:7000"
+            - "8080:7000"
         depends_on:
             - psql
         restart: "unless-stopped"
