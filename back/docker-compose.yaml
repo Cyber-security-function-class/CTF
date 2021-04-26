@@ -1,11 +1,11 @@
 version: "3"
 
 services:
-    database:
+    psql:
         image: postgres:latest
-        container_name: postgres
+        container_name: psql
         volumes:
-            - /usr/local/var/postgres:/data/db
+            - /usr/local/var/psql:/data/db
         environment:
             POSTGRES_USER: "${dbUser}"
             POSTGRES_DB: "${dbDatabaseName}"
@@ -27,6 +27,6 @@ services:
             context: ./
             dockerfile: ./Dockerfile
         depends_on:
-            - database
+            - psql
             - proxy
         restart: "unless-stopped"
