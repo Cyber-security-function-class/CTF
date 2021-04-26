@@ -12,20 +12,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteNotice = exports.updateNotice = exports.addNotice = exports.getNotices = exports.getNotice = void 0;
+exports.deleteNotice = exports.updateNotice = exports.addNotice = exports.getNotices = exports.getCurrentNotice = void 0;
 const express_validator_1 = require("express-validator");
 const error_1 = require("../../error");
 const index_1 = __importDefault(require("../../models/index"));
 const Notice_1 = require("../../models/Notice");
 const noticeRepository = index_1.default.sequelize.getRepository(Notice_1.Notice);
-const getNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const errors = express_validator_1.validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ error: error_1.getErrorMessage(error_1.ErrorType.ValidationError), detail: errors.array() });
-    }
-    const { id } = req.query;
+const getCurrentNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const notice = yield noticeRepository.findOne({ where: { id }, raw: true });
+        const notice = yield noticeRepository.findOne({
+            order: [['createdAt', 'DESC']],
+            raw: true
+        });
         if (notice) {
             return res.json(notice);
         }
@@ -35,18 +33,15 @@ const getNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log(err);
     }
 });
-exports.getNotice = getNotice;
+exports.getCurrentNotice = getCurrentNotice;
 const getNotices = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const errors = express_validator_1.validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ error: error_1.getErrorMessage(error_1.ErrorType.ValidationError), detail: errors.array() });
-    }
     try {
         const notice = yield noticeRepository.findAll({ raw: true });
         return res.json(notice);
     }
     catch (err) {
         console.log(err);
+        return res.status(500).json({ error: error_1.getErrorMessage(error_1.ErrorType.UnexpectedError) });
     }
 });
 exports.getNotices = getNotices;

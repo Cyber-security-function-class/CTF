@@ -1,16 +1,6 @@
 'use strict'
 import { body, query } from "express-validator"
 
-
-export const getNoticeValidator = () => {
-    return [
-        query('id')
-            .notEmpty()
-            .withMessage('id is required')
-            .isNumeric()
-            .withMessage("id must be a number")
-    ]
-}
 export const addNoticeValidator = () => {
     return [
         body('content')

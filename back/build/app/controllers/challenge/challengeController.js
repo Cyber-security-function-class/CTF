@@ -33,7 +33,7 @@ const getChallenges = (req, res) => __awaiter(void 0, void 0, void 0, function* 
         let challenges;
         if (!category) {
             challenges = yield challengeRepository.findAll({
-                attributes: ['id', 'title', 'score', 'categoryId'],
+                attributes: ['id', 'title', 'score', 'categoryId', 'createdAt', 'updatedAt'],
                 include: [{
                         model: categoryRepository,
                         as: 'category',
@@ -61,7 +61,7 @@ const getChallenges = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     where: {
                         [sequelize_1.Op.or]: f
                     },
-                    attributes: ['id', 'title', 'score', 'categoryId'],
+                    attributes: ['id', 'title', 'score', 'categoryId', 'createdAt', 'updatedAt'],
                     include: [{
                             model: categoryRepository,
                             as: 'category',
@@ -216,31 +216,29 @@ const authFlag = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     const teamId = user['team.id'];
     const challenge = yield challengeRepository.findOne({ where: { flag }, raw: true });
-    if (challenge !== null && teamId !== null) {
-        // flag is correct
-        const solved = yield solvedRepository.findOrCreate({
-            where: {
-                teamId,
-                challengeId: challenge.id
-            },
-            defaults: {
-                userId,
-                score: challenge.score
-            }
-        });
-        if (solved[1]) { // solved
-            yield teamRepository.update({ score: sequelize_1.Sequelize.literal('score + ' + challenge.score) }, { where: { id: teamId } });
-            return res.json({ result: true });
-        }
-        else { // already solved
-            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "already solved" });
-        }
+    if (teamId === null) {
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AccessDenied), detail: "you have to join a team before submit flag." });
     }
-    else {
-        if (teamId === null) {
-            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AccessDenied), detail: "you have to join a team before submit flag." });
+    if (challenge === null) {
+        return res.json({ result: false }); // flag is wrong
+    }
+    // flag is correct
+    const solved = yield solvedRepository.findOrCreate({
+        where: {
+            teamId,
+            challengeId: challenge.id
+        },
+        defaults: {
+            userId,
+            score: challenge.score
         }
-        res.json({ result: false }); // flag is wrong
+    });
+    if (solved[1]) { // solved
+        yield teamRepository.update({ score: sequelize_1.Sequelize.literal('score + ' + challenge.score) }, { where: { id: teamId } });
+        return res.json({ result: true });
+    }
+    else { // already solved
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "already solved" });
     }
 });
 exports.authFlag = authFlag;

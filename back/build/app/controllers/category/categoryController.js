@@ -103,8 +103,6 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
         ((e.category.toLowerCase() === Lcategory)) ? isCategoryOverlap = true : isCategoryOverlap = isCategoryOverlap;
         ((e.id === id)) ? isIdExist = true : isIdExist = isIdExist;
     });
-    console.log("isCategoryOverlap ", isCategoryOverlap);
-    console.log("isIdExist ", isIdExist);
     if (isCategoryOverlap) {
         return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.AlreadyExist), detail: "this category is already exist" }).send();
     }

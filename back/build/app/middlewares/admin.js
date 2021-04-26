@@ -19,9 +19,9 @@ exports.default = (req, res, next) => {
         }
     });
     const onError = (error) => {
-        res.status(500).json({
-            error: index_1.getErrorMessage(index_1.ErrorType.UnexpectedError),
-            detail: error.message
+        res.status(400).json({
+            error: index_1.getErrorMessage(index_1.ErrorType.AccessDenied),
+            detail: "you are not a admin."
         });
     };
     p.then(() => {

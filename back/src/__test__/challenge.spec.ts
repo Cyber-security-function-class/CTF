@@ -129,6 +129,23 @@ describe(addDescribeFormat("category_test"), function () {
             done()
         }
     })
+    it("category - network",(done) => {
+        try {
+            request.post(BASEURI+"/api/category/addCategory",{
+                body : { category : "network"},
+                json : true,
+                headers : { 
+                    Authorization : token
+                }
+            },(err, res, body) => {
+                assert(body.result)
+                done()
+            })
+        } catch (err) {
+            console.log(err)
+            done()
+        }
+    })
     it("add web challenge1",(done) =>{
         try {
             request.post(BASEURI+"/api/challenge/addChallenge",{
@@ -199,6 +216,30 @@ describe(addDescribeFormat("category_test"), function () {
             done()
         }
     })
+    it("add network challenge1",(done) =>{
+        try {
+            request.post(BASEURI+"/api/challenge/addChallenge",{
+                body : {
+                    id : 1,
+                    categoryId : 3,
+                    title :"network",
+                    content : "what is network",
+                    score : 300,
+                    flag : "skillCTF{helloworld2233}"
+                },
+                json : true,
+                headers : { 
+                    Authorization : token
+                }
+            },(err, res, body) => {
+                assert(body.result)
+                done()
+            })
+        } catch (err) {
+            console.log(err)
+            done()
+        }
+    })
     it("get challenges",(done) =>{
         try {
             request.get(BASEURI+"/api/challenge/getchallenges",{
@@ -208,7 +249,8 @@ describe(addDescribeFormat("category_test"), function () {
                 json : true
             },
             (err,res,body)=>{
-                assert(body.length == 3)
+                console.log("get challenges",body)
+                assert(body.length == 4)
                 done()
             })
         } catch (err){
@@ -217,14 +259,32 @@ describe(addDescribeFormat("category_test"), function () {
     })
     it("get challenges category filter",(done) =>{
         try {
-            request.get(BASEURI+"/api/challenge/getchallenges?category=1",{
+            request.get(BASEURI+"/api/challenge/getchallenges?category=asd",{
                 headers : {
                     Authorization : token
                 },
                 json :true
             },
             (err,res,body)=>{
-                assert(body.length == 2)
+                console.log("category filter ",body)
+                assert(body.length == 0)
+                done()
+            })
+        } catch (err){
+            done()
+        }
+    })
+    it("get challenges",(done) =>{
+        try {
+            request.get(BASEURI+"/api/challenge/getChallenge?id=1",{
+                headers : {
+                    Authorization : token
+                },
+                json : true
+            },
+            (err,res,body)=>{
+                console.log("get challenge ",body)
+                assert(body?.id !== null)
                 done()
             })
         } catch (err){

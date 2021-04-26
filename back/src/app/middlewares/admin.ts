@@ -22,9 +22,9 @@ export default (req, res, next) => {
     )
 
     const onError = (error) => {
-        res.status(500).json({
-            error : getErrorMessage(ErrorType.UnexpectedError),
-            detail: error.message
+        res.status(400).json({
+            error : getErrorMessage(ErrorType.AccessDenied),
+            detail: "you are not a admin."
         })
     }
     p.then(()=>{

@@ -1,14 +1,15 @@
 import express from "express"
 import authMiddleware from '../../middlewares/auth'
 import adminMiddleware from '../../middlewares/admin'
-import { addNoticeValidator, deleteNoticeValidator, getNoticeValidator, updateNoticeValidator } from "../../middlewares/validators/noticeValidator"
+import { addNoticeValidator, deleteNoticeValidator, updateNoticeValidator } from "../../middlewares/validators/noticeValidator"
 
-import {addNotice, deleteNotice, getNotice, getNotices, updateNotice} from "./noticeController"
+import {addNotice, deleteNotice, getCurrentNotice, getNotices, updateNotice} from "./noticeController"
 
 const routes = express.Router()
 
 
-routes.get("/getNotice",getNoticeValidator(),getNotice)
+routes.get("/getCurrentNotice",getCurrentNotice)
+
 routes.get("/getNotices",getNotices)
 
 routes.post("/addNotice",authMiddleware,adminMiddleware,addNoticeValidator(),addNotice)

@@ -7,39 +7,30 @@ import { Notice } from "../../models/Notice";
 
 const noticeRepository:Repository<Notice> = db.sequelize.getRepository(Notice)
 
-export const getNotice = async (req :Request, res :Response) => {
-    const errors = validationResult(req)
-
-    if (!errors.isEmpty()) {
-        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
-    }
-    const { id } = req.query
+export const getCurrentNotice = async (req :Request, res :Response) => {
+    
     try {
-        const notice = await noticeRepository.findOne({where:{id},raw : true})
-        if ( notice ) {
-            return res.json(notice)
-        }
-        return res.json({error:getErrorMessage(ErrorType.NotExist), detail:"notice not exist"})
+        const notice = await noticeRepository.findOne({
+            order: [ [ 'createdAt', 'DESC' ]],
+            raw : true
+        })
+        return res.json(notice)
     } catch (err){
         console.log(err)
-
+        return res.json({error:getErrorMessage(ErrorType.UnexpectedError)})
     }
 }
 export const getNotices = async (req :Request, res :Response) => {
-    const errors = validationResult(req)
-
-    if (!errors.isEmpty()) {
-        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
-    }
     
     try {
         const notice = await noticeRepository.findAll({raw : true})
         return res.json(notice)
     } catch (err){
         console.log(err)
-
+        return res.status(500).json({error:getErrorMessage(ErrorType.UnexpectedError)})
     }
 }
+
 export const addNotice = async (req :Request, res :Response) => {
     const errors = validationResult(req)
 
@@ -49,7 +40,6 @@ export const addNotice = async (req :Request, res :Response) => {
     
     const { content } = req.body
     try {
-        
         await noticeRepository.create({content})
         return res.json({result : true})
     } catch (err) {
@@ -88,7 +78,7 @@ export const deleteNotice = async (req :Request, res :Response) => {
     const { id } = req.body
 
     try {
-        if ( await noticeRepository.findOne({where : {id }}) !== null) {
+        if ( await noticeRepository.findOne({where : {id}}) !== null) {
             await noticeRepository.destroy({where : {id}})
             return res.json({result : true})
         } else {

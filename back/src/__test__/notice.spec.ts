@@ -117,6 +117,27 @@ describe(addDescribeFormat("user_test"), function () {
     done()
     }
     })
+    it("add notice (need isAdmin)",(done) => {
+        try {
+        request.post(BASEURI+"/api/notice/addNotice",{
+        headers:{
+            Authorization : token
+        },
+        body : {
+            content : {
+                title : "second",
+                content : "aaaaa"
+            }
+        },
+        json : true
+        },(err, res, body) => {
+        assert(body.result)
+        done()
+        })
+        } catch (err) {
+        done()
+        }
+    })
     it("get notices", (done) => {
         try {
             request.get(BASEURI+"/api/notice/getNotices",{
@@ -126,22 +147,24 @@ describe(addDescribeFormat("user_test"), function () {
             json : true
         },(err, res, body) => {
             notices = body
-            assert(body.length === 1)
+            console.log("Notices ",notices)
+            assert(body.length === 2)
             done()
         })
         } catch (err) {
             done()
         }
     })
-    it("get notice", (done) => {
+    it("get Current Notice", (done) => {
         try {
-            request.get(BASEURI+"/api/notice/getNotice?id="+notices[0].id,{
+            request.get(BASEURI+"/api/notice/getCurrentNotice",{
                 headers:{
                     Authorization : token
                 },
                 json : true
             },(err, res, body) => {
-                assert(body.id === notices[0].id)
+                console.log("Notice ",body)
+                assert(body.id === notices[1].id)
                 done()
             })
         } catch (err) {
@@ -153,7 +176,7 @@ describe(addDescribeFormat("user_test"), function () {
         try {
             request.post(BASEURI+"/api/notice/updateNotice",{
                 body : { 
-                    id : notices[0].id,
+                    id : notices[1].id,
                     content : {
                         title : "updated title",
                         content : "udpated content",
@@ -176,12 +199,13 @@ describe(addDescribeFormat("user_test"), function () {
 
     it("checking the notice update was succeed",(done) => {
         try {
-            request.get(BASEURI+"/api/notice/getNotice?id="+notices[0].id,{
+            request.get(BASEURI+"/api/notice/getCurrentNotice",{
                 headers:{
                     Authorization : token
                 },
                 json : true
             },(err, res, body) => {
+                console.log(body)
                 assert(body?.content?.isUpdated)
                 done()
             })
@@ -194,7 +218,7 @@ describe(addDescribeFormat("user_test"), function () {
         try {
             request.post(BASEURI+"/api/notice/deleteNotice",{
                 body : { 
-                    id : notices[0].id
+                    id : notices[1].id
                 },
                 headers : {
                     Authorization : token
@@ -211,14 +235,14 @@ describe(addDescribeFormat("user_test"), function () {
     })
     it("check the notice delete was succeed", (done) => {
         try {
-            request.get(BASEURI+"/api/notice/getNotices",{
+            request.get(BASEURI+"/api/notice/getCurrentNotice",{
             headers:{
                 Authorization : token
             },
             json : true
         },(err, res, body) => {
             notices = body
-            assert(body.length === 0)
+            assert(body.id !== 2)
             done()
         })
         } catch (err) {

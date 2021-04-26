@@ -1,17 +1,7 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteNoticeValidator = exports.updateNoticeValidator = exports.addNoticeValidator = exports.getNoticeValidator = void 0;
+exports.deleteNoticeValidator = exports.updateNoticeValidator = exports.addNoticeValidator = void 0;
 const express_validator_1 = require("express-validator");
-const getNoticeValidator = () => {
-    return [
-        express_validator_1.query('id')
-            .notEmpty()
-            .withMessage('id is required')
-            .isNumeric()
-            .withMessage("id must be a number")
-    ];
-};
-exports.getNoticeValidator = getNoticeValidator;
 const addNoticeValidator = () => {
     return [
         express_validator_1.body('content')
