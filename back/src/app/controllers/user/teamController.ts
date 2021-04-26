@@ -33,8 +33,7 @@ export const getTeam = async (req : Request, res : Response) => { // get
     try {
         const team = await teamRepository.findOne({
             where : {id},
-            raw:true,
-            attributes: ['teamName','score'],
+            attributes: ['id','teamName','score'],
             include: [
                 {
                 model: userRepository,

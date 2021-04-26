@@ -328,6 +328,27 @@ describe(addDescribeFormat("team_test"), function () {
       done()
     }
   })
+  it("get teams",(done) => {
+    request.get(BASEURI+"/api/user/getTeams",{
+      headers : {
+        Authorization : users.user1.token
+      }, json : true
+    },(err,res,body)=>{
+      teamId = body[0].id
+      assert(body.length == 1)
+      done()
+    })
+  })
+  it("get team",(done) => {
+    request.get(BASEURI+"/api/user/getTeam?id="+teamId,{
+      headers : {
+        Authorization : users.user1.token
+      }, json : true
+    },(err,res,body)=>{
+      assert(body.id === teamId)
+      done()
+    })
+  })
   it("join team (user4)",(done) => {
     try {
       request.post(BASEURI+"/api/user/joinTeam",{
@@ -354,6 +375,7 @@ describe(addDescribeFormat("team_test"), function () {
         Authorization : users.user1.token
       }, json : true
     },(err,res,body)=>{
+      console.log(body)
       teamId = body[0].id
       assert(body.length == 1)
       done()

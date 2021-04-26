@@ -138,6 +138,7 @@ describe(addDescribeFormat("category_test"), function () {
                     Authorization : token
                 }
             },(err, res, body) => {
+                
                 assert(body.result)
                 done()
             })
@@ -156,7 +157,26 @@ describe(addDescribeFormat("category_test"), function () {
                 }
             },(err, res, body) => {
                 category_1 = body[0].id
+                console.log(body)
                 assert(body.length >= 3)
+                done()
+            })
+        } catch (err) {
+            console.log(err)
+            done()
+        }
+    })
+    it("category - udpate(to already exist)",(done) => {
+        try {
+            request.post(BASEURI+"/api/category/updateCategory",{
+                body : { id : category_1,category : "pwn"},
+                json : true,
+                headers : { 
+                    Authorization : token
+                }
+            },(err, res, body) => {
+                console.log("category update body.error",body?.error)
+                assert(body?.error.errorType == "alreadyExist")
                 done()
             })
         } catch (err) {
@@ -173,6 +193,7 @@ describe(addDescribeFormat("category_test"), function () {
                     Authorization : token
                 }
             },(err, res, body) => {
+                console.log("update body ",body)
                 assert(body.result)
                 done()
             })
@@ -181,6 +202,8 @@ describe(addDescribeFormat("category_test"), function () {
             done()
         }
     })
+    
+    
     it("category - delete",(done) => {
         try {
             request.post(BASEURI+"/api/category/deleteCategory",{

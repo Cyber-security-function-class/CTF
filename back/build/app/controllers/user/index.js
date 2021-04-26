@@ -9,6 +9,7 @@ const teamValidator_1 = require("../../middlewares/validators/teamValidator");
 const userController_1 = require("./userController");
 const teamController_1 = require("./teamController");
 const auth_1 = __importDefault(require("../../middlewares/auth"));
+const admin_1 = __importDefault(require("../../middlewares/admin"));
 const routes = express_1.default.Router();
 routes.post("/signUp", userValidator_1.signUpValidator(), userController_1.signUp);
 routes.post("/signIn", userValidator_1.signInValidator(), userController_1.signIn);
@@ -29,9 +30,9 @@ routes.get('/getTeams', teamController_1.getTeams);
 routes.post("/joinTeam", auth_1.default);
 routes.post("/joinTeam", teamValidator_1.joinTeamValidator(), teamController_1.joinTeam);
 // only admin
-routes.post("/updateUser", auth_1.default);
+routes.post("/updateUser", auth_1.default, admin_1.default);
 routes.post("/updateUser", userValidator_1.updateUserValidator(), userController_1.updateUser);
-routes.post("/deleteUser", auth_1.default);
+routes.post("/deleteUser", auth_1.default, admin_1.default);
 routes.post("/deleteUser", userValidator_1.deleteUserValidator(), userController_1.deleteUser);
 exports.default = routes;
 //# sourceMappingURL=index.js.map

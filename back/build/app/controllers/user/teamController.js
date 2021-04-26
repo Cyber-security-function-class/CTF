@@ -40,8 +40,7 @@ const getTeam = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const team = yield teamRepository.findOne({
             where: { id },
-            raw: true,
-            attributes: ['teamName', 'score'],
+            attributes: ['id', 'teamName', 'score'],
             include: [
                 {
                     model: userRepository,

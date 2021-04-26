@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resendEmail = exports.verifyEmail = exports.deleteUser = exports.updateUser = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
+exports.deleteUser = exports.updateUser = exports.resendEmail = exports.verifyEmail = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt_1 = require("bcrypt");
 const express_validator_1 = require("express-validator");
@@ -248,75 +248,6 @@ const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getUser = getUser;
-const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
-    }
-    const errors = express_validator_1.validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
-    }
-    const { id, nickname, email, isAdmin } = req.body;
-    try {
-        const isUserExist = yield userRepository.findOne({
-            where: {
-                id
-            },
-            attributes: ['id'],
-            raw: true
-        });
-        if (isUserExist !== null) {
-            try {
-                // update user
-                yield userRepository.update({
-                    nickname, email, isAdmin
-                }, {
-                    where: {
-                        id
-                    }
-                });
-                res.json({ result: true });
-            }
-            catch (err) {
-                console.log(err);
-                return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
-            }
-        }
-        else {
-            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send();
-        }
-    }
-    catch (err) {
-        console.log(err);
-        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
-    }
-});
-exports.updateUser = updateUser;
-const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
-    }
-    const errors = express_validator_1.validationResult(req);
-    if (!errors.isEmpty()) {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
-    }
-    const { id } = req.body;
-    if ((yield userRepository.findOne({ where: { id }, raw: true, attributes: ['id'] })) !== null) {
-        // user exist
-        try {
-            yield userRepository.destroy({ where: { id } });
-            return res.json({ result: true });
-        }
-        catch (err) {
-            console.log(err);
-            return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
-        }
-    }
-    else {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send();
-    }
-});
-exports.deleteUser = deleteUser;
 const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
@@ -402,4 +333,67 @@ const resendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     }
 });
 exports.resendEmail = resendEmail;
+const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+    }
+    const { id, nickname, email, isAdmin } = req.body;
+    try {
+        const isUserExist = yield userRepository.findOne({
+            where: {
+                id
+            },
+            attributes: ['id'],
+            raw: true
+        });
+        if (isUserExist !== null) {
+            try {
+                // update user
+                yield userRepository.update({
+                    nickname, email, isAdmin
+                }, {
+                    where: {
+                        id
+                    }
+                });
+                res.json({ result: true });
+            }
+            catch (err) {
+                console.log(err);
+                return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+            }
+        }
+        else {
+            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send();
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+    }
+});
+exports.updateUser = updateUser;
+const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+    }
+    const { id } = req.body;
+    if ((yield userRepository.findOne({ where: { id }, raw: true, attributes: ['id'] })) !== null) {
+        // user exist
+        try {
+            yield userRepository.destroy({ where: { id } });
+            return res.json({ result: true });
+        }
+        catch (err) {
+            console.log(err);
+            return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+        }
+    }
+    else {
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "user not exist" }).send();
+    }
+});
+exports.deleteUser = deleteUser;
 //# sourceMappingURL=userController.js.map

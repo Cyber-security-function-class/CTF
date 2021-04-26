@@ -115,10 +115,6 @@ const getChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.getChallenge = getChallenge;
 const addChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
-        // he is not a admin
-    }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
@@ -149,10 +145,6 @@ const addChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* (
 });
 exports.addChallenge = addChallenge;
 const updateChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
-        // he is not a admin
-    }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
@@ -185,10 +177,6 @@ const updateChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function
 });
 exports.updateChallenge = updateChallenge;
 const deleteChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(400).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
-        // he is not a admin
-    }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
