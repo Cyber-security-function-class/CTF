@@ -1,7 +1,12 @@
 version: "3"
+networks:
+    backend-network:
+        driver: bridge
 
 services:
     psql:
+        networks:
+            - backend-network
         image: postgres:latest
         container_name: psql
         volumes:
@@ -15,6 +20,8 @@ services:
         restart: "unless-stopped"
         
     api:
+        networks:
+            - backend-network
         container_name: api
         build:
             context: ./
@@ -24,3 +31,5 @@ services:
         depends_on:
             - psql
         restart: "unless-stopped"
+        links:
+            - psql
