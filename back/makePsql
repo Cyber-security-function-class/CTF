@@ -1,7 +1,0 @@
-#!/bin/sh
-docker run --name psql -p 5432:5432 -v psql:/var/lib/postgresql/data \
-	-e POSTGRES_DB=SkillCTF \
-	-e POSTGRES_USER=skilluser \
-	-e POSTGRES_PASSWORD=imskilluser \
-	-e POSTGRES_INITDB_ARGS="--encoding=UTF-8" \
-	-d postgres
