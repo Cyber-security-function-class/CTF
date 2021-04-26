@@ -23,5 +23,4 @@ services:
             - "80:7000"
         depends_on:
             - psql
-            - proxy
         restart: "unless-stopped"
