@@ -24,13 +24,11 @@ const getCurrentNotice = (req, res) => __awaiter(void 0, void 0, void 0, functio
             order: [['createdAt', 'DESC']],
             raw: true
         });
-        if (notice) {
-            return res.json(notice);
-        }
-        return res.json({ error: error_1.getErrorMessage(error_1.ErrorType.NotExist), detail: "notice not exist" });
+        return res.json(notice);
     }
     catch (err) {
         console.log(err);
+        return res.json({ error: error_1.getErrorMessage(error_1.ErrorType.UnexpectedError) });
     }
 });
 exports.getCurrentNotice = getCurrentNotice;

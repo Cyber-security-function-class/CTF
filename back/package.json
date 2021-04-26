@@ -40,6 +40,7 @@
   "scripts": {
     "prestart": "tsc",
     "start": "nodemon --exec ts-node build/index.js",
+    "pm2": "pm2 start processes.json --no-daemon",
     "usertest": "yarn mocha ./src/__test__/user.spec.ts -r ts-node/register",
     "teamtest": "yarn mocha ./src/__test__/team.spec.ts -r ts-node/register",
     "categorytest": "yarn mocha ./src/__test__/category.spec.ts -r ts-node/register",

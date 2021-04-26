@@ -2,13 +2,14 @@ FROM node:15
 
 RUN npm install -g yarn --force
 
-WORKDIR /usr/src/app
+WORKDIR /app
 
 COPY package*.json ./
 RUN yarn
+RUN yarn global add pm2
 
 COPY . .
 
 EXPOSE 7000
 
-CMD [ "yarn", "start" ]
+CMD ["yarn","pm2"]
