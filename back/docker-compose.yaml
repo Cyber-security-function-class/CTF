@@ -1,7 +1,7 @@
 version: "3"
 networks:
     backend-network:
-        driver: bridge
+        driver: host
 
 services:
     psql:
