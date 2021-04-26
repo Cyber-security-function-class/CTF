@@ -1,5 +1,7 @@
+version: "3"
+
 services:
-    postgres:
+    database:
         image: postgres:latest
         container_name: postgres
         volumes:
@@ -25,6 +27,6 @@ services:
             context: ./
             dockerfile: ./Dockerfile
         depends_on:
-            - postgres
+            - database
             - proxy
         restart: "unless-stopped"
