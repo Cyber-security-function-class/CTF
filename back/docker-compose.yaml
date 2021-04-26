@@ -13,19 +13,14 @@ services:
             POSTGRES_INITDB_ARGS : "--encoding=UTF-8"
 
         restart: "unless-stopped"
-  
-    proxy:
-        image: nginx:latest
-        container_name: proxy
-        volumes:
-            - ./proxy/nginx.conf:/etc/nginx/nginx.conf
-        restart: "unless-stopped"
-  
+        
     api:
         container_name: api
         build:
             context: ./
             dockerfile: ./Dockerfile
+        ports:
+            - "80:7000"
         depends_on:
             - psql
             - proxy
