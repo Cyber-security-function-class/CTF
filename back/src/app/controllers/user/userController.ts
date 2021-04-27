@@ -289,9 +289,11 @@ export const resendEmail = async (req,res) => {
     try{
         user = await userRepository.findOne({
             where : {id : userId},
+            attributes : ['id','email'],
             raw : true,
             include : [{
-                model : emailVerifiedRepository
+                model : emailVerifiedRepository,
+                as : "emailVerified"
             }]
         })
     } catch (err) {
@@ -299,24 +301,29 @@ export const resendEmail = async (req,res) => {
         return res.status(500).json({error : getErrorMessage(ErrorType.UnexpectedError),detail:"maybe user is not Exist"})
     }
     let now = new Date()
-    
-    if ( user.updatedAt.valueOf() + (30 * 1000) < now.valueOf() ) { // 30 second
-        if ( user.emailVerified.isVerified ) {
-            return res.status(400).json({error : getErrorMessage(ErrorType.AlreadyExist),detail:"already verified"})
-        }
-        const token = await createToken()
-        send_auth_mail(user.email,token)
-
-        emailVerifiedRepository.update({
-            token
-        },{
-            where : { 
-                id : user.emailVerified.id
+    try {
+        if ( user['emailVerified.updatedAt'].valueOf() + (30 * 1000) < now.valueOf() ) { // 30 second
+            
+            if ( user['emailVerified.isVerified'] ) {
+                return res.status(400).json({error : getErrorMessage(ErrorType.AlreadyExist),detail:"already verified"})
             }
-        })
-        res.json({result : true})
-    } else {
-        res.json({error : getErrorMessage(ErrorType.AccessDenied),detail:"Only one mail can be sent per 30 seconds."})
+            const token = await createToken()
+            send_auth_mail(user.email,token)
+
+            emailVerifiedRepository.update({
+                token
+            },{
+                where : { 
+                    id : user['emailVerified.id']
+                }
+            })
+            return res.json({result : true})
+        } else {
+            return res.json({error : getErrorMessage(ErrorType.AccessDenied),detail:"Only one mail can be sent per 30 seconds."})
+        }
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
     }
 }
 
