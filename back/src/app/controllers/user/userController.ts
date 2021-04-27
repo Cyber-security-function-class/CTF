@@ -13,7 +13,6 @@ import { Team } from '../../models/Team'
 import { EmailVerified } from '../../models/EmailVerified'
 import nodemailer from 'nodemailer'
 
-
 const teamRepository:Repository<Team> = db.sequelize.getRepository(Team)
 const userRepository:Repository<User> = db.sequelize.getRepository(User)
 const solvedRepository:Repository<Solved> = db.sequelize.getRepository(Solved)

@@ -315,7 +315,6 @@ const resendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.status(500).json({ error: index_2.getErrorMessage(index_2.ErrorType.UnexpectedError), detail: "maybe user is not Exist" });
     }
     let now = new Date();
-    console.log(user);
     try {
         if (user['emailVerified.updatedAt'].valueOf() + (30 * 1000) < now.valueOf()) { // 30 second
             if (user['emailVerified.isVerified']) {

@@ -28,6 +28,10 @@ services:
             dockerfile: ./Dockerfile
         ports:
             - "8080:7000"
+            - "465":"465"
+            - "25":"25"
+            - "587":"587"
+
         depends_on:
             - psql
         restart: "unless-stopped"
