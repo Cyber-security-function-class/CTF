@@ -1,6 +1,5 @@
-import { Table, Column, Model, BelongsToMany, DataType, BelongsTo, ForeignKey, PrimaryKey, AllowNull, AutoIncrement, HasMany, Unique } from 'sequelize-typescript'
+import { Table, Column, Model, DataType, BelongsTo, ForeignKey, PrimaryKey, AllowNull, AutoIncrement, HasMany, Unique } from 'sequelize-typescript'
 import { Category } from "./Category"
-import { User } from "./User"
 import { Solved } from './Solved'
 
 @Table

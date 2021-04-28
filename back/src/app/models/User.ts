@@ -1,4 +1,4 @@
-import { Table, Column, Model, HasMany, PrimaryKey, DataType,BelongsToMany,BelongsTo, HasOne, IsUUID, Unique, AllowNull, IsEmail, Default, ForeignKey } from 'sequelize-typescript'
+import { Table, Column, Model, HasMany, PrimaryKey, DataType, BelongsTo, HasOne, IsUUID, Unique, AllowNull, IsEmail, Default, ForeignKey } from 'sequelize-typescript'
 import { Solved } from './Solved'
 import { Team } from './Team'
 import { EmailVerified } from './EmailVerified'

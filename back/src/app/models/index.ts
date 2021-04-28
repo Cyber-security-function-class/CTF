@@ -1,7 +1,11 @@
 'use strict';
-
-import { Sequelize } from 'sequelize-typescript'
+// get database config
 import dbconfig from '../config/dbconfig'
+
+// get sequelize
+import { Sequelize } from 'sequelize-typescript'
+
+//get models
 import { Category } from './Category';
 import { Challenge } from './Challenge';
 import { Solved } from './Solved';
@@ -9,6 +13,7 @@ import { User} from './User'
 import { Team } from './Team';
 import { Notice } from './Notice';
 import { EmailVerified } from './EmailVerified';
+
 const db = {
     sequelize : new Sequelize(
         dbconfig.database,
@@ -23,6 +28,5 @@ const db = {
         }
     )
 }
-
 
 export default db
