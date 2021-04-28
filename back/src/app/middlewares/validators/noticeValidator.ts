@@ -1,35 +1,32 @@
 'use strict'
-import { body, query } from "express-validator"
+import { body } from "express-validator"
+
+const validators = {
+    id : body('id')
+        .notEmpty()
+        .withMessage('id is required')
+        .isNumeric()
+        .withMessage("id must be a number"),
+    content : body('content')
+        .notEmpty()
+        .withMessage('category is required')
+        .isObject()
+        .withMessage("category must be string")
+}
 
 export const addNoticeValidator = () => {
     return [
-        body('content')
-            .notEmpty()
-            .withMessage('category is required')
-            .isObject()
-            .withMessage("category must be string")
+        validators.content
     ]
 }
 export const updateNoticeValidator = () => {
     return [
-        body('id')
-            .notEmpty()
-            .withMessage('id is required')
-            .isNumeric()
-            .withMessage("id must be a number"),
-        body('content')
-            .notEmpty()
-            .withMessage('category is required')
-            .isObject()
-            .withMessage("category must be string")
+        validators.id,
+        validators.content,
     ]
 }
 export const deleteNoticeValidator = () => {
     return [
-        body('id')
-            .notEmpty()
-            .withMessage('id is required')
-            .isNumeric()
-            .withMessage("id must be a number")
+        validators.id
     ]
 }

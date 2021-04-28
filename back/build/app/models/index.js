@@ -3,8 +3,11 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const sequelize_typescript_1 = require("sequelize-typescript");
+// get database config
 const dbconfig_1 = __importDefault(require("../config/dbconfig"));
+// get sequelize
+const sequelize_typescript_1 = require("sequelize-typescript");
+//get models
 const Category_1 = require("./Category");
 const Challenge_1 = require("./Challenge");
 const Solved_1 = require("./Solved");

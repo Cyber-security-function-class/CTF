@@ -1,93 +1,72 @@
 'use strict';
 import { body,query} from 'express-validator';
 
-
+const validators = {
+    id : body('id')
+        .notEmpty()
+        .withMessage("id is required")
+        .isNumeric()
+        .withMessage("id is must be number"),
+    title : body('title')
+        .notEmpty()
+        .withMessage('title is required')
+        .isString()
+        .withMessage("title is must be string"),
+    content : body('content')
+        .notEmpty()
+        .withMessage('content is required')
+        .isString()
+        .withMessage("content is must be string"),
+    score : body('score')
+        .notEmpty()
+        .withMessage('score is required')
+        .isNumeric()
+        .withMessage("score is must be number"),
+    categoryId : body('categoryId')
+        .notEmpty()
+        .withMessage('categoryId is required')
+        .isNumeric()
+        .withMessage("categoryId is must be number"),
+    flag : body('flag')
+        .notEmpty()
+        .withMessage("flag is required")
+        .isString()
+        .withMessage("flag is must be string")
+}
 export const addChallengeValidator = () => {
     return [
-        body('title')
-            .notEmpty()
-            .withMessage('title is required')
-            .isString()
-            .withMessage("title is must be string"),
-        body('content')
-            .notEmpty()
-            .withMessage('content is required')
-            .isString()
-            .withMessage("content is must be string"),
-        body('score')
-            .notEmpty()
-            .withMessage('score is required')
-            .isNumeric()
-            .withMessage("score is must be number"),
-        body('categoryId')
-            .notEmpty()
-            .withMessage('categoryId is required')
-            .isNumeric()
-            .withMessage("categoryId is must be number"),
-        body('flag')
-            .notEmpty()
-            .withMessage("flag is required")
-            .isString()
-            .withMessage("flag is must be string")
+        validators.title,
+        validators.content,
+        validators.score,
+        validators.categoryId,
+        validators.flag,
     ]
 }
 
 export const updateChallengeValidator = () => {
     return [
-        body('id')
-            .notEmpty()
-            .withMessage("id is required")
-            .isNumeric()
-            .withMessage("id is must be number"),
-        body('title')
-            .notEmpty()
-            .withMessage('title is required')
-            .isString()
-            .withMessage("title is must be string"),
-        body('content')
-            .notEmpty()
-            .withMessage('content is required')
-            .isString()
-            .withMessage("content is must be string"),
-        body('score')
-            .notEmpty()
-            .withMessage('score is required')
-            .isNumeric()
-            .withMessage("score is must be number"),
-        body('categoryId')
-            .notEmpty()
-            .withMessage('categoryId is required')
-            .isNumeric()
-            .withMessage("categoryId is must be number"),
-        body('flag')
-            .notEmpty()
-            .withMessage("flag is required")
-            .isString()
-            .withMessage("flag is must be string")
+        validators.id,
+        validators.title,
+        validators.content,
+        validators.score,
+        validators.categoryId,
+        validators.flag,
     ]
 }
 export const deleteChallengeValidator = () => {
     return [
-        body('id')
-            .notEmpty()
-            .withMessage("id is required")
-            .isNumeric()
-            .withMessage("id is must be number")
+        validators.id
     ]
 }
 
 export const authFlagValidator = () => {
     return [
-        body('flag')
-            .notEmpty()
-            .withMessage("flag is required")
-            .isString()
-            .withMessage("flag is must be string")
+        validators.flag,
     ]
 }
 
 export const getChallengeValidator = () => {
-    return [
+    return [ // this is one is unique because it use query()
         query('id')
             .notEmpty()
             .withMessage("id is required")

@@ -207,12 +207,13 @@ describe(addDescribeFormat("category_test"), function () {
     it("category - delete",(done) => {
         try {
             request.post(BASEURI+"/api/category/deleteCategory",{
-                body : { id : category_1},
+                body : { id : "category_1"},
                 json : true,
                 headers : { 
                     Authorization : token
                 }
             },(err, res, body) => {
+                console.log(body)
                 assert(body.result)
                 done()
             })
