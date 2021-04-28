@@ -1,5 +1,7 @@
 import { ErrorType, getErrorMessage } from '../error/index'
 
+// admin middleware only use after auth middleware
+
 export default (req, res, next) => {
     
     let isAdmin = req['decoded']?.isAdmin

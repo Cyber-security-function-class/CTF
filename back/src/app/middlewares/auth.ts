@@ -1,6 +1,5 @@
 import * as jwt from "jsonwebtoken"
 import { ErrorType, getErrorMessage } from '../error/index'
-import { validationResult } from "express-validator"
 
 let allowUrl = [
     "/api/user/verifyEmail",
@@ -14,7 +13,7 @@ export default (req, res, next) => {
     if(!token) {
         return res.status(403).json({
             error : getErrorMessage(ErrorType.AccessDenied),
-            detail: 'not logged in'
+            detail: 'Not logged in'
         })
     }
 
