@@ -1,16 +1,14 @@
 import { expect,assert } from 'chai';
 import request from 'request'
-import { preStart, dbclient } from "./index.spec"
-import jwt_decode from "jwt-decode";
+import { preStart } from "./index.spec"
 import db from "../app/models/index"
 import {User} from "../app/models/User"
-import { EmailVerified } from '../app/models/EmailVerified';
-import { Op } from 'sequelize';
+
+import { register, login, verifyEmails, makeAdmin, getDecoded } from './utils'
+
 import * as dotenv from 'dotenv';
 dotenv.config();
 
-const userRepository = db.sequelize.getRepository(User)
-const emailVerifiedRepository = db.sequelize.getRepository(EmailVerified)
 const ADDRESS = "http://localhost"
 const PORT = process.env.PORT || 7000
 const BASEURI = ADDRESS+":"+PORT
@@ -34,55 +32,59 @@ describe(addDescribeFormat("user_test"), function () {
     service = preStart(done)
   })
   it("register",(done)=>{
-    try{
-      request.post(BASEURI+"/api/user/signUp",{
-        body : userInfo,
-        json: true
-      },(err, res, body)=>{
-        expect(body.result).to.equal(true)
-        done()
-      })
-    } catch (err) {
+    register(userInfo)
+    .then(result => {
+      assert(result)
       done()
-    }
-  })
-  it("register duplicate user",(done)=>{
-    try {
-      request.post(BASEURI+"/api/user/signUp",{
-        body : userInfo,
-        json : true
-      },(err, res, body) => {
-        expect(body.error.errorType).to.equal('alreadyExist')
-        done()
-      })
-    } catch (err) {
-      done()
-    }
-  })
-  it("verify emails", (done)=>{
-    emailVerifiedRepository.findAll({raw: true,attributes:['id']})
-    .then(e=>{
-      emailVerifiedRepository.update({isVerified:true},{where:{[Op.or]: e}})
-      done()
-    }).catch(err=>{
+    })
+    .catch(err => {
+      console.log(err)
       done()
     })
   })
-  it("login",(done)=>{
-    try {
-      request.post(BASEURI+"/api/user/signIn",{
-        body : userInfo,
-        json : true
-      },(err, res, body) => {
-        token = body.token
-        decoded = jwt_decode(token.split(' ')[1])
-        assert(token)
-        done()
-      })
-    } catch (err) {
+
+  it("register duplicate user",(done)=>{
+    register(userInfo)
+    .then(result => {
+      assert(!result)
       done()
-    }
+    })
+    .catch(err => {
+      console.log(err)
+      done()
+    })
   })
+
+  it("verify emails", (done)=>{
+    verifyEmails()
+    .then(result => {
+      expect(result)
+      done()
+    })
+    .catch(err => {
+      console.log(err)
+      done()
+    })
+  })
+
+  it("login",(done)=>{
+    login(userInfo)
+    .then(result => {
+      if (result?.err) {
+        console.log(result?.err)
+        done()
+      }
+      token = result?.body.token
+      decoded = getDecoded(token)
+      assert(token)
+      done()
+    }).catch(err => {
+      console.log(err)
+      done()
+    })
+    
+  })
+  
   it("getUsers(no login)",(done)=>{
     request.get(BASEURI+"/api/user/getUsers",(err,res,body)=>{
       body = JSON.parse(body)
@@ -90,6 +92,7 @@ describe(addDescribeFormat("user_test"), function () {
       done()
     })
   })
+
   it("getUsers",(done)=>{
     request.get(BASEURI+"/api/user/getUsers",{
       headers :{
@@ -126,23 +129,25 @@ describe(addDescribeFormat("user_test"), function () {
   })
 
   it("Make user to Admin", (done)=>{
-    userRepository.update({isAdmin:true},{where:{id:decoded['id']}})
-    .then(e=>{
-      assert(e[0] == [ 1 ])
+    makeAdmin(decoded.id) // boolean
+    .then(result => {
+      assert(result)
       done()
-    }).catch(err=>{
+    })
+    .catch(err=>{
+      console.log(err)
       done()
     })
   })
 
-  it("get token to get isAdmin",(done)=>{
+  it("login to get adminToken",(done)=>{
     try {
       request.post(BASEURI+"/api/user/signIn",{
         body : userInfo,
         json : true
       },(err, res, body) => {
         token = body.token
-        decoded = jwt_decode(token);
+        decoded = getDecoded(token);
         assert(token)
         done()
       })
@@ -192,32 +197,26 @@ describe(addDescribeFormat("user_test"), function () {
   })
 
   it("register again",(done)=>{
-    try{
-      request.post(BASEURI+"/api/user/signUp",{
-        body : userInfo,
-        json: true
-      },(err, res, body)=>{
-        expect(body.result).to.equal(true)
-        done()
-      })
-    } catch (err) {
+    register(userInfo)
+    .then(result => {
+      assert(result)
       done()
-    }
+    }).catch(err => {
+      console.log(err)
+      done()
+    })
   })
+
   it("login again",(done)=>{
-    try {
-      request.post(BASEURI+"/api/user/signIn",{
-        body : userInfo,
-        json : true
-      },(err, res, body) => {
-        token = body.token
-        decoded = jwt_decode(token.split(' ')[1]);
-        assert(token)
-        done()
-      })
-    } catch (err) {
+    login(userInfo)
+    .then(result => {
+      token = result?.body?.token
+      assert(token !== undefined || token !== null)
       done()
-    }
+    }).catch(err => {
+      console.log(err)
+      done()
+    })
   })
 
 })
