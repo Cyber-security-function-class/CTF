@@ -1,11 +1,13 @@
+'use strict';
+
 import { Request, Response } from "express";
 import { validationResult } from "express-validator";
-import { Repository } from "sequelize-typescript";
-import { ErrorType, getErrorMessage } from "../../error";
-import db from "../../models/index";
-import { Notice } from "../../models/Notice";
 
-const noticeRepository:Repository<Notice> = db.sequelize.getRepository(Notice)
+import { ErrorType, getErrorMessage } from "../../error";
+
+import db from "../../models/index";
+
+const noticeRepository = db.repositories.noticeRepository;
 
 export const getCurrentNotice = async (req :Request, res :Response) => {
     

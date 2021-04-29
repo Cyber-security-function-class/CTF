@@ -3,17 +3,12 @@ import db from '../../models/index'
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
 import { Op, Sequelize } from 'sequelize'
-import { Challenge } from '../../models/Challenge'
-import { Category } from '../../models/Category'
-import { Solved } from '../../models/Solved'
-import { User } from '../../models/User'
-import { Team } from '../../models/Team'
 
-const challengeRepository = db.sequelize.getRepository(Challenge)
-const categoryRepository = db.sequelize.getRepository(Category)
-const solvedRepository = db.sequelize.getRepository(Solved)
-const userRepository = db.sequelize.getRepository(User)
-const teamRepository = db.sequelize.getRepository(Team)
+const challengeRepository = db.repositories.challengeRepository
+const categoryRepository = db.repositories.categoryRepository
+const teamRepository = db.repositories.teamRepository
+const userRepository = db.repositories.userRepository
+const solvedRepository = db.repositories.solvedRepository
 
 export const getChallenges = async (req:Request, res:Response) => {
     const category = req.query['category']

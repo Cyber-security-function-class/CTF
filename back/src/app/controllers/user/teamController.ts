@@ -1,31 +1,26 @@
+'use strict';
+// import express
 import { Request, Response } from "express";
+
+// import sequelize
 import { Repository } from "sequelize-typescript";
 import db from '../../models/index'
-import { Team } from '../../models/Team'
-import { User } from '../../models/User'
+
+// import models 
+
 import { ErrorType, getErrorMessage } from '../../error/index'
-import { genSalt, hash, compare } from 'bcrypt'
 import { validationResult } from "express-validator";
-import { Solved } from "../../models/Solved";
-import { Challenge } from "../../models/Challenge";
+
+import { createHashedPassword, checkPassword } from "../../utils/user"
 
 
-const teamRepository: Repository<Team> = db.sequelize.getRepository(Team)
-const userRepository:Repository<User> = db.sequelize.getRepository(User)
-const solvedRepository:Repository<Solved> = db.sequelize.getRepository(Solved)
-const challengeRepository:Repository<Challenge> = db.sequelize.getRepository(Challenge)
 
-const createHashedPassword = async (password: string) => {
-    const saltRounds = 10
-    const salt = await genSalt(saltRounds)
-    const hashedPassword = await hash(password, salt)
-    return hashedPassword
-}
 
-const checkPassword = async (password: string, hashedPassword: string) => {
-    const isPasswordCorrect = await compare(password, hashedPassword) // hash.toString for type checking hack
-    return isPasswordCorrect
-}
+const teamRepository = db.repositories.teamRepository
+const userRepository = db.repositories.userRepository
+const solvedRepository = db.repositories.solvedRepository
+const challengeRepository = db.repositories.challengeRepository
+
 
 
 export const getTeam = async (req : Request, res : Response) => { // get

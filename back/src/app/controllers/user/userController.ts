@@ -1,34 +1,29 @@
-import {Request, Response} from 'express'
-import * as jwt from 'jsonwebtoken'
-import { genSalt, hash, compare } from 'bcrypt'
-import { validationResult } from "express-validator"
+'use strict';
+
 import environment from '../../config/config'
+
+import {Request, Response} from 'express'
+
+import * as jwt from 'jsonwebtoken'
+
+import { validationResult } from "express-validator"
+import { ErrorType, getErrorMessage } from '../../error/index'
+
 import { Op } from 'sequelize'
 import db from '../../models/index'
-import { ErrorType, getErrorMessage } from '../../error/index'
-import {User} from '../../models/User'
-import {Solved} from "../../models/Solved"
-import { Repository } from 'sequelize-typescript'
-import { Team } from '../../models/Team'
-import { EmailVerified } from '../../models/EmailVerified'
-import nodemailer from 'nodemailer'
 
-const teamRepository:Repository<Team> = db.sequelize.getRepository(Team)
-const userRepository:Repository<User> = db.sequelize.getRepository(User)
-const solvedRepository:Repository<Solved> = db.sequelize.getRepository(Solved)
-const emailVerifiedRepository:Repository<EmailVerified> = db.sequelize.getRepository(EmailVerified)
+import { 
+    createHashedPassword, checkPassword,
+    send_auth_mail
+} from '../../utils/user'
 
-const createHashedPassword = async (password: string) => {
-    const saltRounds = 10
-    const salt = await genSalt(saltRounds)
-    const hashedPassword = await hash(password, salt)
-    return hashedPassword
-}
 
-const checkPassword = async (password: string, hashedPassword: string) => {
-    const isPasswordCorrect = await compare(password, hashedPassword) // hash.toString for type checking hack
-    return isPasswordCorrect
-}
+const teamRepository = db.repositories.teamRepository
+const userRepository = db.repositories.userRepository
+const solvedRepository = db.repositories.solvedRepository
+const emailVerifiedRepository = db.repositories.emailVerifiedRepository
+
+
 
 const createToken = async (): Promise<string> => {
     var result           = [];
@@ -40,31 +35,7 @@ const createToken = async (): Promise<string> => {
    return result.join('');
 }
 
-const transporter = nodemailer.createTransport({
-    service: environment.mail.service,
-    host: environment.mail.host,
-    auth: {
-      user: environment.mail.user,
-      pass: environment.mail.pass
-    }
-});
 
-const send_auth_mail = (email,token) => {
-    const mailOptions = {
-        from: environment.mail.user,
-        to: email ,
-        subject: '이메일 인증',
-        text: '가입완료를 위해 <'+token+'> 를 입력해주세요!'
-    };
-    
-    transporter.sendMail(mailOptions, (err, res) => {
-        if(err){
-            console.log(err)
-        } else {
-            console.log("auth mail to ",email)
-        }
-    });
-}
 
 export const signUp = async (req:Request, res:Response) => {
     const errors = validationResult(req)

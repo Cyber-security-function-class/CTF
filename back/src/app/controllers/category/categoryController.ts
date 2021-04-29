@@ -3,11 +3,11 @@
 import {Request, Response} from 'express'
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
+
 import db from '../../models/index'
-import {Category} from '../../models/Category'
 import sequelize, { Op } from 'sequelize'
 
-const categoryRepository = db.sequelize.getRepository(Category)
+const categoryRepository = db.repositories.categoryRepository
 
 export const getCategories = async (req: Request, res: Response) => {
 
