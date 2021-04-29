@@ -31,7 +31,7 @@ exports.default = (req, res, next) => {
     if (!token) {
         return res.status(403).json({
             error: index_1.getErrorMessage(index_1.ErrorType.AccessDenied),
-            detail: 'not logged in'
+            detail: 'Not logged in'
         });
     }
     const p = new Promise((resolve, reject) => {

@@ -1,8 +1,28 @@
+'use strict';
+
 import express from "express"
-import { signInValidator, signUpValidator, getUserValidator, updateUserValidator, deleteUserValidator, verifyEmailValidator} from "../../middlewares/validators/userValidator"
-import {createTeamValidator, joinTeamValidator, getTeamValidator} from "../../middlewares/validators/teamValidator"
-import { signUp, signIn, getUser,getUsers, deleteUser, updateUser, verifyEmail, resendEmail} from './userController'
+
+// import from userValidator
+import { 
+    signUpValidator, signInValidator,
+    getUserValidator, updateUserValidator, 
+    deleteUserValidator, verifyEmailValidator
+} from "../../middlewares/validators/userValidator"
+
+// import from teamValidator
+import {
+    createTeamValidator, joinTeamValidator, 
+    getTeamValidator
+} from "../../middlewares/validators/teamValidator"
+
+// import from controllers
+import { 
+    signUp, signIn, getUser, getUsers, 
+    deleteUser, updateUser, verifyEmail, resendEmail
+} from './userController'
+
 import { createTeam, getTeam, getTeams, joinTeam } from './teamController'
+
 import authMiddleware from '../../middlewares/auth'
 import adminMiddleware from '../../middlewares/admin'
 
@@ -34,9 +54,6 @@ routes.get('/getTeams',getTeams)
 
 routes.post("/joinTeam",authMiddleware)
 routes.post("/joinTeam",joinTeamValidator(),joinTeam)
-
-
-
 
 // only admin
 routes.post("/updateUser",authMiddleware,adminMiddleware)

@@ -1,11 +1,14 @@
-"use strict";
+'use strict';
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
+// import from userValidator
 const userValidator_1 = require("../../middlewares/validators/userValidator");
+// import from teamValidator
 const teamValidator_1 = require("../../middlewares/validators/teamValidator");
+// import from controllers
 const userController_1 = require("./userController");
 const teamController_1 = require("./teamController");
 const auth_1 = __importDefault(require("../../middlewares/auth"));
