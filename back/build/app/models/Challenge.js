@@ -45,6 +45,8 @@ __decorate([
     __metadata("design:type", Number)
 ], Challenge.prototype, "categoryId", void 0);
 __decorate([
+    sequelize_typescript_1.AllowNull(false),
+    sequelize_typescript_1.Unique,
     sequelize_typescript_1.Column,
     __metadata("design:type", String)
 ], Challenge.prototype, "flag", void 0);

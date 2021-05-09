@@ -31,7 +31,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUser = exports.updateUser = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
+exports.deleteUser = exports.updateUser = exports.resendEmail = exports.verifyEmail = exports.getUser = exports.getUsers = exports.signIn = exports.signUp = void 0;
 const jwt = __importStar(require("jsonwebtoken"));
 const bcrypt_1 = require("bcrypt");
 const express_validator_1 = require("express-validator");
@@ -43,6 +43,7 @@ const User_1 = require("../../models/User");
 const Solved_1 = require("../../models/Solved");
 const Team_1 = require("../../models/Team");
 const EmailVerified_1 = require("../../models/EmailVerified");
+const nodemailer_1 = __importDefault(require("nodemailer"));
 const teamRepository = index_1.default.sequelize.getRepository(Team_1.Team);
 const userRepository = index_1.default.sequelize.getRepository(User_1.User);
 const solvedRepository = index_1.default.sequelize.getRepository(Solved_1.Solved);
@@ -66,6 +67,30 @@ const createToken = () => __awaiter(void 0, void 0, void 0, function* () {
     }
     return result.join('');
 });
+const transporter = nodemailer_1.default.createTransport({
+    service: config_1.default.mail.service,
+    host: config_1.default.mail.host,
+    auth: {
+        user: config_1.default.mail.user,
+        pass: config_1.default.mail.pass
+    }
+});
+const send_auth_mail = (email, token) => {
+    const mailOptions = {
+        from: config_1.default.mail.user,
+        to: email,
+        subject: '이메일 인증',
+        text: '가입완료를 위해 <' + token + '> 를 입력해주세요!'
+    };
+    transporter.sendMail(mailOptions, (err, res) => {
+        if (err) {
+            console.log(err);
+        }
+        else {
+            console.log("auth mail to ", email);
+        }
+    });
+};
 const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
@@ -102,13 +127,19 @@ const signUp = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             score: 0,
             isAdmin: false
         });
+        const token = yield createToken();
         if (user) {
             emailVerifiedRepository.create({
                 userId: user.id,
-                token: yield createToken(),
+                token: token,
                 isVerified: false
             });
-            res.json({ result: true });
+            console.log("sending auth mail");
+            send_auth_mail(email, token);
+            return res.json({ result: true });
+        }
+        else {
+            return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
         }
     }
     catch (err) {
@@ -120,7 +151,7 @@ exports.signUp = signUp;
 const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
     }
     const { email, password } = req.body;
     let user;
@@ -146,7 +177,6 @@ const signIn = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         const result = yield checkPassword(password, user.password); // sign in result
         if (result) { // password correct
             try {
-                console.log("controller user ", user);
                 // make token
                 const token = jwt.sign({
                     id: user.id,
@@ -218,13 +248,103 @@ const getUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.getUser = getUser;
-const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
-    }
+const verifyEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+    }
+    const { token } = req.body;
+    const userId = req['decoded'].id;
+    const emailVerified = yield emailVerifiedRepository.findOne({
+        where: {
+            userId
+        },
+        attributes: ['id', 'token', 'isVerified'],
+        raw: true
+    });
+    if (emailVerified === null) {
+        console.log("unknown user try to email verify");
+        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+    }
+    if (!emailVerified['isVerified']) {
+        try {
+            if (token === emailVerified['token']) {
+                yield emailVerifiedRepository.update({ isVerified: true }, { where: { id: emailVerified['id'] } });
+                const token = jwt.sign({
+                    id: userId,
+                    nickname: req['decoded'].nickname,
+                    isAdmin: req['decoded'].isAdmin,
+                    emailVerified: true
+                }, req.app.get('jwt-secret'), // secret
+                {
+                    expiresIn: config_1.default.jwt.expiresIn
+                });
+                return res.json({ token: "Bearer " + token }).send();
+            }
+            else {
+                return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: "token is not validate" });
+            }
+        }
+        catch (err) {
+            console.log(err);
+            return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+        }
+    }
+    else {
+        // already verified
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "already verified" });
+    }
+});
+exports.verifyEmail = verifyEmail;
+const resendEmail = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const userId = req['decoded'].id;
+    let user;
+    try {
+        user = yield userRepository.findOne({
+            where: { id: userId },
+            attributes: ['id', 'email'],
+            raw: true,
+            include: [{
+                    model: emailVerifiedRepository,
+                    as: "emailVerified"
+                }]
+        });
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json({ error: index_2.getErrorMessage(index_2.ErrorType.UnexpectedError), detail: "maybe user is not Exist" });
+    }
+    let now = new Date();
+    try {
+        if (user['emailVerified.updatedAt'].valueOf() + (30 * 1000) < now.valueOf()) { // 30 second
+            if (user['emailVerified.isVerified']) {
+                return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "already verified" });
+            }
+            const token = yield createToken();
+            send_auth_mail(user.email, token);
+            emailVerifiedRepository.update({
+                token
+            }, {
+                where: {
+                    id: user['emailVerified.id']
+                }
+            });
+            return res.json({ result: true });
+        }
+        else {
+            return res.json({ error: index_2.getErrorMessage(index_2.ErrorType.AccessDenied), detail: "Only one mail can be sent per 30 seconds." });
+        }
+    }
+    catch (err) {
+        console.log(err);
+        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+    }
+});
+exports.resendEmail = resendEmail;
+const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const errors = express_validator_1.validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
     }
     const { id, nickname, email, isAdmin } = req.body;
     try {
@@ -263,12 +383,9 @@ const updateUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
 });
 exports.updateUser = updateUser;
 const deleteUser = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(403).json(index_2.getErrorMessage(index_2.ErrorType.AccessDenied)).send();
-    }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(422).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
     }
     const { id } = req.body;
     if ((yield userRepository.findOne({ where: { id }, raw: true, attributes: ['id'] })) !== null) {

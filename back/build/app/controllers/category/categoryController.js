@@ -1,4 +1,23 @@
 'use strict';
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -17,7 +36,7 @@ const index_1 = require("../../error/index");
 const express_validator_1 = require("express-validator");
 const index_2 = __importDefault(require("../../models/index"));
 const Category_1 = require("../../models/Category");
-const sequelize_1 = __importDefault(require("sequelize"));
+const sequelize_1 = __importStar(require("sequelize"));
 const categoryRepository = index_2.default.sequelize.getRepository(Category_1.Category);
 const getCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -33,20 +52,16 @@ const getCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* 
 });
 exports.getCategories = getCategories;
 const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
-        // he is not a admin
-    }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
     }
     const { category } = req.body;
-    const Scategory = category.toLowerCase();
+    const Lcategory = category.toLowerCase();
     let isExistCategory;
     try {
         isExistCategory = yield categoryRepository.findOne({
-            where: sequelize_1.default.where(sequelize_1.default.fn('lower', sequelize_1.default.col('category')), sequelize_1.default.fn('lower', Scategory)),
+            where: sequelize_1.default.where(sequelize_1.default.fn('lower', sequelize_1.default.col('category')), sequelize_1.default.fn('lower', Lcategory)),
             raw: true
         });
     }
@@ -55,11 +70,10 @@ const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
     }
     if (isExistCategory === null) {
-        // make new category
-        const newCategory = yield categoryRepository.create({
-            category: Scategory,
+        yield categoryRepository.create({
+            category: Lcategory,
         });
-        return res.json(newCategory);
+        return res.json({ result: true });
     }
     else {
         return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AlreadyExist)).send();
@@ -67,35 +81,47 @@ const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
 });
 exports.addCategory = addCategory;
 const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
-        // he is not a admin
-    }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
     }
     const { id, category } = req.body;
-    if ((yield categoryRepository.findOne({ where: { id }, raw: true })) !== null) {
+    const Lcategory = category.toLowerCase();
+    const beforeUpdate = yield categoryRepository.findAll({
+        where: { [sequelize_1.Op.or]: [
+                { id: id },
+                { category: sequelize_1.default.where(sequelize_1.default.fn('lower', Lcategory), sequelize_1.default.fn('lower', sequelize_1.default.col('category'))) }
+            ]
+        },
+        raw: true
+    });
+    console.log("before update : ", beforeUpdate);
+    let isCategoryOverlap;
+    let isIdExist;
+    beforeUpdate.find(e => {
+        // check if the category field is overlap with another category
+        ((e.category.toLowerCase() === Lcategory)) ? isCategoryOverlap = true : isCategoryOverlap = isCategoryOverlap;
+        ((e.id === id)) ? isIdExist = true : isIdExist = isIdExist;
+    });
+    if (isCategoryOverlap) {
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.AlreadyExist), detail: "this category is already exist" }).send();
+    }
+    else if (!isIdExist) {
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.NotExist), detail: "this id is not exist" }).send();
+    }
+    else {
         try {
             yield categoryRepository.update({ category }, { where: { id } });
             return res.json({ result: true });
         }
         catch (err) {
             console.log(err);
-            return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
+            return res.status(500).json({ error: index_1.getErrorMessage(index_1.ErrorType.UnexpectedError), detail: "UnexpectedError" }).send();
         }
-    }
-    else {
-        return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.NotExist)).send();
     }
 });
 exports.updateCategory = updateCategory;
 const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    if (!req['decoded'].isAdmin) {
-        return res.status(400).json(index_1.getErrorMessage(index_1.ErrorType.AccessDenied)).send();
-        // he is not a admin
-    }
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });

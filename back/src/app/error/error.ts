@@ -6,5 +6,4 @@ const getErrorMessage = (errorType: ErrorType) => {
     return response
 }
 
-
 export default getErrorMessage

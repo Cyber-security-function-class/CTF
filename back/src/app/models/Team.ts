@@ -1,7 +1,4 @@
-import { Table, Column, Model, HasMany, PrimaryKey, DataType,BelongsToMany,BelongsTo, HasOne, IsUUID, Default } from 'sequelize-typescript'
-import { Challenge } from './Challenge'
-import { Solved } from './Solved'
-import sequelize, { UUID, UUIDV4 } from 'sequelize'
+import { Table, Column, Model, HasMany, PrimaryKey, DataType, IsUUID, Default } from 'sequelize-typescript'
 import { User } from './User'
 
 @Table

@@ -1,32 +1,56 @@
 'use strict';
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.deleteUserValidator = exports.updateUserValidator = exports.getUserValidator = exports.signInValidator = exports.signUpValidator = void 0;
+exports.verifyEmailValidator = exports.deleteUserValidator = exports.updateUserValidator = exports.getUserValidator = exports.signInValidator = exports.signUpValidator = void 0;
 const express_validator_1 = require("express-validator");
+const validators = {
+    id: express_validator_1.body('id')
+        .notEmpty()
+        .withMessage('id is required')
+        .isString()
+        .withMessage('id must be string'),
+    nickname: express_validator_1.body('nickname')
+        .notEmpty()
+        .withMessage('nickname is required')
+        .isString()
+        .withMessage("nickname must be string"),
+    password: express_validator_1.body('password')
+        .notEmpty()
+        .withMessage('password is required')
+        .isString()
+        .withMessage("password must be string"),
+    email: express_validator_1.body('email')
+        .notEmpty()
+        .withMessage('email is required')
+        .isEmail()
+        .withMessage('Email must be validatable email'),
+    isAdmin: express_validator_1.body('isAdmin')
+        .notEmpty()
+        .withMessage("isAdmin is required")
+        .isBoolean()
+        .withMessage("isAdmin is must be boolean"),
+    token: express_validator_1.body('token')
+        .notEmpty()
+        .withMessage('token is required')
+        .isString()
+        .withMessage('token must be string')
+};
 const signUpValidator = () => {
     return [
-        express_validator_1.body('nickname')
-            .notEmpty()
-            .withMessage('nickname is required')
+        validators.nickname
             .not()
             .custom((val) => /[^A-za-z0-9\s]/g.test(val))
             .withMessage('nickname not use uniq characters'),
-        express_validator_1.body('password')
-            .notEmpty()
-            .withMessage('password is required')
+        validators.password
             .isLength({ min: 8 })
             .withMessage('password must be 8 characters'),
-        express_validator_1.body('email')
-            .notEmpty()
-            .withMessage('email is required')
-            .isEmail()
-            .withMessage('Email must be validatable email')
+        validators.email
     ];
 };
 exports.signUpValidator = signUpValidator;
 const signInValidator = () => {
     return [
-        express_validator_1.body('email').notEmpty().withMessage('email is required'),
-        express_validator_1.body('password').notEmpty().withMessage('password is required')
+        validators.email,
+        validators.password
     ];
 };
 exports.signInValidator = signInValidator;
@@ -42,32 +66,22 @@ const getUserValidator = () => {
 exports.getUserValidator = getUserValidator;
 const updateUserValidator = () => {
     return [
-        express_validator_1.body('nickname')
-            .notEmpty()
-            .withMessage('nickname is required')
-            .isString()
-            .withMessage("nickname must be string"),
-        express_validator_1.body('email')
-            .notEmpty()
-            .withMessage('email is required')
-            .isEmail()
-            .withMessage("Email must be validatable email"),
-        express_validator_1.body('isAdmin')
-            .notEmpty()
-            .withMessage("isAdmin is required")
-            .isBoolean()
-            .withMessage("isAdmin is must be boolean"),
+        validators.nickname,
+        validators.email,
+        validators.isAdmin
     ];
 };
 exports.updateUserValidator = updateUserValidator;
 const deleteUserValidator = () => {
     return [
-        express_validator_1.body('id')
-            .notEmpty()
-            .withMessage('id is required')
-            .isString()
-            .withMessage('id must be string')
+        validators.id
     ];
 };
 exports.deleteUserValidator = deleteUserValidator;
+const verifyEmailValidator = () => {
+    return [
+        validators.token
+    ];
+};
+exports.verifyEmailValidator = verifyEmailValidator;
 //# sourceMappingURL=userValidator.js.map

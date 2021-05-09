@@ -1,4 +1,4 @@
-import { Table, Column, Model, DataType, HasMany, AutoIncrement, PrimaryKey, AllowNull, Unique } from "sequelize-typescript"
+import { Table, Column, Model, HasMany, AutoIncrement, PrimaryKey, AllowNull, Unique } from "sequelize-typescript"
 import { Challenge } from "./Challenge"
 
 @Table

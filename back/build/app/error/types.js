@@ -8,6 +8,7 @@ var ErrorType;
     ErrorType["AccessDenied"] = "accessDenied";
     ErrorType["AlreadyExist"] = "alreadyExist";
     ErrorType["NotExist"] = "notExist";
+    ErrorType["NotVerifiedEmail"] = "notVerifiedEmail";
 })(ErrorType || (ErrorType = {}));
 exports.default = ErrorType;
 //# sourceMappingURL=types.js.map

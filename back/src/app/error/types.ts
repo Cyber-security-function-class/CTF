@@ -5,6 +5,7 @@ enum ErrorType {
     AccessDenied = 'accessDenied',
     AlreadyExist = 'alreadyExist',
     NotExist = 'notExist',
+    NotVerifiedEmail = "notVerifiedEmail",
 }
 
 export default ErrorType

@@ -2,33 +2,29 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getTeamValidator = exports.joinTeamValidator = exports.createTeamValidator = void 0;
 const express_validator_1 = require("express-validator");
+const validators = {
+    teamName: express_validator_1.body('teamName')
+        .notEmpty()
+        .withMessage('teamName is required')
+        .isString()
+        .withMessage("teamName must be string"),
+    teamPassword: express_validator_1.body('teamPassword')
+        .notEmpty()
+        .withMessage('password is required')
+        .isLength({ min: 8 })
+        .withMessage('password must be 8 characters'),
+};
 const createTeamValidator = () => {
     return [
-        express_validator_1.body('teamName')
-            .notEmpty()
-            .withMessage('teamName is required')
-            .isString()
-            .withMessage("teamName must be string"),
-        express_validator_1.body('teamPassword')
-            .notEmpty()
-            .withMessage("teamPassword is required")
-            .isString()
-            .withMessage("teamPassword must be string")
+        validators.teamName,
+        validators.teamPassword
     ];
 };
 exports.createTeamValidator = createTeamValidator;
 const joinTeamValidator = () => {
     return [
-        express_validator_1.body("teamName")
-            .notEmpty()
-            .withMessage('teamName is required')
-            .isString()
-            .withMessage("teamName must be string"),
-        express_validator_1.body("teamPassword")
-            .notEmpty()
-            .withMessage('teamPassword is required')
-            .isString()
-            .withMessage("teamPassword must be string")
+        validators.teamName,
+        validators.teamPassword
     ];
 };
 exports.joinTeamValidator = joinTeamValidator;

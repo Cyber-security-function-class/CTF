@@ -1,7 +1,6 @@
-import { Table, Column, Model, ForeignKey, DataType, PrimaryKey, AllowNull, AutoIncrement, BelongsTo} from 'sequelize-typescript'
+import { Table, Column, Model, ForeignKey, PrimaryKey, AllowNull, AutoIncrement, BelongsTo} from 'sequelize-typescript'
 import { User } from './User'
 import { Challenge } from './Challenge'
-import belongsTo from 'sequelize/types/lib/associations/belongs-to'
 
 @Table
 export class Solved extends Model<Solved> {

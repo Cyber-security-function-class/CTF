@@ -15,6 +15,7 @@ let Notice = class Notice extends sequelize_typescript_1.Model {
 };
 __decorate([
     sequelize_typescript_1.PrimaryKey,
+    sequelize_typescript_1.AutoIncrement,
     sequelize_typescript_1.Column,
     __metadata("design:type", Number)
 ], Notice.prototype, "id", void 0);

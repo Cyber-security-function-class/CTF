@@ -3,11 +3,11 @@
 import {Request, Response} from 'express'
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
-import db from '../../models/index'
-import {Category} from '../../models/Category'
-import sequelize from 'sequelize'
 
-const categoryRepository = db.sequelize.getRepository(Category)
+import db from '../../models/index'
+import sequelize, { Op } from 'sequelize'
+
+const categoryRepository = db.repositories.categoryRepository
 
 export const getCategories = async (req: Request, res: Response) => {
 
@@ -24,23 +24,19 @@ export const getCategories = async (req: Request, res: Response) => {
 }
 
 export const addCategory = async (req: Request, res: Response) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-        // he is not a admin
-    }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
     }
     const { category } = req.body
-    const Scategory:string = category.toLowerCase()
+    const Lcategory:string = category.toLowerCase()
 
     let isExistCategory
     try {
         isExistCategory = await categoryRepository.findOne({
             where : sequelize.where(
                 sequelize.fn('lower', sequelize.col('category')), 
-                sequelize.fn('lower', Scategory
+                sequelize.fn('lower', Lcategory
                 )
             ),
             raw : true
@@ -51,44 +47,57 @@ export const addCategory = async (req: Request, res: Response) => {
     }
 
     if ( isExistCategory === null) {
-        // make new category
-        const newCategory = await categoryRepository.create({
-            category : Scategory,
+        await categoryRepository.create({
+            category : Lcategory,
         })
-        return res.json(newCategory)
+        return res.json({result : true})
     } else {
         return res.status(400).json(getErrorMessage(ErrorType.AlreadyExist)).send()
     }
 }
 
 export const updateCategory = async (req:Request, res:Response) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-        // he is not a admin
-    }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
     }
     const { id, category} = req.body
-    if ( await categoryRepository.findOne({ where : { id },raw : true}) !== null ) {
+    const Lcategory = category.toLowerCase()
+    const beforeUpdate = await categoryRepository.findAll({
+        where : { [Op.or]: [
+            { id : id },
+            { category : sequelize.where(
+                sequelize.fn('lower', Lcategory),
+                sequelize.fn('lower', sequelize.col('category'))
+            )}]
+        },
+        raw : true
+    })
+    console.log("before update : ",beforeUpdate)
+    let isCategoryOverlap: boolean
+    let isIdExist: boolean
+    beforeUpdate.find(e => {
+        // check if the category field is overlap with another category
+        ((e.category.toLowerCase() === Lcategory))? isCategoryOverlap=true : isCategoryOverlap=isCategoryOverlap;
+        ((e.id === id))?isIdExist=true : isIdExist=isIdExist;
+    })
+    if ( isCategoryOverlap ) {
+        return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist),detail:"this category is already exist"}).send()
+    } else if ( !isIdExist ) {
+        return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),detail:"this id is not exist"}).send()
+    } else {
         try {
             await categoryRepository.update({category},{where : {id}})
             return res.json({result: true})
         } catch (err) {
             console.log(err)
-            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+            return res.status(500).json({error:getErrorMessage(ErrorType.UnexpectedError),detail:"UnexpectedError"}).send()
         }
-    } else {
-        return res.status(400).json(getErrorMessage(ErrorType.NotExist)).send()
     }
+        
 }
 
 export const deleteCategory = async (req:Request, res:Response) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(400).json(getErrorMessage(ErrorType.AccessDenied)).send()
-        // he is not a admin
-    }
     const errors = validationResult(req)
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })

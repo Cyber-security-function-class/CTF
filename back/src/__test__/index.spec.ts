@@ -14,7 +14,7 @@ const dbconfig = {
     database: "SkillCTF",
     port: 5432
 };
-const PORT = 7000
+
 const dbClient = new Client(dbconfig)
 
 export const preStart = async(done) => {
@@ -31,3 +31,6 @@ export const preStart = async(done) => {
     return service
 }
 export const dbclient = dbClient
+
+
+// 테스트 코드가 급하게 짜느라 더러움 ㅜ

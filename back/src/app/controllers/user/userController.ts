@@ -1,33 +1,29 @@
-import {Request, Response} from 'express'
-import * as jwt from 'jsonwebtoken'
-import { genSalt, hash, compare } from 'bcrypt'
-import { validationResult } from "express-validator"
+'use strict';
+
 import environment from '../../config/config'
+
+import {Request, Response} from 'express'
+
+import * as jwt from 'jsonwebtoken'
+
+import { validationResult } from "express-validator"
+import { ErrorType, getErrorMessage } from '../../error/index'
+
 import { Op } from 'sequelize'
 import db from '../../models/index'
-import { ErrorType, getErrorMessage } from '../../error/index'
-import {User} from '../../models/User'
-import {Solved} from "../../models/Solved"
-import { Repository } from 'sequelize-typescript'
-import { Team } from '../../models/Team'
-import { EmailVerified } from '../../models/EmailVerified'
 
-const teamRepository:Repository<Team> = db.sequelize.getRepository(Team)
-const userRepository:Repository<User> = db.sequelize.getRepository(User)
-const solvedRepository:Repository<Solved> = db.sequelize.getRepository(Solved)
-const emailVerifiedRepository:Repository<EmailVerified> = db.sequelize.getRepository(EmailVerified)
+import { 
+    createHashedPassword, checkPassword,
+    send_auth_mail
+} from '../../utils/user'
 
-const createHashedPassword = async (password: string) => {
-    const saltRounds = 10
-    const salt = await genSalt(saltRounds)
-    const hashedPassword = await hash(password, salt)
-    return hashedPassword
-}
 
-const checkPassword = async (password: string, hashedPassword: string) => {
-    const isPasswordCorrect = await compare(password, hashedPassword) // hash.toString for type checking hack
-    return isPasswordCorrect
-}
+const teamRepository = db.repositories.teamRepository
+const userRepository = db.repositories.userRepository
+const solvedRepository = db.repositories.solvedRepository
+const emailVerifiedRepository = db.repositories.emailVerifiedRepository
+
+
 
 const createToken = async (): Promise<string> => {
     var result           = [];
@@ -39,8 +35,11 @@ const createToken = async (): Promise<string> => {
    return result.join('');
 }
 
+
+
 export const signUp = async (req:Request, res:Response) => {
     const errors = validationResult(req)
+    
     if (!errors.isEmpty()) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
@@ -78,14 +77,19 @@ export const signUp = async (req:Request, res:Response) => {
             score : 0,
             isAdmin : false
         })
-        
+        const token = await createToken()
         if(user) {
             emailVerifiedRepository.create({
                 userId : user.id,
-                token : await createToken(),
+                token : token,
                 isVerified : false
-            })
-            res.json({ result: true })
+            }) 
+            console.log("sending auth mail")
+            send_auth_mail(email,token)
+            
+            return res.json({ result: true })
+        } else {
+            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
         }
     } catch(err) {
         console.log(err)
@@ -97,7 +101,7 @@ export const signIn = async (req,res) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
     const { email, password } = req.body
     let user
@@ -200,15 +204,105 @@ export const getUser = async (req, res) => {
 
 }
 
-export const updateUser = async (req, res) => { 
-    if ( !req['decoded'].isAdmin) {
-        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
-    }
-
+export const verifyEmail = async (req, res) => {
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+    }
+
+    const { token } = req.body 
+    const userId = req['decoded'].id
+
+    const emailVerified = await emailVerifiedRepository.findOne({
+        where : {
+            userId
+        },
+        attributes : ['id','token','isVerified'],
+        raw : true
+    })
+    if ( emailVerified === null) {
+        console.log("unknown user try to email verify")
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+    }
+    if(!emailVerified['isVerified']) {
+        try {
+            if (token === emailVerified['token']) {
+                await emailVerifiedRepository.update({isVerified : true},{where :{ id:emailVerified['id']}})
+                const token = jwt.sign({    // payload
+                    id: userId,
+                    nickname : req['decoded'].nickname,
+                    isAdmin : req['decoded'].isAdmin,
+                    emailVerified : true
+                },
+                    req.app.get('jwt-secret'),   // secret
+                {                            // policy
+                    expiresIn : environment.jwt.expiresIn
+                });
+                return res.json({ token : "Bearer "+token }).send()
+            } else {
+                return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: "token is not validate"})
+            }
+        } catch (err) {
+            console.log(err)
+            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+        }
+    } else {
+        // already verified
+        return res.status(400).json({error : getErrorMessage(ErrorType.AlreadyExist), detail:"already verified"})
+    }
+}
+
+export const resendEmail = async (req,res) => {
+    const userId = req['decoded'].id
+    let user
+    try{
+        user = await userRepository.findOne({
+            where : {id : userId},
+            attributes : ['id','email'],
+            raw : true,
+            include : [{
+                model : emailVerifiedRepository,
+                as : "emailVerified"
+            }]
+        })
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json({error : getErrorMessage(ErrorType.UnexpectedError),detail:"maybe user is not Exist"})
+    }
+    let now = new Date()
+    try {
+        if ( user['emailVerified.updatedAt'].valueOf() + (30 * 1000) < now.valueOf() ) { // 30 second
+            
+            if ( user['emailVerified.isVerified'] ) {
+                return res.status(400).json({error : getErrorMessage(ErrorType.AlreadyExist),detail:"already verified"})
+            }
+            const token = await createToken()
+            send_auth_mail(user.email,token)
+
+            emailVerifiedRepository.update({
+                token
+            },{
+                where : { 
+                    id : user['emailVerified.id']
+                }
+            })
+            return res.json({result : true})
+        } else {
+            return res.json({error : getErrorMessage(ErrorType.AccessDenied),detail:"Only one mail can be sent per 30 seconds."})
+        }
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+    }
+}
+
+export const updateUser = async (req, res) => { 
+    
+    const errors = validationResult(req)
+
+    if (!errors.isEmpty()) {
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
     
     const { id, nickname, email, isAdmin } = req.body
@@ -250,14 +344,11 @@ export const updateUser = async (req, res) => {
 }
 
 export const deleteUser = async (req, res) => {
-    if ( !req['decoded'].isAdmin) {
-        return res.status(403).json(getErrorMessage(ErrorType.AccessDenied)).send()
-    }
-
+    
     const errors = validationResult(req)
 
     if (!errors.isEmpty()) {
-        return res.status(422).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
+        return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
 
     const { id } = req.body
