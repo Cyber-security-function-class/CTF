@@ -1,14 +1,13 @@
 import {Request, Response} from 'express'
-import db from '../../models/index'
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
 import { Op, Sequelize } from 'sequelize'
 
-const challengeRepository = db.repositories.challengeRepository
-const categoryRepository = db.repositories.categoryRepository
-const teamRepository = db.repositories.teamRepository
-const userRepository = db.repositories.userRepository
-const solvedRepository = db.repositories.solvedRepository
+import { Challenge } from '../../models/Challenge'
+import { User } from '../../models/User'
+import { Team } from '../../models/Team'
+import { Category } from '../../models/Category'
+import { Solved } from '../../models/Solved'
 
 export const getChallenges = async (req:Request, res:Response) => {
     const category = req.query['category']
@@ -16,10 +15,10 @@ export const getChallenges = async (req:Request, res:Response) => {
     try {
         let challenges
         if (!category){
-            challenges = await challengeRepository.findAll({
+            challenges = await Challenge.findAll({
                 attributes : ['id','title','score','categoryId','createdAt','updatedAt'],
                 include: [{
-                    model: categoryRepository,
+                    model: Category,
                     as: 'category',
                     attributes : ['category']
                 }],
@@ -40,13 +39,13 @@ export const getChallenges = async (req:Request, res:Response) => {
                     }
                 })
             }).then( async (f) => {
-                challenges = await challengeRepository.findAll({
+                challenges = await Challenge.findAll({
                     where : {
                         [Op.or]: f
                     },
                     attributes : ['id','title','score','categoryId','createdAt','updatedAt'],
                     include : [{
-                        model: categoryRepository,
+                        model: Category,
                         as: 'category',
                         attributes : ['category']
                     }],
@@ -74,14 +73,14 @@ export const getChallenge = async (req:Request, res:Response) => {
     }
 
     try {
-        const challenge = await challengeRepository.findOne({
+        const challenge = await Challenge.findOne({
             where : { 
                 id : id
             },
             attributes : ['id','title','content','score','categoryId'],
             raw : true,
             include: [{
-                model: categoryRepository,
+                model: Category,
                 as: 'category'
             }]
         })
@@ -106,11 +105,11 @@ export const addChallenge = async (req:Request, res:Response) => {
     const { title, score,categoryId, content, flag} = req.body
     
     try {
-        if ( await categoryRepository.findOne({where : {id : categoryId}}) !== null) {
-            if ( await challengeRepository.findOne({where : {flag}}) !== null) {
+        if ( await Category.findOne({where : {id : categoryId}}) !== null) {
+            if ( await Challenge.findOne({where : {flag}}) !== null) {
                 return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist),detail : "The same flag already exist."})
             }
-            await challengeRepository.create({
+            await Challenge.create({
                 title,
                 score,
                 content,
@@ -135,13 +134,13 @@ export const updateChallenge = async (req:Request, res:Response) => {
     }
     const {id,title,content,score,flag,categoryId} = req.body
     
-    if ( await challengeRepository.findOne({where : id}) === null) {
+    if ( await Challenge.findOne({where : id}) === null) {
         return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),detail:"challenge doesn't exist"})
     }
     
-    if( await categoryRepository.findOne({where : {id:categoryId}}) !== null) {
+    if( await Category.findOne({where : {id:categoryId}}) !== null) {
         try {
-            await challengeRepository.update({
+            await Challenge.update({
                 title,
                 content,
                 score,
@@ -167,9 +166,9 @@ export const deleteChallenge = async (req:Request, res:Response) => {
     }
     
     const { id } = req.body
-    if ( await challengeRepository.findOne({where:{id}}) !== null) {
+    if ( await Challenge.findOne({where:{id}}) !== null) {
         try {
-            await challengeRepository.destroy({where:{id}})
+            await Challenge.destroy({where:{id}})
             return res.json({result: true})
         } catch (err) {
             console.log(err)
@@ -187,10 +186,10 @@ export const authFlag = async (req: Request, res: Response) => {
     }
     const userId = req['decoded'].id
     const { flag } = req.body
-    const user = await userRepository.findOne({
+    const user = await User.findOne({
         where : {id : userId},raw : true,
         include : [{
-            model : teamRepository,
+            model : Team,
             attributes : ['id']
         }]
     })
@@ -199,7 +198,7 @@ export const authFlag = async (req: Request, res: Response) => {
     }
     
     const teamId = user['team.id']
-    const challenge = await challengeRepository.findOne({where : {flag},raw : true})
+    const challenge = await Challenge.findOne({where : {flag},raw : true})
 
     if ( teamId === null ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.AccessDenied),detail:"you have to join a team before submit flag."})
@@ -209,7 +208,7 @@ export const authFlag = async (req: Request, res: Response) => {
     }
     
     // flag is correct
-    const solved = await solvedRepository.findOrCreate({
+    const solved = await Solved.findOrCreate({
         where : {
             teamId,
             challengeId : challenge.id
@@ -220,7 +219,7 @@ export const authFlag = async (req: Request, res: Response) => {
         }
     })
     if(solved[1]) { // solved
-        await teamRepository.update({score:Sequelize.literal('score + '+challenge.score)},{where : {id : teamId}})
+        await Team.update({score:Sequelize.literal('score + '+challenge.score)},{where : {id : teamId}})
         return res.json({result : true})
     } else { // already solved
         return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist),detail:"already solved"})

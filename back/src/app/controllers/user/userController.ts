@@ -17,13 +17,10 @@ import {
     send_auth_mail
 } from '../../utils/user'
 
-
-const teamRepository = db.repositories.teamRepository
-const userRepository = db.repositories.userRepository
-const solvedRepository = db.repositories.solvedRepository
-const emailVerifiedRepository = db.repositories.emailVerifiedRepository
-
-
+import { User } from '../../models/User'
+import { Team } from '../../models/Team'
+import { Solved } from '../../models/Solved'
+import { EmailVerified } from '../../models/EmailVerified'
 
 const createToken = async (): Promise<string> => {
     var result           = [];
@@ -51,7 +48,7 @@ export const signUp = async (req:Request, res:Response) => {
     const hashedPassword = await createHashedPassword( password )
 
     // await check('nickname')
-    const isExistingUser = await userRepository.findOne({
+    const isExistingUser = await User.findOne({
         attributes : ['nickname','email'],
         where : {
             [Op.or]: [{ nickname: nickname}, { email : email }]
@@ -70,7 +67,7 @@ export const signUp = async (req:Request, res:Response) => {
     }
 
     try {
-        const user = await userRepository.create({
+        const user = await User.create({
             nickname : nickname,
             password : hashedPassword,
             email : email,
@@ -79,7 +76,7 @@ export const signUp = async (req:Request, res:Response) => {
         })
         const token = await createToken()
         if(user) {
-            emailVerifiedRepository.create({
+            EmailVerified.create({
                 userId : user.id,
                 token : token,
                 isVerified : false
@@ -106,12 +103,12 @@ export const signIn = async (req,res) => {
     const { email, password } = req.body
     let user
     try {
-        user = await userRepository.findOne({
+        user = await User.findOne({
             where : {email:email},
             raw : true,
             attributes : ['id','password','isAdmin','nickname'],
             include : [{
-                model : emailVerifiedRepository,
+                model : EmailVerified,
                 attributes : ['isVerified']
             }]
         })
@@ -153,10 +150,10 @@ export const signIn = async (req,res) => {
 
 export const getUsers = async (req,res) => {
     try {
-        const users = await userRepository.findAll({
+        const users = await User.findAll({
             attributes: ['id','nickname'],
             include: [{
-                model : teamRepository,
+                model : Team,
                 attributes : ['id','teamName','leader']
             }],
             raw : true
@@ -179,15 +176,15 @@ export const getUser = async (req, res) => {
     let { id } = req.query
 
     try {
-        const user = await userRepository.findOne({
+        const user = await User.findOne({
             where : {
                 id : id
             },
             attributes : ['id','nickname','email','isAdmin'],
             include : [{
-                model : solvedRepository
+                model : Solved
             },{
-                model : teamRepository
+                model : Team
             }]
         })
         if ( user !== null) {
@@ -214,7 +211,7 @@ export const verifyEmail = async (req, res) => {
     const { token } = req.body 
     const userId = req['decoded'].id
 
-    const emailVerified = await emailVerifiedRepository.findOne({
+    const emailVerified = await EmailVerified.findOne({
         where : {
             userId
         },
@@ -228,7 +225,7 @@ export const verifyEmail = async (req, res) => {
     if(!emailVerified['isVerified']) {
         try {
             if (token === emailVerified['token']) {
-                await emailVerifiedRepository.update({isVerified : true},{where :{ id:emailVerified['id']}})
+                await EmailVerified.update({isVerified : true},{where :{ id:emailVerified['id']}})
                 const token = jwt.sign({    // payload
                     id: userId,
                     nickname : req['decoded'].nickname,
@@ -257,12 +254,12 @@ export const resendEmail = async (req,res) => {
     const userId = req['decoded'].id
     let user
     try{
-        user = await userRepository.findOne({
+        user = await User.findOne({
             where : {id : userId},
             attributes : ['id','email'],
             raw : true,
             include : [{
-                model : emailVerifiedRepository,
+                model : EmailVerified,
                 as : "emailVerified"
             }]
         })
@@ -280,7 +277,7 @@ export const resendEmail = async (req,res) => {
             const token = await createToken()
             send_auth_mail(user.email,token)
 
-            emailVerifiedRepository.update({
+            EmailVerified.update({
                 token
             },{
                 where : { 
@@ -307,7 +304,7 @@ export const updateUser = async (req, res) => {
     
     const { id, nickname, email, isAdmin } = req.body
     try {
-        const isUserExist = await userRepository.findOne({
+        const isUserExist = await User.findOne({
             where : {
                 id
             }, 
@@ -318,7 +315,7 @@ export const updateUser = async (req, res) => {
         if ( isUserExist !== null ){
             try {
                 // update user
-                await userRepository.update(
+                await User.update(
                     {
                         nickname,email,isAdmin
                     },
@@ -353,10 +350,10 @@ export const deleteUser = async (req, res) => {
 
     const { id } = req.body
 
-    if ( await userRepository.findOne({where : {id},raw : true, attributes:['id']}) !== null ){
+    if ( await User.findOne({where : {id},raw : true, attributes:['id']}) !== null ){
         // user exist
         try {
-            await userRepository.destroy({where : {id}})
+            await User.destroy({where : {id}})
             return res.json({result : true})
         } catch (err) {
             console.log(err)

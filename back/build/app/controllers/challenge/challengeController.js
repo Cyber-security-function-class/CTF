@@ -8,34 +8,25 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authFlag = exports.deleteChallenge = exports.updateChallenge = exports.addChallenge = exports.getChallenge = exports.getChallenges = void 0;
-const index_1 = __importDefault(require("../../models/index"));
-const index_2 = require("../../error/index");
+const index_1 = require("../../error/index");
 const express_validator_1 = require("express-validator");
 const sequelize_1 = require("sequelize");
 const Challenge_1 = require("../../models/Challenge");
-const Category_1 = require("../../models/Category");
-const Solved_1 = require("../../models/Solved");
 const User_1 = require("../../models/User");
 const Team_1 = require("../../models/Team");
-const challengeRepository = index_1.default.sequelize.getRepository(Challenge_1.Challenge);
-const categoryRepository = index_1.default.sequelize.getRepository(Category_1.Category);
-const solvedRepository = index_1.default.sequelize.getRepository(Solved_1.Solved);
-const userRepository = index_1.default.sequelize.getRepository(User_1.User);
-const teamRepository = index_1.default.sequelize.getRepository(Team_1.Team);
+const Category_1 = require("../../models/Category");
+const Solved_1 = require("../../models/Solved");
 const getChallenges = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const category = req.query['category'];
     try {
         let challenges;
         if (!category) {
-            challenges = yield challengeRepository.findAll({
+            challenges = yield Challenge_1.Challenge.findAll({
                 attributes: ['id', 'title', 'score', 'categoryId', 'createdAt', 'updatedAt'],
                 include: [{
-                        model: categoryRepository,
+                        model: Category_1.Category,
                         as: 'category',
                         attributes: ['category']
                     }],
@@ -57,13 +48,13 @@ const getChallenges = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     }
                 });
             }).then((f) => __awaiter(void 0, void 0, void 0, function* () {
-                challenges = yield challengeRepository.findAll({
+                challenges = yield Challenge_1.Challenge.findAll({
                     where: {
                         [sequelize_1.Op.or]: f
                     },
                     attributes: ['id', 'title', 'score', 'categoryId', 'createdAt', 'updatedAt'],
                     include: [{
-                            model: categoryRepository,
+                            model: Category_1.Category,
                             as: 'category',
                             attributes: ['category']
                         }],
@@ -72,13 +63,13 @@ const getChallenges = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                 return res.json(challenges);
             })).catch(err => {
                 console.log(err);
-                return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+                return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
             });
         }
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+        return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
     }
 });
 exports.getChallenges = getChallenges;
@@ -87,17 +78,17 @@ const getChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     const { id } = req.query;
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), detail: errors.array() });
     }
     try {
-        const challenge = yield challengeRepository.findOne({
+        const challenge = yield Challenge_1.Challenge.findOne({
             where: {
                 id: id
             },
             attributes: ['id', 'title', 'content', 'score', 'categoryId'],
             raw: true,
             include: [{
-                    model: categoryRepository,
+                    model: Category_1.Category,
                     as: 'category'
                 }]
         });
@@ -105,27 +96,27 @@ const getChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             return res.json(challenge);
         }
         else {
-            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), "detail": "Challenge not exist" });
+            return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.NotExist), "detail": "Challenge not exist" });
         }
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json({ error: index_2.getErrorMessage(index_2.ErrorType.UnexpectedError) });
+        return res.status(500).json({ error: index_1.getErrorMessage(index_1.ErrorType.UnexpectedError) });
     }
 });
 exports.getChallenge = getChallenge;
 const addChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), detail: errors.array() });
     }
     const { title, score, categoryId, content, flag } = req.body;
     try {
-        if ((yield categoryRepository.findOne({ where: { id: categoryId } })) !== null) {
-            if ((yield challengeRepository.findOne({ where: { flag } })) !== null) {
-                return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "The same flag already exist." });
+        if ((yield Category_1.Category.findOne({ where: { id: categoryId } })) !== null) {
+            if ((yield Challenge_1.Challenge.findOne({ where: { flag } })) !== null) {
+                return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.AlreadyExist), detail: "The same flag already exist." });
             }
-            yield challengeRepository.create({
+            yield Challenge_1.Challenge.create({
                 title,
                 score,
                 content,
@@ -135,27 +126,27 @@ const addChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* (
             return res.json({ result: true });
         }
         else {
-            return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), "detail": "category not exist" });
+            return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.NotExist), "detail": "category not exist" });
         }
     }
     catch (err) {
         console.log(err);
-        return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+        return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
     }
 });
 exports.addChallenge = addChallenge;
 const updateChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), detail: errors.array() });
     }
     const { id, title, content, score, flag, categoryId } = req.body;
-    if ((yield challengeRepository.findOne({ where: id })) === null) {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "challenge doesn't exist" });
+    if ((yield Challenge_1.Challenge.findOne({ where: id })) === null) {
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.NotExist), detail: "challenge doesn't exist" });
     }
-    if ((yield categoryRepository.findOne({ where: { id: categoryId } })) !== null) {
+    if ((yield Category_1.Category.findOne({ where: { id: categoryId } })) !== null) {
         try {
-            yield challengeRepository.update({
+            yield Challenge_1.Challenge.update({
                 title,
                 content,
                 score,
@@ -168,62 +159,62 @@ const updateChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function
         }
         catch (err) {
             console.log(err);
-            return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+            return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
         }
     }
     else {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), "detail": "category not exist" });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.NotExist), "detail": "category not exist" });
     }
 });
 exports.updateChallenge = updateChallenge;
 const deleteChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), detail: errors.array() });
     }
     const { id } = req.body;
-    if ((yield challengeRepository.findOne({ where: { id } })) !== null) {
+    if ((yield Challenge_1.Challenge.findOne({ where: { id } })) !== null) {
         try {
-            yield challengeRepository.destroy({ where: { id } });
+            yield Challenge_1.Challenge.destroy({ where: { id } });
             return res.json({ result: true });
         }
         catch (err) {
             console.log(err);
-            return res.status(500).json(index_2.getErrorMessage(index_2.ErrorType.UnexpectedError)).send();
+            return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
         }
     }
     else {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.NotExist), detail: "challenge doesn't exist" });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.NotExist), detail: "challenge doesn't exist" });
     }
 });
 exports.deleteChallenge = deleteChallenge;
 const authFlag = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const errors = express_validator_1.validationResult(req);
     if (!errors.isEmpty()) {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.ValidationError), detail: errors.array() });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), detail: errors.array() });
     }
     const userId = req['decoded'].id;
     const { flag } = req.body;
-    const user = yield userRepository.findOne({
+    const user = yield User_1.User.findOne({
         where: { id: userId }, raw: true,
         include: [{
-                model: teamRepository,
+                model: Team_1.Team,
                 attributes: ['id']
             }]
     });
     if (user === null) {
-        return res.status(500).json({ error: index_2.getErrorMessage(index_2.ErrorType.UnexpectedError) });
+        return res.status(500).json({ error: index_1.getErrorMessage(index_1.ErrorType.UnexpectedError) });
     }
     const teamId = user['team.id'];
-    const challenge = yield challengeRepository.findOne({ where: { flag }, raw: true });
+    const challenge = yield Challenge_1.Challenge.findOne({ where: { flag }, raw: true });
     if (teamId === null) {
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AccessDenied), detail: "you have to join a team before submit flag." });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.AccessDenied), detail: "you have to join a team before submit flag." });
     }
     if (challenge === null) {
         return res.json({ result: false }); // flag is wrong
     }
     // flag is correct
-    const solved = yield solvedRepository.findOrCreate({
+    const solved = yield Solved_1.Solved.findOrCreate({
         where: {
             teamId,
             challengeId: challenge.id
@@ -234,11 +225,11 @@ const authFlag = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
     });
     if (solved[1]) { // solved
-        yield teamRepository.update({ score: sequelize_1.Sequelize.literal('score + ' + challenge.score) }, { where: { id: teamId } });
+        yield Team_1.Team.update({ score: sequelize_1.Sequelize.literal('score + ' + challenge.score) }, { where: { id: teamId } });
         return res.json({ result: true });
     }
     else { // already solved
-        return res.status(400).json({ error: index_2.getErrorMessage(index_2.ErrorType.AlreadyExist), detail: "already solved" });
+        return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.AlreadyExist), detail: "already solved" });
     }
 });
 exports.authFlag = authFlag;

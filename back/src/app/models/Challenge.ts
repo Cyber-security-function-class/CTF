@@ -34,4 +34,6 @@ export class Challenge extends Model<Challenge> {
 
     @HasMany(() => Solved)
     solveds : Solved[]
+
+
 }

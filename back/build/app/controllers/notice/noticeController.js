@@ -1,4 +1,4 @@
-"use strict";
+'use strict';
 var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
     function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
     return new (P || (P = Promise))(function (resolve, reject) {
@@ -8,19 +8,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteNotice = exports.updateNotice = exports.addNotice = exports.getNotices = exports.getCurrentNotice = void 0;
 const express_validator_1 = require("express-validator");
 const error_1 = require("../../error");
-const index_1 = __importDefault(require("../../models/index"));
 const Notice_1 = require("../../models/Notice");
-const noticeRepository = index_1.default.sequelize.getRepository(Notice_1.Notice);
 const getCurrentNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const notice = yield noticeRepository.findOne({
+        const notice = yield Notice_1.Notice.findOne({
             order: [['createdAt', 'DESC']],
             raw: true
         });
@@ -34,7 +29,7 @@ const getCurrentNotice = (req, res) => __awaiter(void 0, void 0, void 0, functio
 exports.getCurrentNotice = getCurrentNotice;
 const getNotices = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const notice = yield noticeRepository.findAll({ raw: true });
+        const notice = yield Notice_1.Notice.findAll({ raw: true });
         return res.json(notice);
     }
     catch (err) {
@@ -50,7 +45,7 @@ const addNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
     const { content } = req.body;
     try {
-        yield noticeRepository.create({ content });
+        yield Notice_1.Notice.create({ content });
         return res.json({ result: true });
     }
     catch (err) {
@@ -66,8 +61,8 @@ const updateNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
     const { id, content } = req.body;
     try {
-        if ((yield noticeRepository.findOne({ where: { id } })) !== null) {
-            yield noticeRepository.update({ content }, { where: { id } });
+        if ((yield Notice_1.Notice.findOne({ where: { id } })) !== null) {
+            yield Notice_1.Notice.update({ content }, { where: { id } });
             return res.json({ result: true });
         }
         else {
@@ -87,8 +82,8 @@ const deleteNotice = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     }
     const { id } = req.body;
     try {
-        if ((yield noticeRepository.findOne({ where: { id } })) !== null) {
-            yield noticeRepository.destroy({ where: { id } });
+        if ((yield Notice_1.Notice.findOne({ where: { id } })) !== null) {
+            yield Notice_1.Notice.destroy({ where: { id } });
             return res.json({ result: true });
         }
         else {

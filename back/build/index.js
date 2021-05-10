@@ -39,6 +39,7 @@ app_1.default.listen(PORT, () => __awaiter(void 0, void 0, void 0, function* () 
     });
     console.info(`Server running on port ${PORT}`);
     if (initCallback) {
+        console.log("initing server");
         initCallback();
     }
 }));

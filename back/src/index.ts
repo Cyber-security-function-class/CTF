@@ -1,6 +1,5 @@
 'use strict'
 
-import {createServer} from 'http'
 import app from './app'
 import db from "./app/models"
 import 'dotenv'
@@ -32,6 +31,7 @@ app.listen ( PORT , async () => {
     })
     console.info(`Server running on port ${PORT}`)
     if(initCallback) {
+        console.log("initing server")
         initCallback();
     }
 })

@@ -27,20 +27,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.deleteCategory = exports.updateCategory = exports.addCategory = exports.getCategories = void 0;
 const index_1 = require("../../error/index");
 const express_validator_1 = require("express-validator");
-const index_2 = __importDefault(require("../../models/index"));
-const Category_1 = require("../../models/Category");
 const sequelize_1 = __importStar(require("sequelize"));
-const categoryRepository = index_2.default.sequelize.getRepository(Category_1.Category);
+const category_1 = require("../../models/category");
 const getCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const categories = yield categoryRepository.findAll({
+        const categories = yield category_1.Category.findAll({
             raw: true
         });
         res.json(categories);
@@ -60,7 +55,7 @@ const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const Lcategory = category.toLowerCase();
     let isExistCategory;
     try {
-        isExistCategory = yield categoryRepository.findOne({
+        isExistCategory = yield category_1.Category.findOne({
             where: sequelize_1.default.where(sequelize_1.default.fn('lower', sequelize_1.default.col('category')), sequelize_1.default.fn('lower', Lcategory)),
             raw: true
         });
@@ -70,7 +65,7 @@ const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
     }
     if (isExistCategory === null) {
-        yield categoryRepository.create({
+        yield category_1.Category.create({
             category: Lcategory,
         });
         return res.json({ result: true });
@@ -87,7 +82,7 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     const { id, category } = req.body;
     const Lcategory = category.toLowerCase();
-    const beforeUpdate = yield categoryRepository.findAll({
+    const beforeUpdate = yield category_1.Category.findAll({
         where: { [sequelize_1.Op.or]: [
                 { id: id },
                 { category: sequelize_1.default.where(sequelize_1.default.fn('lower', Lcategory), sequelize_1.default.fn('lower', sequelize_1.default.col('category'))) }
@@ -111,7 +106,7 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     else {
         try {
-            yield categoryRepository.update({ category }, { where: { id } });
+            yield category_1.Category.update({ category }, { where: { id } });
             return res.json({ result: true });
         }
         catch (err) {
@@ -127,9 +122,9 @@ const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
     }
     const { id } = req.body;
-    if ((yield categoryRepository.findOne({ where: { id }, raw: true })) !== null) {
+    if ((yield category_1.Category.findOne({ where: { id }, raw: true })) !== null) {
         try {
-            yield categoryRepository.destroy({ where: { id } });
+            yield category_1.Category.destroy({ where: { id } });
             return res.json({ result: true });
         }
         catch (err) {

@@ -13,32 +13,27 @@ import { validationResult } from "express-validator";
 
 import { createHashedPassword, checkPassword } from "../../utils/user"
 
-
-
-
-const teamRepository = db.repositories.teamRepository
-const userRepository = db.repositories.userRepository
-const solvedRepository = db.repositories.solvedRepository
-const challengeRepository = db.repositories.challengeRepository
-
-
+import { Team } from "../../models/Team"
+import { User } from "../../models/User"
+import { Solved } from "../../models/Solved"
+import { Challenge } from "../../models/Challenge" 
 
 export const getTeam = async (req : Request, res : Response) => { // get
     const { id } = req.query
     try {
-        const team = await teamRepository.findOne({
+        const team = await Team.findOne({
             where : {id},
             attributes: ['id','teamName','score'],
             include: [
                 {
-                model: userRepository,
+                model: User,
                 attributes : ['id','nickname'],
                 include : [{
-                    model : solvedRepository,
+                    model : Solved,
                     attributes : ['score'],
                     required : false,
                     include : [{
-                        model : challengeRepository,
+                        model : Challenge,
                         attributes : ['id','title']
                     }]
                 }],
@@ -58,7 +53,7 @@ export const getTeam = async (req : Request, res : Response) => { // get
 
 export const getTeams = async (req: Request, res: Response) => {
     try {
-        const teams = await teamRepository.findAll({attributes:['id','teamName','score']})
+        const teams = await Team.findAll({attributes:['id','teamName','score']})
         
         return res.json(teams)
     } catch (err) {
@@ -78,7 +73,7 @@ export const createTeam = async(req: Request, res: Response) => {
     let leader
     let hasTeam:boolean // is user has team
     try {
-        leader = await userRepository.findOne({where : {id:leaderId},raw:true, attributes:['teamId']})
+        leader = await User.findOne({where : {id:leaderId},raw:true, attributes:['teamId']})
         if ( leader ){
             // if user has team : true 
             hasTeam = ( leader.teamId !== null ) ? true : false
@@ -92,7 +87,7 @@ export const createTeam = async(req: Request, res: Response) => {
 
     if ( !hasTeam ) {
         const hashedTeamPassword = await createHashedPassword(teamPassword)
-        const newTeam = await teamRepository.findOrCreate({
+        const newTeam = await Team.findOrCreate({
             where: { teamName },
             defaults: { 
                 leader : leaderId,
@@ -102,7 +97,7 @@ export const createTeam = async(req: Request, res: Response) => {
         })
         if (newTeam[1]){ // team already exists : false
             // join to team
-            await userRepository.update({
+            await User.update({
                 teamId : newTeam[0].id
             },{
                 where : { id : leaderId },
@@ -132,17 +127,17 @@ export const joinTeam = async(req: Request, res: Response) => {
     const userId = req['decoded'].id
 
     try {
-        const user = await userRepository.findOne({where : {id : userId},attributes:['teamId'],raw : true})
+        const user = await User.findOne({where : {id : userId},attributes:['teamId'],raw : true})
         if (user.teamId !== null) {
             return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist), detail:"already joined a team"})
         }
-        const team = await teamRepository.findOne({
+        const team = await Team.findOne({
             where : { 
                 teamName
             },
             attributes : ['id','leader','teamPassword'],
             include: [{
-                model : userRepository,
+                model : User,
                 attributes : ['id','nickname']
             }]
         })
@@ -152,7 +147,7 @@ export const joinTeam = async(req: Request, res: Response) => {
                 return res.status(400).json({error:getErrorMessage(ErrorType.AccessDenied), detail:"team is full"})
             }
             if ( await checkPassword(teamPassword,team.teamPassword) ) {
-                await userRepository.update({
+                await User.update({
                     teamId : team.id,
                 },{
                     where : {

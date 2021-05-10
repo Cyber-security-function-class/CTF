@@ -4,15 +4,14 @@ import {Request, Response} from 'express'
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
 
-import db from '../../models/index'
 import sequelize, { Op } from 'sequelize'
 
-const categoryRepository = db.repositories.categoryRepository
+import { Category } from '../../models/Category'
 
 export const getCategories = async (req: Request, res: Response) => {
 
     try {
-        const categories = await categoryRepository.findAll({ 
+        const categories = await Category.findAll({ 
             raw : true
         })
 
@@ -33,7 +32,7 @@ export const addCategory = async (req: Request, res: Response) => {
 
     let isExistCategory
     try {
-        isExistCategory = await categoryRepository.findOne({
+        isExistCategory = await Category.findOne({
             where : sequelize.where(
                 sequelize.fn('lower', sequelize.col('category')), 
                 sequelize.fn('lower', Lcategory
@@ -47,7 +46,7 @@ export const addCategory = async (req: Request, res: Response) => {
     }
 
     if ( isExistCategory === null) {
-        await categoryRepository.create({
+        await Category.create({
             category : Lcategory,
         })
         return res.json({result : true})
@@ -63,7 +62,7 @@ export const updateCategory = async (req:Request, res:Response) => {
     }
     const { id, category} = req.body
     const Lcategory = category.toLowerCase()
-    const beforeUpdate = await categoryRepository.findAll({
+    const beforeUpdate = await Category.findAll({
         where : { [Op.or]: [
             { id : id },
             { category : sequelize.where(
@@ -87,7 +86,7 @@ export const updateCategory = async (req:Request, res:Response) => {
         return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),detail:"this id is not exist"}).send()
     } else {
         try {
-            await categoryRepository.update({category},{where : {id}})
+            await Category.update({category},{where : {id}})
             return res.json({result: true})
         } catch (err) {
             console.log(err)
@@ -103,9 +102,9 @@ export const deleteCategory = async (req:Request, res:Response) => {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), msg: errors.array() })
     }
     const { id } = req.body
-    if ( await categoryRepository.findOne({ where : { id },raw : true}) !== null ) {
+    if ( await Category.findOne({ where : { id },raw : true}) !== null ) {
         try {
-            await categoryRepository.destroy({where : { id }})
+            await Category.destroy({where : { id }})
             return res.json({result: true})
         } catch (err) {
             console.log(err)

@@ -7,11 +7,12 @@ import { Op } from 'sequelize';
 
 import jwt_decode from "jwt-decode";
 
+import { EmailVerified } from '../app/models/EmailVerified'
+import { User } from "../app/models/User"
+
 const ADDRESS = "http://localhost"
 const PORT = process.env.PORT || 7000
 const BASEURI = ADDRESS+":"+PORT
-const emailVerifiedRepository = db.repositories.emailVerifiedRepository
-const userRepository = db.repositories.userRepository
 
 interface response {
     err: any,
@@ -59,15 +60,15 @@ export const login = (userInfo):Promise<response> => {
 
 export const verifyEmails = ():Promise<boolean> => {
     return new Promise(async (resolve, reject) => {
-        const result = await emailVerifiedRepository.findAll({raw: true,attributes:['id']})
-        await emailVerifiedRepository.update({isVerified:true},{where:{[Op.or]: result}})
+        const result = await EmailVerified.findAll({raw: true,attributes:['id']})
+        await EmailVerified.update({isVerified:true},{where:{[Op.or]: result}})
         resolve(true)
     })
 }
 
 export const makeAdmin = (userId:string): Promise<boolean> => {
     return new Promise(async (resolve, reject) => {
-        const result = await userRepository.update({isAdmin:true},{where:{id:userId}})
+        const result = await User.update({isAdmin:true},{where:{id:userId}})
         if(result[0] == [ 1 ]) {
             resolve(true)
             return
