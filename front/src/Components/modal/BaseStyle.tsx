@@ -11,7 +11,7 @@ type Props = {
     children: JSX.Element;
 };
 
-const BaseStyle: React.FC<Props> = ({ classs, onClose, children }) => {
+const BaseStyle = ({ classs, onClose, children }: Props) => {
     return (
         <Draggable>
             <Base>
@@ -29,14 +29,7 @@ const BaseStyle: React.FC<Props> = ({ classs, onClose, children }) => {
                     </Box>
                 </Top>
                 <Main>
-                    <MBase>
-                        <MTitle>{classs}</MTitle>
-                        <label>
-                            <MMain>
-                                {children}
-                            </MMain>
-                        </label>
-                    </MBase>
+                    {children}
                 </Main>
             </Base>
         </Draggable>

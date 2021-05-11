@@ -2,57 +2,46 @@ import React from 'react'
 import styled from 'styled-components'
 import axios from 'axios'
 
-const Base = styled.div`
-    background-color: white;
-    width: 100%;
-    height: 100%;
-    border: 3px solid black;
-`
-const BaseIN = styled.div`
-    padding: 10px;
-`
+type Props = {
+    classs: string,
+    children: JSX.Element;
+};
 
-const InLines = styled.div`
-    width: 100%;
-`
-const In = styled.input`
-    width: 100%;
-    border: none;
-    border-right: 0px;
-    border-top: 0px;
-    border-left: 0px;
-    border-bottom: 0px;
-
-    padding-top: 0px;
-    
-    font-family: 'Courier New', monospace;
-    font-size: 13px;
-
-    &:focus {
-        outline: none;
-    }
-`
-
-const Cusors = styled.div`
-    font-size: 13px;
-    display: flex;
-`
-
-const Terminal: React.FC = () => {
-    const cursor = 'Login>';
-
+const GUI: React.FC<Props> = ({ classs, children }) => {
     return (
-        <label>
-            <Base>
-                <BaseIN>
-                    <Cusors>
-                        {cursor}
-                        <In type="text"></In>
-                    </Cusors>
-                </BaseIN>
-            </Base>
-        </label>
+        <div>
+            <MBase>
+                <MTitle>{classs}</MTitle>
+                <label>
+                    <MMain>
+                        {children}
+                    </MMain>
+                </label>
+            </MBase>
+        </div>
     )
 }
 
-export default Terminal;
+const MBase = styled.div`
+    height: 100%;
+    background-color: rgb(255, 255, 255);
+`
+
+const MTitle = styled.div`
+    padding-top: 10px;
+    text-align: center;
+    font-family: 'Lato', sans-serif;
+`
+
+const MMain = styled.div`
+    height: 420px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    margin-left: 11px;
+    margin-right: 11px;
+    border: 2px solid rgb(0, 0, 0);
+    overflow: scroll;
+    word-break: break-all;
+`
+
+export default GUI;
