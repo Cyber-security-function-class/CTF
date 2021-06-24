@@ -32,10 +32,10 @@ exports.deleteCategory = exports.updateCategory = exports.addCategory = exports.
 const index_1 = require("../../error/index");
 const express_validator_1 = require("express-validator");
 const sequelize_1 = __importStar(require("sequelize"));
-const category_1 = require("../../models/category");
+const Category_1 = require("../../models/Category");
 const getCategories = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const categories = yield category_1.Category.findAll({
+        const categories = yield Category_1.Category.findAll({
             raw: true
         });
         res.json(categories);
@@ -55,7 +55,7 @@ const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
     const Lcategory = category.toLowerCase();
     let isExistCategory;
     try {
-        isExistCategory = yield category_1.Category.findOne({
+        isExistCategory = yield Category_1.Category.findOne({
             where: sequelize_1.default.where(sequelize_1.default.fn('lower', sequelize_1.default.col('category')), sequelize_1.default.fn('lower', Lcategory)),
             raw: true
         });
@@ -65,7 +65,7 @@ const addCategory = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
     }
     if (isExistCategory === null) {
-        yield category_1.Category.create({
+        yield Category_1.Category.create({
             category: Lcategory,
         });
         return res.json({ result: true });
@@ -82,7 +82,7 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     const { id, category } = req.body;
     const Lcategory = category.toLowerCase();
-    const beforeUpdate = yield category_1.Category.findAll({
+    const beforeUpdate = yield Category_1.Category.findAll({
         where: { [sequelize_1.Op.or]: [
                 { id: id },
                 { category: sequelize_1.default.where(sequelize_1.default.fn('lower', Lcategory), sequelize_1.default.fn('lower', sequelize_1.default.col('category'))) }
@@ -106,7 +106,7 @@ const updateCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
     }
     else {
         try {
-            yield category_1.Category.update({ category }, { where: { id } });
+            yield Category_1.Category.update({ category }, { where: { id } });
             return res.json({ result: true });
         }
         catch (err) {
@@ -122,9 +122,9 @@ const deleteCategory = (req, res) => __awaiter(void 0, void 0, void 0, function*
         return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), msg: errors.array() });
     }
     const { id } = req.body;
-    if ((yield category_1.Category.findOne({ where: { id }, raw: true })) !== null) {
+    if ((yield Category_1.Category.findOne({ where: { id }, raw: true })) !== null) {
         try {
-            yield category_1.Category.destroy({ where: { id } });
+            yield Category_1.Category.destroy({ where: { id } });
             return res.json({ result: true });
         }
         catch (err) {
