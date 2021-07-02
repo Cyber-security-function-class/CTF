@@ -8,8 +8,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.authFlag = exports.deleteChallenge = exports.updateChallenge = exports.addChallenge = exports.getChallenge = exports.getChallenges = void 0;
+const config_1 = __importDefault(require("../../config/config"));
 const index_1 = require("../../error/index");
 const express_validator_1 = require("express-validator");
 const sequelize_1 = require("sequelize");
@@ -18,13 +22,49 @@ const User_1 = require("../../models/User");
 const Team_1 = require("../../models/Team");
 const Category_1 = require("../../models/Category");
 const Solved_1 = require("../../models/Solved");
+const getDecay = () => __awaiter(void 0, void 0, void 0, function* () {
+    const userCount = yield User_1.User.count();
+    return userCount;
+});
+const convertToDynamicScore = (utils) => {
+    let newScore = (((utils.minium - utils.score) / (Math.pow(utils.decay, 2))) * (Math.pow(utils.solvedCount, 2))) + utils.score;
+    newScore = Math.ceil(newScore);
+    return newScore;
+};
+const convertToAppliedDynamicScore = (challenges) => {
+    return new Promise((resolve) => __awaiter(void 0, void 0, void 0, function* () {
+        const decay = yield getDecay();
+        challenges.forEach((challenge, index) => {
+            const tmp = {
+                minium: Number(config_1.default.miniumScore),
+                decay,
+                score: challenge.score,
+                solvedCount: challenge.solved_count,
+            };
+            challenges[index].score = convertToDynamicScore(tmp);
+            if (index === challenges.length - 1) {
+                resolve(challenges);
+            }
+        });
+    }));
+};
 const getChallenges = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const category = req.query['category'];
+    const attributes = [
+        'id',
+        'title',
+        'score',
+        'categoryId',
+        'solved_count',
+        'createdAt',
+        'updatedAt'
+    ];
     try {
         let challenges;
         if (!category) {
+            // get all challenges
             challenges = yield Challenge_1.Challenge.findAll({
-                attributes: ['id', 'title', 'score', 'categoryId', 'createdAt', 'updatedAt'],
+                attributes,
                 include: [{
                         model: Category_1.Category,
                         as: 'category',
@@ -32,9 +72,12 @@ const getChallenges = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     }],
                 raw: true
             });
-            return res.json(challenges);
+            const converted = yield convertToAppliedDynamicScore(challenges);
+            console.log(converted);
+            return res.json(converted);
         }
         else {
+            // get challenges filtered by category query
             let f = [];
             new Promise((resolve) => {
                 const filterList = category.toString().split(',');
@@ -52,7 +95,7 @@ const getChallenges = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                     where: {
                         [sequelize_1.Op.or]: f
                     },
-                    attributes: ['id', 'title', 'score', 'categoryId', 'createdAt', 'updatedAt'],
+                    attributes,
                     include: [{
                             model: Category_1.Category,
                             as: 'category',
@@ -60,7 +103,8 @@ const getChallenges = (req, res) => __awaiter(void 0, void 0, void 0, function* 
                         }],
                     raw: true
                 });
-                return res.json(challenges);
+                const converted = yield convertToAppliedDynamicScore(challenges);
+                return res.json(converted);
             })).catch(err => {
                 console.log(err);
                 return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
@@ -80,12 +124,22 @@ const getChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* (
     if (!errors.isEmpty()) {
         return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.ValidationError), detail: errors.array() });
     }
+    const attributes = [
+        'id',
+        'title',
+        'score',
+        'content',
+        'categoryId',
+        'solved_count',
+        'createdAt',
+        'updatedAt'
+    ];
     try {
         const challenge = yield Challenge_1.Challenge.findOne({
             where: {
                 id: id
             },
-            attributes: ['id', 'title', 'content', 'score', 'categoryId'],
+            attributes,
             raw: true,
             include: [{
                     model: Category_1.Category,
@@ -93,7 +147,16 @@ const getChallenge = (req, res) => __awaiter(void 0, void 0, void 0, function* (
                 }]
         });
         if (challenge !== null) {
-            return res.json(challenge);
+            const tmp = {
+                score: challenge.score,
+                decay: yield getDecay(),
+                minium: Number(config_1.default.miniumScore),
+                solvedCount: challenge.solved_count
+            };
+            const dynamicScore = convertToDynamicScore(tmp);
+            const appliedDynamicScore = challenge;
+            appliedDynamicScore.score = dynamicScore;
+            return res.json(appliedDynamicScore);
         }
         else {
             return res.status(400).json({ error: index_1.getErrorMessage(index_1.ErrorType.NotExist), "detail": "Challenge not exist" });
@@ -203,6 +266,7 @@ const authFlag = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             }]
     });
     if (user === null) {
+        console.log("unknown user");
         return res.status(500).json({ error: index_1.getErrorMessage(index_1.ErrorType.UnexpectedError) });
     }
     const teamId = user['team.id'];
@@ -225,7 +289,22 @@ const authFlag = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         }
     });
     if (solved[1]) { // solved
-        yield Team_1.Team.update({ score: sequelize_1.Sequelize.literal('score + ' + challenge.score) }, { where: { id: teamId } });
+        // team점수 올리기
+        const tmp = {
+            score: challenge.score,
+            decay: yield getDecay(),
+            minium: Number(config_1.default.miniumScore),
+            solvedCount: challenge.solved_count
+        };
+        const dynamicScore = convertToDynamicScore(tmp);
+        try {
+            yield Team_1.Team.update({ score: sequelize_1.Sequelize.literal('score + ' + dynamicScore) }, { where: { id: teamId } });
+            yield Challenge_1.Challenge.update({ solved_count: sequelize_1.Sequelize.literal('solved_count + 1') }, { where: { id: challenge.id } });
+        }
+        catch (err) {
+            console.log(err);
+            return res.status(500).json(index_1.getErrorMessage(index_1.ErrorType.UnexpectedError)).send();
+        }
         return res.json({ result: true });
     }
     else { // already solved

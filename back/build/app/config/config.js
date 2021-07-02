@@ -32,7 +32,8 @@ const environment = {
     jwt: {
         secret: process.env.jwtSecret || "secretjuju",
         expiresIn: "2days"
-    }
+    },
+    miniumScore: process.env.miniumScore || "50",
 };
 exports.default = environment;
 //# sourceMappingURL=config.js.map

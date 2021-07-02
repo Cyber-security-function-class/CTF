@@ -40,7 +40,9 @@ __decorate([
     __metadata("design:type", Boolean)
 ], EmailVerified.prototype, "isVerified", void 0);
 EmailVerified = __decorate([
-    sequelize_typescript_1.Table
+    sequelize_typescript_1.Table({
+        tableName: 'email_verified'
+    })
 ], EmailVerified);
 exports.EmailVerified = EmailVerified;
 //# sourceMappingURL=EmailVerified.js.map

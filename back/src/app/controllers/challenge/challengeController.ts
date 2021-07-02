@@ -1,22 +1,68 @@
+import environment from '../../config/config';
 import {Request, Response} from 'express'
 import { ErrorType, getErrorMessage } from '../../error/index'
 import { validationResult } from "express-validator"
 import { Op, Sequelize } from 'sequelize'
-
 import { Challenge } from '../../models/Challenge'
 import { User } from '../../models/User'
 import { Team } from '../../models/Team'
 import { Category } from '../../models/Category'
 import { Solved } from '../../models/Solved'
 
+interface IDynamicScoreUtils {
+    minium: number
+    decay: number
+    score: number
+    solvedCount: number
+}
+
+const getDecay = async () => {
+    const userCount = await User.count()
+    return userCount
+}
+
+const convertToDynamicScore = (utils: IDynamicScoreUtils) => {
+    let newScore = (((utils.minium - utils.score)/(utils.decay**2)) * (utils.solvedCount**2)) + utils.score
+    newScore = Math.ceil(newScore)
+    return newScore
+}
+
+const convertToAppliedDynamicScore = (challenges) => {
+    return new Promise( async (resolve) => {
+        const decay = await getDecay()
+        challenges.forEach((challenge,index) => {
+            const tmp: IDynamicScoreUtils = {
+                minium: Number(environment.miniumScore),
+                decay,
+                score: challenge.score,
+                solvedCount: challenge.solved_count,
+            }
+            challenges[index].score = convertToDynamicScore(tmp)
+            if (index === challenges.length - 1) {
+                resolve(challenges)
+            }
+        })
+    })
+    
+}
+
 export const getChallenges = async (req:Request, res:Response) => {
     const category = req.query['category']
-    
+    const attributes = [
+        'id',
+        'title',
+        'score',
+        'categoryId',
+        'solved_count',
+        'createdAt',
+        'updatedAt'
+    ]
     try {
         let challenges
         if (!category){
+            // get all challenges
             challenges = await Challenge.findAll({
-                attributes : ['id','title','score','categoryId','createdAt','updatedAt'],
+                attributes,
                 include: [{
                     model: Category,
                     as: 'category',
@@ -24,8 +70,10 @@ export const getChallenges = async (req:Request, res:Response) => {
                 }],
                 raw : true
             })
-            return res.json(challenges)
+            const converted = await convertToAppliedDynamicScore(challenges)
+            return res.json(converted)
         } else {
+            // get challenges filtered by category query
             let f = []
             new Promise ((resolve) => {
                 const filterList = category.toString().split(',')
@@ -43,7 +91,7 @@ export const getChallenges = async (req:Request, res:Response) => {
                     where : {
                         [Op.or]: f
                     },
-                    attributes : ['id','title','score','categoryId','createdAt','updatedAt'],
+                    attributes,
                     include : [{
                         model: Category,
                         as: 'category',
@@ -51,7 +99,8 @@ export const getChallenges = async (req:Request, res:Response) => {
                     }],
                     raw : true
                 })
-                return res.json(challenges)
+                const converted = await convertToAppliedDynamicScore(challenges)
+                return res.json(converted)
             }).catch(err => {
                 console.log(err)
                 return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
@@ -71,13 +120,22 @@ export const getChallenge = async (req:Request, res:Response) => {
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
-
+    const attributes = [
+        'id',
+        'title',
+        'score',
+        'content',
+        'categoryId',
+        'solved_count',
+        'createdAt',
+        'updatedAt'
+    ]
     try {
         const challenge = await Challenge.findOne({
             where : { 
                 id : id
             },
-            attributes : ['id','title','content','score','categoryId'],
+            attributes,
             raw : true,
             include: [{
                 model: Category,
@@ -85,7 +143,16 @@ export const getChallenge = async (req:Request, res:Response) => {
             }]
         })
         if ( challenge !== null){
-            return res.json(challenge)
+            const tmp: IDynamicScoreUtils = {
+                score: challenge.score,
+                decay: await getDecay(),
+                minium: Number(environment.miniumScore),
+                solvedCount: challenge.solved_count
+            }
+            const dynamicScore: number = convertToDynamicScore(tmp)
+            const appliedDynamicScore = challenge
+            appliedDynamicScore.score = dynamicScore
+            return res.json(appliedDynamicScore)
         } else {
             return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),"detail":"Challenge not exist"})
         }
@@ -193,7 +260,9 @@ export const authFlag = async (req: Request, res: Response) => {
             attributes : ['id']
         }]
     })
+
     if ( user === null) {
+        console.log("unknown user")
         return res.status(500).json({error:getErrorMessage(ErrorType.UnexpectedError)})
     }
     
@@ -219,7 +288,22 @@ export const authFlag = async (req: Request, res: Response) => {
         }
     })
     if(solved[1]) { // solved
-        await Team.update({score:Sequelize.literal('score + '+challenge.score)},{where : {id : teamId}})
+        // team점수 올리기
+        const tmp: IDynamicScoreUtils = {
+            score: challenge.score,
+            decay: await getDecay(),
+            minium: Number(environment.miniumScore),
+            solvedCount: challenge.solved_count
+        }
+        const dynamicScore: number = convertToDynamicScore(tmp)
+        try {
+            await Team.update({score:Sequelize.literal('score + '+dynamicScore)},{where : {id : teamId}})
+            await Challenge.update({solved_count: Sequelize.literal('solved_count + 1')},{where: {id: challenge.id}})
+        } catch (err) {
+            console.log(err)
+            return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+        }
+         
         return res.json({result : true})
     } else { // already solved
         return res.status(400).json({error:getErrorMessage(ErrorType.AlreadyExist),detail:"already solved"})

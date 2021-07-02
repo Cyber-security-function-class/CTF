@@ -51,11 +51,18 @@ __decorate([
     __metadata("design:type", String)
 ], Challenge.prototype, "flag", void 0);
 __decorate([
+    sequelize_typescript_1.Default(0),
+    sequelize_typescript_1.Column,
+    __metadata("design:type", Number)
+], Challenge.prototype, "solved_count", void 0);
+__decorate([
     sequelize_typescript_1.HasMany(() => Solved_1.Solved),
     __metadata("design:type", Array)
 ], Challenge.prototype, "solveds", void 0);
 Challenge = __decorate([
-    sequelize_typescript_1.Table
+    sequelize_typescript_1.Table({
+        tableName: 'challenge'
+    })
 ], Challenge);
 exports.Challenge = Challenge;
 //# sourceMappingURL=Challenge.js.map

@@ -24,7 +24,9 @@ __decorate([
     __metadata("design:type", String)
 ], Notice.prototype, "content", void 0);
 Notice = __decorate([
-    sequelize_typescript_1.Table
+    sequelize_typescript_1.Table({
+        tableName: 'notice'
+    })
 ], Notice);
 exports.Notice = Notice;
 //# sourceMappingURL=Notice.js.map

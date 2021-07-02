@@ -31,7 +31,9 @@ __decorate([
     __metadata("design:type", Array)
 ], Category.prototype, "challenges", void 0);
 Category = __decorate([
-    sequelize_typescript_1.Table
+    sequelize_typescript_1.Table({
+        tableName: 'category'
+    })
 ], Category);
 exports.Category = Category;
 //# sourceMappingURL=Category.js.map

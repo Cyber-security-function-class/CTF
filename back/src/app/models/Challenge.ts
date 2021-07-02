@@ -36,7 +36,7 @@ export class Challenge extends Model<Challenge> {
 
     @Default(0)
     @Column
-    solvedCount: number
+    solved_count: number
     
     @HasMany(() => Solved)
     solveds : Solved[]

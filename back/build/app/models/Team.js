@@ -42,7 +42,9 @@ __decorate([
     __metadata("design:type", String)
 ], Team.prototype, "teamPassword", void 0);
 Team = __decorate([
-    sequelize_typescript_1.Table
+    sequelize_typescript_1.Table({
+        tableName: 'team'
+    })
 ], Team);
 exports.Team = Team;
 //# sourceMappingURL=Team.js.map

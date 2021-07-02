@@ -52,7 +52,9 @@ __decorate([
     __metadata("design:type", String)
 ], Solved.prototype, "teamId", void 0);
 Solved = __decorate([
-    sequelize_typescript_1.Table
+    sequelize_typescript_1.Table({
+        tableName: 'solved'
+    })
 ], Solved);
 exports.Solved = Solved;
 //# sourceMappingURL=Solved.js.map
