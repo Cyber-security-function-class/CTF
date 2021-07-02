@@ -1,7 +1,9 @@
 import { Table, Column, Model, PrimaryKey, AutoIncrement, BelongsTo, ForeignKey, AllowNull, Default } from 'sequelize-typescript'
 import { User } from './User';
 
-@Table
+@Table({
+    tableName: 'email_verified'
+})
 export class EmailVerified extends Model<EmailVerified> {
     @PrimaryKey
     @AutoIncrement

@@ -2,7 +2,9 @@ import { Table, Column, Model, ForeignKey, PrimaryKey, AllowNull, AutoIncrement,
 import { User } from './User'
 import { Challenge } from './Challenge'
 
-@Table
+@Table({
+    tableName: 'solved'
+})
 export class Solved extends Model<Solved> {
     @PrimaryKey
     @AutoIncrement

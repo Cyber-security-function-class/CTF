@@ -1,8 +1,10 @@
-import { Table, Column, Model, DataType, BelongsTo, ForeignKey, PrimaryKey, AllowNull, AutoIncrement, HasMany, Unique } from 'sequelize-typescript'
+import { Table, Column, Model, DataType, BelongsTo, ForeignKey, PrimaryKey, AllowNull, AutoIncrement, HasMany, Unique, Default } from 'sequelize-typescript'
 import { Category } from "./Category"
 import { Solved } from './Solved'
 
-@Table
+@Table({
+    tableName: 'challenge'
+})
 export class Challenge extends Model<Challenge> {
     @PrimaryKey
     @AutoIncrement
@@ -32,6 +34,10 @@ export class Challenge extends Model<Challenge> {
     @Column
     flag : string
 
+    @Default(0)
+    @Column
+    solvedCount: number
+    
     @HasMany(() => Solved)
     solveds : Solved[]
 

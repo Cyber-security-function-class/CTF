@@ -2,7 +2,12 @@ import { Table, Column, Model, HasMany, PrimaryKey, DataType, BelongsTo, HasOne,
 import { Solved } from './Solved'
 import { Team } from './Team'
 import { EmailVerified } from './EmailVerified'
-@Table
+
+
+@Table({
+    tableName: 'user'
+})
+
 export class User extends Model<User> {
     
     @IsUUID(4)

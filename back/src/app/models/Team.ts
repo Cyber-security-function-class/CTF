@@ -1,7 +1,9 @@
 import { Table, Column, Model, HasMany, PrimaryKey, DataType, IsUUID, Default } from 'sequelize-typescript'
 import { User } from './User'
 
-@Table
+@Table({
+    tableName: 'team'
+})
 export class Team extends Model<Team> {
 
     @IsUUID(4)
