@@ -136,7 +136,7 @@ export const signIn = async (req,res) => {
                 {                            // policy
                     expiresIn : environment.jwt.expiresIn
                 });
-                return res.json({ token : "Bearer "+token }).send()
+                return res.json({ token : "Bearer "+token, user: { nickname: user.nickname }}).send()
             } catch (err) {
                 return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError))
             }
