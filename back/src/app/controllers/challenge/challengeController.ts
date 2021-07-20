@@ -164,6 +164,9 @@ export const getChallenge = async (req:Request, res:Response) => {
     // get by challenge id
     const { id } = req.query
     const errors = validationResult(req)
+    const authInfo: any = await checkIsAuthed(req)
+    const decoded = authInfo?.decoded
+    const isAuthed = authInfo?.isAuthed
     if ( !errors.isEmpty() ) {
         return res.status(400).json({error:getErrorMessage(ErrorType.ValidationError), detail: errors.array() })
     }
@@ -199,7 +202,17 @@ export const getChallenge = async (req:Request, res:Response) => {
             const dynamicScore: number = convertToDynamicScore(tmp)
             const appliedDynamicScore = challenge
             appliedDynamicScore.score = dynamicScore
-            return res.json(appliedDynamicScore)
+            let solved = undefined
+            if (isAuthed) {
+                solved = await Solved.findOne({
+                    where: {
+                        userId: decoded.id,
+                        challengeId: id,
+                    },
+                    raw: true
+                })
+            }
+            return res.json({ challenge: appliedDynamicScore , solved:solved})
         } else {
             return res.status(400).json({error:getErrorMessage(ErrorType.NotExist),"detail":"Challenge not exist"})
         }
