@@ -9,6 +9,9 @@ import { Team } from '../../models/Team'
 import { Category } from '../../models/Category'
 import { Solved } from '../../models/Solved'
 
+import * as jwt from "jsonwebtoken"
+
+
 interface IDynamicScoreUtils {
     minium: number
     decay: number
@@ -49,7 +52,31 @@ const convertToAppliedDynamicScore = (challenges) => {
     
 }
 
-export const getChallenges = async (req:Request, res:Response) => {
+const checkIsAuthed = (req) => new Promise((resolve, reject) => {
+    let token = req.headers?.authorization
+    token = token.split(' ')[1]
+
+    if (!token) {
+        resolve({isAuthed: false})
+    }
+    jwt.verify(token, req.app.get('jwt-secret'), (err, decoded) => { 
+        if (err) {
+            console.log(err)
+            resolve({isAuthed: false})
+        }
+        else { 
+            resolve({decoded, isAuthed: true})
+        }
+    })
+})
+    
+
+
+export const getChallenges = async (req: Request, res: Response) => {
+    const authInfo: any = await checkIsAuthed(req)
+    const decoded = authInfo?.decoded
+    const isAuthed = authInfo?.isAuthed
+
     const category = req.query['category']
     const attributes = [
         'id',
@@ -60,22 +87,33 @@ export const getChallenges = async (req:Request, res:Response) => {
         'createdAt',
         'updatedAt'
     ]
+    
     try {
         let challenges
+        const include:Array<any> = [{
+            model: Category,
+            as: "category",
+            attributes: ['category'],
+        }]
+
         if (!category) {
-            console.log("no category")
             // get all challenges
             challenges = await Challenge.findAll({
                 attributes,
-                include: [{
-                    model: Category,
-                    as: 'category',
-                    attributes : ['category']
-                }],
+                include,
                 raw : true
             })
+            let solveds = undefined
+            if (isAuthed) {
+                solveds = await Solved.findAll({
+                    where: {
+                        userId: decoded.id
+                    },
+                    raw: true
+                })
+            }
             const converted = await convertToAppliedDynamicScore(challenges)
-            return res.json(converted)
+            return res.json({challenges: converted,solveds:solveds})
         } else {
             // get challenges filtered by category query
             let f = []
@@ -96,15 +134,20 @@ export const getChallenges = async (req:Request, res:Response) => {
                         [Op.or]: f
                     },
                     attributes,
-                    include : [{
-                        model: Category,
-                        as: 'category',
-                        attributes : ['category']
-                    }],
+                    include,
                     raw : true
                 })
+                let solveds = undefined
+                if (isAuthed) {
+                    solveds = await Solved.findAll({
+                        where: {
+                            userId: decoded.id
+                        },
+                        raw: true
+                    })
+                }
                 const converted = await convertToAppliedDynamicScore(challenges)
-                return res.json(converted)
+                return res.json({challenges: converted,solveds:solveds})
             }).catch(err => {
                 console.log(err)
                 return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()

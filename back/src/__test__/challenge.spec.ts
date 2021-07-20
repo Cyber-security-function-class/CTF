@@ -238,8 +238,9 @@ describe(addDescribeFormat("category_test"), function () {
                 json : true
             },
             (err,res,body)=>{
-                console.log("get challenges",body)
-                assert(body.length == 4)
+                console.log("get challenges", body)
+                
+                assert(body[0].length == 4)
                 done()
             })
         } catch (err){
@@ -257,7 +258,7 @@ describe(addDescribeFormat("category_test"), function () {
             (err,res,body)=>{
                 console.log("category filter ", body)
                 console.log("======================")
-                assert(body.length == 0)
+                assert(body[0].length == 0)
                 done()
             })
         } catch (err){
@@ -266,7 +267,7 @@ describe(addDescribeFormat("category_test"), function () {
     })
     it("get challenges",(done) =>{
         try {
-            request.get(BASEURI+"/api/challenge/getChallenge?id=1",{
+            request.get(BASEURI+"/api/challenge/getChallenge",{
                 headers : {
                     Authorization : token
                 },
@@ -274,7 +275,8 @@ describe(addDescribeFormat("category_test"), function () {
             },
             (err,res,body)=>{
                 console.log("get challenge ",body)
-                assert(body?.id !== null)
+                console.log(token)
+                assert(body[0]?.id !== null)
                 done()
             })
         } catch (err){
@@ -332,7 +334,7 @@ describe(addDescribeFormat("category_test"), function () {
                   teamPassword : "hellopass"
               },
               json : true
-            },(err, res, body) => {
+            }, (err, res, body) => {
               assert(body.result)
               done()
             })
@@ -371,6 +373,23 @@ describe(addDescribeFormat("category_test"), function () {
             })
         } catch (err) {
             console.log(err)
+            done()
+        }
+    })
+    it("get challenges",(done) =>{
+        try {
+            request.get(BASEURI+"/api/challenge/getChallenges",{
+                headers : {
+                    Authorization : token
+                },
+                json : true
+            },
+            (err,res,body)=>{
+                console.log("get challenge ",body)
+                assert(body[0]?.id !== null)
+                done()
+            })
+        } catch (err){
             done()
         }
     })
