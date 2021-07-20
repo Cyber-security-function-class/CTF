@@ -4,7 +4,7 @@ import { preStart } from "./index.spec"
 import db from "../app/models/index"
 import {User} from "../app/models/User"
 
-import { register, login, verifyEmails, makeAdmin, getDecoded } from './utils'
+import { register, login, makeAdmin, getDecoded } from './utils'
 
 import * as dotenv from 'dotenv';
 dotenv.config();
@@ -47,18 +47,6 @@ describe(addDescribeFormat("user_test"), function () {
     register(userInfo)
     .then(result => {
       assert(!result)
-      done()
-    })
-    .catch(err => {
-      console.log(err)
-      done()
-    })
-  })
-
-  it("verify emails", (done)=>{
-    verifyEmails()
-    .then(result => {
-      expect(result)
       done()
     })
     .catch(err => {

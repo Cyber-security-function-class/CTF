@@ -1,8 +1,6 @@
 import { Table, Column, Model, HasMany, PrimaryKey, DataType, BelongsTo, HasOne, IsUUID, Unique, AllowNull, IsEmail, Default, ForeignKey } from 'sequelize-typescript'
 import { Solved } from './Solved'
 import { Team } from './Team'
-import { EmailVerified } from './EmailVerified'
-
 
 @Table({
     tableName: 'user'
@@ -32,9 +30,6 @@ export class User extends Model<User> {
     @IsEmail
     @Column
     email : string
-    
-    @HasOne(() => EmailVerified)
-    emailVerified : EmailVerified
     
     @BelongsTo(() => Team)
     team : Team

@@ -11,7 +11,7 @@ export default (req, res, next) => {
     let token = req.headers?.authorization
 
     if(!token) {
-        return res.status(403).json({
+        return res.status(401).json({
             error : getErrorMessage(ErrorType.AccessDenied),
             detail: 'Not logged in'
         })
@@ -23,15 +23,6 @@ export default (req, res, next) => {
             jwt.verify(token, req.app.get('jwt-secret'), (err, decoded) => { 
                 if(err) reject(err)
                 else { 
-                    if(!decoded.emailVerified) {
-                        if(allowUrl.includes(req.originalUrl)) {
-                            resolve(decoded)
-                        }
-                        reject({
-                            error : getErrorMessage(ErrorType.NotVerifiedEmail),
-                            detail:"email not verified"
-                        })
-                    } 
                     resolve(decoded)
                 }
             })
@@ -39,15 +30,12 @@ export default (req, res, next) => {
     )
 
     const onError = (error) => {
-        if(error.error && error.error.errorType === 'notVerifiedEmail') {
-            res.status(400).json(error)
-        } else {
-            console.log(error)
-            res.status(500).json({
-                error : getErrorMessage(ErrorType.UnexpectedError),
-                detail: error.message
-            })
-        }
+        console.log(error)
+        res.status(500).json({
+            error : getErrorMessage(ErrorType.UnexpectedError),
+            detail: error.message
+        })
+        
     }
     p.then((decoded)=>{
         req.decoded = decoded

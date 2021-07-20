@@ -30,6 +30,9 @@ const convertToDynamicScore = (utils: IDynamicScoreUtils) => {
 const convertToAppliedDynamicScore = (challenges) => {
     return new Promise( async (resolve) => {
         const decay = await getDecay()
+        if (challenges.length === 0) {
+            resolve(challenges)
+        }
         challenges.forEach((challenge,index) => {
             const tmp: IDynamicScoreUtils = {
                 minium: Number(environment.miniumScore),
@@ -59,7 +62,8 @@ export const getChallenges = async (req:Request, res:Response) => {
     ]
     try {
         let challenges
-        if (!category){
+        if (!category) {
+            console.log("no category")
             // get all challenges
             challenges = await Challenge.findAll({
                 attributes,

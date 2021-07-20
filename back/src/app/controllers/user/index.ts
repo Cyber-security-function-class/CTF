@@ -18,7 +18,7 @@ import {
 // import from controllers
 import { 
     signUp, signIn, getUser, getUsers, 
-    deleteUser, updateUser, verifyEmail, resendEmail
+    deleteUser, updateUser
 } from './userController'
 
 import { createTeam, getTeam, getTeams, joinTeam } from './teamController'
@@ -36,12 +36,6 @@ routes.get('/getUser',getUserValidator(),getUser)
 
 // routes.get('/getUsers',authMiddleware)
 routes.get('/getUsers',getUsers)
-
-routes.post("/verifyEmail",authMiddleware)
-routes.post("/verifyEmail",verifyEmailValidator(),verifyEmail)
-
-routes.post("/resendEmail",authMiddleware)
-routes.post("/resendEmail",resendEmail)
 
 routes.post('/createTeam',authMiddleware)
 routes.post('/createTeam',createTeamValidator(),createTeam)

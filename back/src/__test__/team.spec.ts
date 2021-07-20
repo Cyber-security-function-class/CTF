@@ -4,11 +4,10 @@ import { preStart, dbclient } from "./index.spec"
 import jwt_decode from "jwt-decode";
 import db from "../app/models/index"
 import {User} from "../app/models/User"
-import { EmailVerified } from '../app/models/EmailVerified';
 import { Op} from 'sequelize'
 import * as dotenv from 'dotenv';
 import { getDecoded, login, makeAdmin,
-   register, verifyEmails, createTeam,
+   register , createTeam,
    joinTeam 
 } from './utils';
 
@@ -149,21 +148,6 @@ describe(addDescribeFormat("team_test"), function () {
       done()
     })
   })
-
-  it("verify emails", (done)=>{
-    setTimeout(()=>{
-      verifyEmails()
-      .then(result => {
-        assert(result)
-        done()
-      })
-      .catch(err => {
-        console.log(err)
-        done()
-      })
-    },1000)
-  })
-
   it("login user1",(done)=>{
     login(userInfo)
     .then(result => {

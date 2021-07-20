@@ -12,7 +12,6 @@ import { Solved } from './Solved';
 import { User} from './User'
 import { Team } from './Team';
 import { Notice } from './Notice';
-import { EmailVerified } from './EmailVerified';
 
 interface db {
     sequelize: Sequelize
@@ -26,7 +25,7 @@ const sequelize = new Sequelize(
         host: dbconfig.host,
         dialect: 'postgres',
         logging : dbconfig.logging,
-        models: [User, Category,Challenge,Solved,Team,Notice,EmailVerified]
+        models: [User, Category,Challenge,Solved,Team,Notice]
     }
 )
 

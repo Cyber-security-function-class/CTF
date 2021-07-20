@@ -7,7 +7,6 @@ import { Op } from 'sequelize';
 
 import jwt_decode from "jwt-decode";
 
-import { EmailVerified } from '../app/models/EmailVerified'
 import { User } from "../app/models/User"
 
 const ADDRESS = "http://localhost"
@@ -55,14 +54,6 @@ export const login = (userInfo):Promise<response> => {
             }
             resolve({err,res,body})
         })
-    })
-}
-
-export const verifyEmails = ():Promise<boolean> => {
-    return new Promise(async (resolve, reject) => {
-        const result = await EmailVerified.findAll({raw: true,attributes:['id']})
-        await EmailVerified.update({isVerified:true},{where:{[Op.or]: result}})
-        resolve(true)
     })
 }
 
