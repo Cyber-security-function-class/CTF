@@ -246,3 +246,35 @@ export const deleteUser = async (req, res) => {
         return res.status(400).json({error : getErrorMessage(ErrorType.NotExist),detail:"user not exist"}).send()
     }
 }
+
+export const getMe = async (req, res) => {
+    const { id } = req.decoded
+
+    try {
+        const user = await User.findOne({
+            where : {
+                id : id
+            },
+            attributes : ['id','nickname','email','isAdmin'],
+            include : [{
+                model : Solved
+            },{
+                model: Team,
+                attributes: [
+                    "id","teamName","leader","score","createdAt","updatedAt"
+                ]
+            }]
+        })
+        if ( user !== null) {
+            return res.json(user)
+        }
+        else {
+            return res.status(400).json({error:getErrorMessage(ErrorType.NotExist), detail:"user doesn't exist"})
+        }
+        
+    } catch (err) {
+        console.log(err)
+        return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError)).send()
+    }
+
+}

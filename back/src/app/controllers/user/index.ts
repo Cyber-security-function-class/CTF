@@ -18,7 +18,7 @@ import {
 // import from controllers
 import { 
     signUp, signIn, getUser, getUsers, 
-    deleteUser, updateUser
+    deleteUser, updateUser, getMe
 } from './userController'
 
 import { createTeam, getTeam, getTeams, joinTeam } from './teamController'
@@ -27,6 +27,8 @@ import authMiddleware from '../../middlewares/auth'
 import adminMiddleware from '../../middlewares/admin'
 
 const routes = express.Router()
+
+routes.get("/getMe",authMiddleware,getMe)
 
 routes.post("/signUp",signUpValidator() , signUp)
 routes.post("/signIn",signInValidator() , signIn)
