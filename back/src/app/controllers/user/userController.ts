@@ -82,7 +82,13 @@ export const signIn = async (req,res) => {
         user = await User.findOne({
             where : {email:email},
             raw : true,
-            attributes : ['id','password','isAdmin','nickname'],
+            attributes: ['id', 'password', 'isAdmin', 'nickname'],
+            include: [
+                {
+                    model: Team,
+                    attributes: ["teamName"]
+                }
+            ]
         })
     } catch ( err ) {
         console.log(err)
@@ -107,8 +113,10 @@ export const signIn = async (req,res) => {
                     req.app.get('jwt-secret'),   // secret
                 {                            // policy
                     expiresIn : environment.jwt.expiresIn
-                });
-                return res.json({ token : "Bearer "+token, user: { nickname: user.nickname }}).send()
+                    });
+                delete user.password
+                delete user.isAdmin
+                return res.json({ token : "Bearer "+token, user}).send()
             } catch (err) {
                 return res.status(500).json(getErrorMessage(ErrorType.UnexpectedError))
             }
