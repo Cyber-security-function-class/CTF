@@ -53,7 +53,12 @@ export const getTeam = async (req : Request, res : Response) => { // get
 
 export const getTeams = async (req: Request, res: Response) => {
     try {
-        const teams = await Team.findAll({attributes:['id','teamName','score']})
+        const teams = await Team.findAll({
+            attributes: ['id', 'teamName', 'score'],
+            order: [
+                ['score', 'DESC']
+            ],
+        })
         
         return res.json(teams)
     } catch (err) {

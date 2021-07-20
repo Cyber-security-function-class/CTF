@@ -292,6 +292,8 @@ describe(addDescribeFormat("team_test"), function () {
     request.get(BASEURI + "/api/user/getTeams",
       (err, res, body) => {
         body = JSON.parse(body)
+        console.log("get teams(sort)")
+        console.log(body)
       teamId = body[0].id
       assert(body.length == 1)
       done()
