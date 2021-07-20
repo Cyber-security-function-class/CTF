@@ -31,10 +31,10 @@ const routes = express.Router()
 routes.post("/signUp",signUpValidator() , signUp)
 routes.post("/signIn",signInValidator() , signIn)
 
-routes.get('/getUser',authMiddleware)
+// routes.get('/getUser',authMiddleware)
 routes.get('/getUser',getUserValidator(),getUser)
 
-routes.get('/getUsers',authMiddleware)
+// routes.get('/getUsers',authMiddleware)
 routes.get('/getUsers',getUsers)
 
 routes.post("/verifyEmail",authMiddleware)
@@ -46,10 +46,10 @@ routes.post("/resendEmail",resendEmail)
 routes.post('/createTeam',authMiddleware)
 routes.post('/createTeam',createTeamValidator(),createTeam)
 
-routes.get('/getTeam',authMiddleware)
+// routes.get('/getTeam',authMiddleware)
 routes.get('/getTeam',getTeamValidator(),getTeam)
 
-routes.get('/getTeams',authMiddleware)
+// routes.get('/getTeams',authMiddleware)
 routes.get('/getTeams',getTeams)
 
 routes.post("/joinTeam",authMiddleware)

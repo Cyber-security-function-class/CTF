@@ -87,8 +87,8 @@ describe(addDescribeFormat("user_test"), function () {
   
   it("getUsers(no login)",(done)=>{
     request.get(BASEURI+"/api/user/getUsers",(err,res,body)=>{
-      body = JSON.parse(body)
-      assert(body.error.errorType == "accessDenied")
+      console.log(body)
+      assert(!body.error)
       done()
     })
   })
@@ -99,7 +99,8 @@ describe(addDescribeFormat("user_test"), function () {
         Authorization : token
       },
       json : true
-    },(err,res,body)=>{
+    }, (err, res, body) => {
+      console.log(body)
       assert(!body.error)
       done()
     })

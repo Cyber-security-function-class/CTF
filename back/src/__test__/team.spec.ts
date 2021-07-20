@@ -305,22 +305,18 @@ describe(addDescribeFormat("team_test"), function () {
     })
   })
   it("get teams",(done) => {
-    request.get(BASEURI+"/api/user/getTeams",{
-      headers : {
-        Authorization : users.user1.token
-      }, json : true
-    },(err,res,body)=>{
+    request.get(BASEURI + "/api/user/getTeams",
+      (err, res, body) => {
+        body = JSON.parse(body)
       teamId = body[0].id
       assert(body.length == 1)
       done()
     })
   })
   it("get team",(done) => {
-    request.get(BASEURI+"/api/user/getTeam?id="+teamId,{
-      headers : {
-        Authorization : users.user1.token
-      }, json : true
-    },(err,res,body)=>{
+    request.get(BASEURI + "/api/user/getTeam?id=" + teamId,
+      (err, res, body) => {
+        body = JSON.parse(body)
       assert(body.id === teamId)
       done()
     })
@@ -354,7 +350,6 @@ describe(addDescribeFormat("team_test"), function () {
         Authorization : users.user1.token
       }, json : true
     },(err,res,body)=>{
-      console.log(body)
       assert(body.error == undefined)
       done()
     })

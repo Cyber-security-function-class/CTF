@@ -184,7 +184,10 @@ export const getUser = async (req, res) => {
             include : [{
                 model : Solved
             },{
-                model : Team
+                model: Team,
+                attributes: [
+                    "id","teamName","leader","score","createdAt","updatedAt"
+                ]
             }]
         })
         if ( user !== null) {
